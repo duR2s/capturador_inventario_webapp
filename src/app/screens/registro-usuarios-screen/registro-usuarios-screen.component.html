@@ -1,0 +1,16 @@
+<div class="registro-wrapper">
+  <h2>Registro de Usuarios de Inventario</h2>
+  <div class="tabs">
+    <!-- Botones para cambiar al nuevo tipo de registro -->
+    <button (click)="tipoRegistro = 'capturador'" [class.active]="tipoRegistro === 'capturador'">Capturador</button>
+    <button (click)="tipoRegistro = 'administrador'" [class.active]="tipoRegistro === 'administrador'">Administrador</button>
+  </div>
+
+  <!-- Usamos ngSwitch para mostrar el formulario correcto -->
+  <div [ngSwitch]="tipoRegistro">
+    <app-registro-capturador *ngSwitchCase="'capturador'"></app-registro-capturador>
+    <app-registro-administradores *ngSwitchCase="'administrador'"></app-registro-administradores>
+    <p *ngSwitchDefault>Por favor, selecciona un tipo de usuario para registrar.</p>
+  </div>
+</div>
+
