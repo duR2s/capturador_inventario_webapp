@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 // Importa los nuevos componentes "parciales" que usarás
 import { RegistroAdministradoresComponent } from '../../partials/registro-administradores/registro-administradores.component';
 import { RegistroCapturadorComponent } from '../../partials/registro-capturador/registro-capturador.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-registro-usuarios-screen',
@@ -11,6 +12,7 @@ import { RegistroCapturadorComponent } from '../../partials/registro-capturador/
   // Importa los componentes que vas a usar en la plantilla.
   imports: [
     CommonModule,
+    RouterLink,
     RegistroAdministradoresComponent,
     RegistroCapturadorComponent
   ],

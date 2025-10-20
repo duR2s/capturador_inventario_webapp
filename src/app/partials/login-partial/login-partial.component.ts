@@ -2,16 +2,17 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 // Importa las herramientas para formularios reactivos
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AppRoutingModule } from "src/app/app-routing.module";
 
 @Component({
-  selector: 'app-registro-administradores',
+  selector: 'app-login-partial',
   standalone: true,
   // Asegúrate de importar ReactiveFormsModule aquí
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './registro-administradores.component.html',
-  styleUrls: ['./registro-administradores.component.scss']
+  imports: [CommonModule, ReactiveFormsModule, AppRoutingModule],
+  templateUrl: './login-partial.component.html',
+  styleUrls: ['./login-partial.component.scss']
 })
-export class RegistroAdministradoresComponent implements OnInit {
+export class LoginPartialComponent implements OnInit {
   // Declaramos la propiedad para nuestro formulario, añadiendo "!"
   registroForm!: FormGroup;
 
@@ -21,7 +22,6 @@ export class RegistroAdministradoresComponent implements OnInit {
   ngOnInit(): void {
     // En ngOnInit, definimos la estructura y las validaciones del formulario
     this.registroForm = this.fb.group({
-      nombre: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });

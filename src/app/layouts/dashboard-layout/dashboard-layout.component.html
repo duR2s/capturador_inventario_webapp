@@ -1,1 +1,46 @@
-<p>dashboard-layout works!</p>
+<div class="dashboard-container">
+  <!-- Panel Lateral Izquierdo (Sidebar) -->
+  <aside class="sidebar">
+    <div class="logo-container">
+      <h3>Inventario App</h3>
+    </div>
+    <nav class="navigation">
+      <ul>
+        <!--
+          Estos enlaces cambiarán el contenido inyectado en el <router-outlet>.
+          Necesitarás definir estas rutas en tu archivo app.routes.ts
+        -->
+        <li><a routerLink="/dashboard/resumen" routerLinkActive="active">Resumen</a></li>
+        <li><a routerLink="/dashboard/productos" routerLinkActive="active">Productos</a></li>
+        <li><a routerLink="/dashboard/reportes" routerLinkActive="active">Reportes</a></li>
+        <li><a routerLink="/dashboard/usuarios" routerLinkActive="active">Usuarios</a></li>
+        <!-- NUEVO ENLACE AÑADIDO CON routerLink -->
+        <li><a routerLink="/registro">Registrar Usuario</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Contenido Principal -->
+  <main class="main-content">
+    <!-- Encabezado Superior -->
+    <header class="top-header">
+      <div class="header-title">
+        <h2>Panel de Control</h2>
+      </div>
+      <div class="user-info">
+        <span>Usuario Admin</span>
+        <button class="logout-button">Cerrar Sesión</button>
+      </div>
+    </header>
+
+    <!-- Área de Contenido Dinámico -->
+    <section class="content-area">
+      <!--
+        Aquí es donde Angular inyectará tus componentes
+        (gráficos, tablas, cálculos, etc.) según la ruta activa.
+      -->
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+</div>
+

@@ -4,12 +4,7 @@
   (ngSubmit) se dispara cuando se presiona el botón de tipo "submit"
 -->
 <form [formGroup]="registroForm" (ngSubmit)="onSubmit()" class="form-container">
-  <h3>Registro de Administrador</h3>
-
-  <div class="form-field">
-    <label for="nombre">Nombre:</label>
-    <input id="nombre" type="text" formControlName="nombre">
-  </div>
+  <h3>Acceder</h3>
 
   <div class="form-field">
     <label for="email">Correo Electrónico:</label>
@@ -21,10 +16,6 @@
     <input id="password" type="password" formControlName="password">
   </div>
 
-  <div class="form-field">
-    <label for="password">Confirmar ontraseña:</label>
-    <input id="password" type="password" formControlName="password">
-  </div>
+  <button type="submit" [disabled]="registroForm.invalid">Acceder</button>
 
-  <button type="submit" [disabled]="registroForm.invalid">Registrar</button>
 </form>
