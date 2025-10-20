@@ -3,11 +3,17 @@ import { CommonModule } from '@angular/common';
 // Importa las herramientas para formularios reactivos
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
+// Angular Material modules
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+
 @Component({
   selector: 'app-registro-capturador',
   standalone: true,
-  // Asegúrate de importar ReactiveFormsModule aquí
-  imports: [CommonModule, ReactiveFormsModule],
+  // Asegúrate de importar ReactiveFormsModule y los módulos Material aquí
+  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule],
   templateUrl: './registro-capturador.component.html',
   styleUrls: ['./registro-capturador.component.scss']
 })
