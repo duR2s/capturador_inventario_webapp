@@ -2,13 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 // Importa las herramientas para formularios reactivos
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AppRoutingModule } from "src/app/app-routing.module";
 
 @Component({
   selector: 'app-login-partial',
   standalone: true,
   // Asegúrate de importar ReactiveFormsModule aquí
-  imports: [CommonModule, ReactiveFormsModule, AppRoutingModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login-partial.component.html',
   styleUrls: ['./login-partial.component.scss']
 })
