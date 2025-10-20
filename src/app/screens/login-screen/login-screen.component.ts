@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 // Importa los nuevos componentes "parciales" que usarás
-import { LoginPartialComponent } from "src/app/partials/login-partial/login-partial.component";
+import { LoginPartialComponent } from "src/app/partials/login/login-partial/login-partial.component";
 import { RouterLink } from '@angular/router';
 
 @Component({

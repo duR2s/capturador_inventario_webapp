@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 // Importa los nuevos componentes "parciales" que usarás
-import { RegistroAdministradoresComponent } from '../../partials/registro-administradores/registro-administradores.component';
-import { RegistroCapturadorComponent } from '../../partials/registro-capturador/registro-capturador.component';
+import { RegistroAdministradoresComponent } from '../../partials/registro/registro-administradores/registro-administradores.component';
+import { RegistroCapturadorComponent } from '../../partials/registro/registro-capturador/registro-capturador.component';
 import { RouterLink } from '@angular/router';
 
 @Component({

@@ -1,10 +1,13 @@
-<div class="registro-wrapper">
-  <h2>Registro de Usuarios de Inventario</h2>
-  <div class="tabs">
+<div class="login-screen-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Acceso de Usuarios</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
       <app-login-partial></app-login-partial>
-  </div>
-
-  <div>
-    <a routerLink="/registro">Registrarse</a>
-  </div>
-
+    </mat-card-content>
+    <mat-card-actions>
+      <a mat-button routerLink="/registro">¿No tienes cuenta? Regístrate</a>
+    </mat-card-actions>
+  </mat-card>
+</div>
