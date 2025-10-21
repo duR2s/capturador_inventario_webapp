@@ -5,6 +5,10 @@ import { CommonModule } from '@angular/common';
 import { RegistroAdministradoresComponent } from '../../partials/registro/registro-administradores/registro-administradores.component';
 import { RegistroCapturadorComponent } from '../../partials/registro/registro-capturador/registro-capturador.component';
 import { RouterLink } from '@angular/router';
+// Angular Material
+import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-registro-usuarios-screen',
@@ -14,7 +18,10 @@ import { RouterLink } from '@angular/router';
     CommonModule,
     RouterLink,
     RegistroAdministradoresComponent,
-    RegistroCapturadorComponent
+    RegistroCapturadorComponent,
+    MatCardModule,
+    MatButtonModule,
+    MatButtonToggleModule
   ],
   templateUrl: './registro-usuarios-screen.component.html',
   styleUrls: ['./registro-usuarios-screen.component.scss']

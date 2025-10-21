@@ -1,20 +1,23 @@
-<div class="registro-wrapper">
-  <h2>Registro de Usuarios de Inventario</h2>
-  <div class="tabs">
-    <!-- Botones para cambiar al nuevo tipo de registro -->
-    <button (click)="tipoRegistro = 'capturador'" [class.active]="tipoRegistro === 'capturador'">Capturador</button>
-    <button (click)="tipoRegistro = 'administrador'" [class.active]="tipoRegistro === 'administrador'">Administrador</button>
-  </div>
+<mat-card class="registro-wrapper">
+  <mat-card-header>
+    <mat-card-title>Registro de Usuarios de Inventario</mat-card-title>
+  </mat-card-header>
 
-  <!-- Usamos ngSwitch para mostrar el formulario correcto -->
-  <div [ngSwitch]="tipoRegistro">
-    <app-registro-capturador *ngSwitchCase="'capturador'"></app-registro-capturador>
-    <app-registro-administradores *ngSwitchCase="'administrador'"></app-registro-administradores>
-    <p *ngSwitchDefault>Por favor, selecciona un tipo de usuario para registrar.</p>
-  </div>
+  <mat-card-content>
+    <mat-button-toggle-group value="capturador" aria-label="Tipo de registro" class="toggle-group">
+      <mat-button-toggle (click)="tipoRegistro = 'capturador'" [checked]="tipoRegistro === 'capturador'">Capturador</mat-button-toggle>
+      <mat-button-toggle (click)="tipoRegistro = 'administrador'" [checked]="tipoRegistro === 'administrador'">Administrador</mat-button-toggle>
+    </mat-button-toggle-group>
 
-  <div>
-    <a routerLink="/login">Acceder</a>
-  </div>
-</div>
+    <div [ngSwitch]="tipoRegistro">
+      <app-registro-capturador *ngSwitchCase="'capturador'"></app-registro-capturador>
+      <app-registro-administradores *ngSwitchCase="'administrador'"></app-registro-administradores>
+      <p *ngSwitchDefault>Por favor, selecciona un tipo de usuario para registrar.</p>
+    </div>
+
+    <div class="actions">
+      <a mat-button routerLink="/login">Acceder</a>
+    </div>
+  </mat-card-content>
+</mat-card>
 
