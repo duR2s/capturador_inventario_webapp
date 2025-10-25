@@ -1,46 +1,29 @@
-<div class="dashboard-container">
-  <!-- Panel Lateral Izquierdo (Sidebar) -->
-  <aside class="sidebar">
+<mat-sidenav-container class="dashboard-sidenav-container">
+  <mat-sidenav #sidenav class="app-sidenav" mode="side" >
     <div class="logo-container">
-      <h3>Inventario App</h3>
+      <h3>Tu Logo</h3>
     </div>
-    <nav class="navigation">
-      <ul>
-        <!--
-          Estos enlaces cambiarán el contenido inyectado en el <router-outlet>.
-          Necesitarás definir estas rutas en tu archivo app.routes.ts
-        -->
-        <li><a routerLink="/dashboard/resumen" routerLinkActive="active">Resumen</a></li>
-        <li><a routerLink="/dashboard/productos" routerLinkActive="active">Productos</a></li>
-        <li><a routerLink="/dashboard/reportes" routerLinkActive="active">Reportes</a></li>
-        <li><a routerLink="/dashboard/usuarios" routerLinkActive="active">Usuarios</a></li>
-        <!-- NUEVO ENLACE AÑADIDO CON routerLink -->
-        <li><a routerLink="/registro">Registrar Usuario</a></li>
-      </ul>
-    </nav>
-  </aside>
+    <mat-nav-list>
+      <a mat-list-item routerLink="/dashboard/inicio" routerLinkActive="active"><mat-icon>dashboard</mat-icon><span class="link-text">Dashboard</span></a>
+      <a mat-list-item routerLink="/usuarios" routerLinkActive="active"><mat-icon>people</mat-icon><span class="link-text">Usuarios</span></a>
+      <a mat-list-item routerLink="/config" routerLinkActive="active"><mat-icon>settings</mat-icon><span class="link-text">Configuración</span></a>
+    </mat-nav-list>
+  </mat-sidenav>
 
-  <!-- Contenido Principal -->
-  <main class="main-content">
-    <!-- Encabezado Superior -->
-    <header class="top-header">
-      <div class="header-title">
-        <h2>Panel de Control</h2>
-      </div>
+  <mat-sidenav-content>
+    <mat-toolbar class="top-header" color="primary">
+
+      <button class="toolbar-hamburger" mat-icon-button (click)="sidenav.toggle()" aria-label="Toggle sidenav"><mat-icon>menu</mat-icon></button>
+      <span class="toolbar-title">Panel de Control</span>
+      <span class="spacer"></span>
       <div class="user-info">
-        <span>Usuario Admin</span>
-        <button class="logout-button">Cerrar Sesión</button>
+        <span>Hola, Usuario</span>
+        <button mat-button class="logout-button">Salir</button>
       </div>
-    </header>
+    </mat-toolbar>
 
-    <!-- Área de Contenido Dinámico -->
-    <section class="content-area">
-      <!--
-        Aquí es donde Angular inyectará tus componentes
-        (gráficos, tablas, cálculos, etc.) según la ruta activa.
-      -->
+    <main class="content-area">
       <router-outlet></router-outlet>
-    </section>
-  </main>
-</div>
-
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

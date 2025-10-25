@@ -19,6 +19,14 @@
         <input matInput type="password" formControlName="password" id="password" />
       </mat-form-field>
 
+      <mat-form-field appearance="fill">
+        <mat-label>Confirmar Contraseña</mat-label>
+        <input matInput id="confirmPassword" type="password" formControlName="confirmPassword">
+        <mat-error *ngIf="registroForm.hasError('passwordMismatch')">
+          Las contraseñas no coinciden.
+        </mat-error>
+      </mat-form-field>
+
       <div class="actions">
         <button mat-raised-button color="primary" type="submit" [disabled]="registroForm.invalid">Registrar</button>
       </div>
