@@ -1,0 +1,33 @@
+.capture-area{
+  display: flex;
+  flex-direction: row;
+}
+
+.right-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.left-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 10px;
+}
+
+.separador {
+  width: 100%;
+  flex-grow: 1;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 10px;
+}
+
+#registrar-button {
+  height: 96px;
+}

@@ -1,8 +1,4 @@
-<div class="capture-area">
-  <div class="left-actions">
-    <button mat-raised-button color="primary" (click)="buscarProducto()"><mat-icon>search</mat-icon> Buscar</button>
-    <button mat-raised-button color="accent" (click)="registrarCaptura()"><mat-icon>save</mat-icon> Registrar</button>
-  </div>
+<form [formGroup]="form" class="capture-area">
 
   <div class="right-form">
     <div class="row">
@@ -24,4 +20,11 @@
         </mat-form-field>
     </div>
   </div>
-</div>
+
+<div class="separador"></div>
+
+  <div class="left-actions">
+    <button mat-raised-button color="primary" (click)="buscarProducto()"  id="buscar-button"><mat-icon>search</mat-icon> Buscar</button>
+    <button mat-raised-button color="accent" (click)="registrarCaptura()" id="registrar-button"><mat-icon>save</mat-icon> Registrar</button>
+  </div>
+</form>
