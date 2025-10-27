@@ -1,0 +1,27 @@
+<div class="capture-area">
+  <div class="left-actions">
+    <button mat-raised-button color="primary" (click)="buscarProducto()"><mat-icon>search</mat-icon> Buscar</button>
+    <button mat-raised-button color="accent" (click)="registrarCaptura()"><mat-icon>save</mat-icon> Registrar</button>
+  </div>
+
+  <div class="right-form">
+    <div class="row">
+        <mat-form-field appearance="fill" class="flex">
+          <mat-label>Código</mat-label>
+          <input matInput formControlName="codigo" />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="flex">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="nombre" />
+        </mat-form-field>
+    </div>
+
+    <div class="row">
+        <mat-form-field appearance="fill" class="full">
+          <mat-label>Cantidad</mat-label>
+          <input matInput type="number" formControlName="cantidad" />
+        </mat-form-field>
+    </div>
+  </div>
+</div>
