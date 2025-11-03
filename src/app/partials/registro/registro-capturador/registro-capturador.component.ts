@@ -33,6 +33,7 @@ export class RegistroCapturadorComponent implements OnInit {
   ngOnInit(): void {
       this.registroForm = this.fb.group({
         nombre: ['', Validators.required],
+        apellido: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
         password: ['', [Validators.required, Validators.minLength(6)]],
         confirmPassword: ['', Validators.required]

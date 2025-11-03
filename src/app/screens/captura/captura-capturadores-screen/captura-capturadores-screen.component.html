@@ -2,6 +2,7 @@
   <mat-card>
     <mat-card-content>
       <!-- Tabla superior -->
+       <p>Folio de captura - 0000 </p>
       <div class="table-wrapper">
         <app-tabla-captura-partial> </app-tabla-captura-partial>
       </div>
@@ -10,10 +11,11 @@
 
   <mat-card class="bottom-actions">
     <mat-card-content>
-      <div class="wrapper">
+      <div class="wrapper mat-card">
         <!-- Area inferior: botones a la izquierda, campos a la derecha -->
          <app-inputs-captura-partial> </app-inputs-captura-partial>
       </div>
     </mat-card-content>
+    <button mat-raised-button color="primary"  id="buscar-button" (click)="openTicketDialog()"><mat-icon>add</mat-icon> Ticket</button>
   </mat-card>
 </div>
