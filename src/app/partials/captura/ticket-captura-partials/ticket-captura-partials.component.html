@@ -1,3 +1,5 @@
+<mat-icon (click)="onClose()">delete</mat-icon>
+
 <form [formGroup]="form" class="capture-area">
 
   <div class="right-form">
@@ -10,9 +12,24 @@
     </div>
 
     <div class="row">
+        <mat-form-field appearance="fill" class="flex">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="nombre" />
+        </mat-form-field>
+
+    </div>
+
+    <div class="row">
         <mat-form-field appearance="fill" class="full">
           <mat-label>Cantidad</mat-label>
           <input matInput type="number" formControlName="cantidad" />
+        </mat-form-field>
+    </div>
+
+    <div *ngIf="data.generarTicket" class="row">
+        <mat-form-field appearance="fill" class="flex">
+          <mat-label>Nombre del Responsable</mat-label>
+          <input matInput formControlName="nombreResponsable" />
         </mat-form-field>
     </div>
   </div>
@@ -20,7 +37,6 @@
 <div class="separador"></div>
 
   <div class="left-actions">
-    <button mat-raised-button color="primary"  id="buscar-button"><mat-icon>search</mat-icon> Buscar</button>
     <button mat-raised-button color="accent" id="registrar-button"><mat-icon>save</mat-icon> Registrar</button>
   </div>
 </form>
