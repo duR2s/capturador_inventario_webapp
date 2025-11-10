@@ -100,6 +100,24 @@ export class TablaCapturaPartialComponent implements AfterViewInit { // Agregamo
 
   eliminarFila(element: CaptureRow): void {
     console.log(`Editando fila con código: ${element.codigo}`);
-    // Implementación de eliminación...
+    // 1. Obtener la referencia al array de datos
+    const data = this.dataSource.data;
+
+    // 2. 🚨 CLAVE: Usar indexOf() para encontrar el índice del objeto
+    //    indexOf() busca la referencia exacta del objeto en memoria.
+    const index = data.indexOf(element);
+
+    // 3. Verificar si se encontró el elemento
+    if (index > -1) {
+      // 4. Eliminar el elemento del array usando splice
+      data.splice(index, 1);
+
+      // 5. Asignar los datos modificados para forzar la actualización de la tabla
+      this.dataSource.data = data;
+
+      console.log(`Elemento '${element.nombre}' eliminado por referencia.`);
+    } else {
+      console.log(`Elemento '${element.nombre}' no encontrado.`);
+    }
   }
 }
