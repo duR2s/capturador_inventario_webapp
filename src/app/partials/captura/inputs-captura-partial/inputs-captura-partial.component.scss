@@ -22,9 +22,14 @@
   flex-grow: 1;
 }
 
+.producto-info {
+  display: flex;
+  flex-direction: row;
+}
+
 .row {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 20px;
   margin-bottom: 10px;
 }
