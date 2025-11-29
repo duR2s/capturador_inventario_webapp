@@ -1,9 +1,12 @@
+// Importar variables de color centralizadas
+@import '../../styles/color-variables';
+
 .auth-layout-container {
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f5f5f5;
+  background: $color-bg-light-2;
 }
 .auth-main {
   width: 100%;

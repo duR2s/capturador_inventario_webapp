@@ -1,3 +1,6 @@
+// Importar variables de color centralizadas
+@import '../../styles/color-variables';
+
 // Animaciones
 @keyframes fadeInUp {
   from {
@@ -78,7 +81,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+ background: linear-gradient(135deg, #eef9e3 0%, #ccebb0 100%);
 }
 
 .login-container {
@@ -110,8 +113,8 @@
   margin-bottom: 24px;
 }
 
-.logo-buap {
-  width: 40px;
+.logo-VR {
+  width:60xp;
   height: 40px;
   object-fit: contain;
 }
@@ -120,7 +123,7 @@
   margin-top: 8px;
   font-family: Nexa-Bold, Arial, sans-serif;
   font-size: 1.25rem;
-  color: #1976d2;
+  color: #37563D;
   font-weight: bold;
 }
 

@@ -1,0 +1,89 @@
+// ============================================================================
+// VARIABLES DE COLOR - Pantalla Centralizada para Cambios Rápidos
+// ============================================================================
+// Modifica los valores aquí y todos los estilos de la aplicación se actualizarán
+// automáticamente en toda la aplicación.
+// ============================================================================
+
+// COLORES PRIMARIOS Y DE MARCA
+$color-primary: #1976d2;           // Azul principal (botones, links, acentos)
+$color-primary-light: #90caf9;     // Azul claro (hover states)
+$color-primary-dark: #1565c0;      // Azul oscuro (active states)
+$color-primary-light-bg: #e3f2fd;  // Azul muy claro (fondos)
+
+// COLORES SECUNDARIOS
+$color-secondary: #0092B8;         // Azul secundario (registro, acentos alternativos)
+$color-secondary-dark: #017895;    // Azul secundario oscuro (hover)
+
+// COLORES VERDES (Éxito, positivo)
+$color-success: #1abc9c;           // Verde turquesa (éxito, activo, hover)
+$color-green-light: #eef9e3;       // Verde muy claro (gradientes)
+$color-green-light-accent: #ccebb0; // Verde claro (gradientes)
+
+// COLORES ROJOS (Error, crítico, peligro)
+$color-error: #d32f2f;             // Rojo de error
+$color-danger: #e74c3c;            // Rojo de peligro (botones de eliminar)
+$color-danger-dark: #c0392b;       // Rojo oscuro (hover de botones peligro)
+$color-critical: #be0000;          // Rojo crítico
+
+// COLORES NEUTROS
+$color-white: #ffffff;             // Blanco puro
+$color-black: #000000;             // Negro puro
+$color-text-dark: #222222;         // Texto oscuro principal
+$color-text-light: #666666;        // Texto gris claro
+$color-text-muted: #999999;        // Texto muy claro (secundario)
+
+// COLORES DE FONDO
+$color-bg-light: #f7f9fa;          // Fondo muy claro
+$color-bg-light-2: #f5f5f5;        // Fondo claro alternativo
+$color-bg-light-3: #fafafa;        // Fondo claro alternativo 2
+$color-bg-page: #f4f7fa;           // Fondo de página (gris claro)
+$color-bg-container: #ffffff;      // Fondo de contenedores
+
+// COLORES DE SIDEBAR/NAVEGACIÓN
+$color-sidebar-bg: #2c3e50;        // Fondo sidebar (gris azulado oscuro)
+$color-sidebar-text: #ecf0f1;      // Texto sidebar (gris muy claro)
+$color-sidebar-hover: #34495e;     // Hover sidebar
+$color-nav-border: #34495e;        // Borde nav
+
+// COLORES DE BORDES Y SOMBRAS
+$color-border-light: #e0e0e0;      // Borde claro
+$color-border-medium: #bdbdbd;     // Borde medio
+$color-border-dark: #ccc;          // Borde oscuro
+$color-border-sidebar: #34495e;    // Borde sidebar
+$color-shadow-light: rgba(44, 62, 80, 0.08);   // Sombra muy clara
+$color-shadow-medium: rgba(44, 62, 80, 0.12);  // Sombra media
+$color-shadow-dark: rgba(0, 0, 0, 0.06);       // Sombra oscura
+$color-shadow-stronger: rgba(0, 0, 0, 0.5);    // Sombra fuerte
+$color-shadow-input: rgba(0, 0, 0, 0.06);      // Sombra para inputs
+
+// COLORES PARA TEXTOS ESPECÍFICOS
+$color-text-title: #37563d;        // Color títulos (verde oscuro)
+$color-text-label: #231f20;        // Color etiquetas (marrón oscuro)
+$color-text-aquamarine: mediumaquamarine; // Aquamarine
+
+// COLORES PARA COMPONENTES ESPECÍFICOS
+$color-accent-blue: #0092b8;       // Acento azul (radio buttons, checkboxes)
+$color-accent-blue-ripple: #000;   // Ripple neutral
+$color-accent-blue-ripple-checked: #0092b8; // Ripple cuando está checkeado
+
+// GRADIENTES (COMBINACIONES DE COLORES)
+$gradient-green: linear-gradient(135deg, $color-green-light 0%, $color-green-light-accent 100%);
+$gradient-blue: linear-gradient(135deg, $color-primary-light-bg 0%, $color-white 100%);
+
+// ============================================================================
+// NOTAS DE USO:
+// ============================================================================
+// 1. Para usar estas variables en cualquier archivo SCSS:
+//    @import 'path/to/_color-variables.scss';
+//    background-color: $color-primary;
+//
+// 2. Para cambiar un color globalmente:
+//    - Modifica el valor de la variable aquí
+//    - Todos los estilos que usen esa variable se actualizarán automáticamente
+//
+// 3. Mantén una nomenclatura consistente:
+//    - $color-{context}-{intensity}: para colores específicos
+//    - $color-{semantic}: para colores semánticos (success, error, etc)
+//    - Siempre usa camelCase o kebab-case, pero consistente
+// ============================================================================
