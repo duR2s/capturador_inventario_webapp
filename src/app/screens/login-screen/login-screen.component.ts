@@ -8,18 +8,16 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-
-// Asumo que tu FacadeService también necesita ser importado
 import { FacadeService } from 'src/app/services/facade.service';
 
 @Component({
   selector: 'app-login-screen',
-  standalone: true, // <-- ¡Componente Standalone!
+  standalone: true,
   imports: [
-    CommonModule,        // Para directivas como *ngIf, *ngFor, etc.
-    FormsModule,         // Para el two-way binding ([ngModel])
-    RouterLink,          // Para el método 'registrar()' que usa router.navigate
-    MatCardModule,       // Módulos de Material UI (asumiendo que los usa el template)
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
@@ -31,7 +29,6 @@ import { FacadeService } from 'src/app/services/facade.service';
 })
 export class LoginScreenComponent implements OnInit {
 
-  // Uso de 'inject()' para inyectar dependencias (Práctica moderna de Angular 16+)
   public router = inject(Router);
   private facadeService = inject(FacadeService);
 
@@ -40,9 +37,8 @@ export class LoginScreenComponent implements OnInit {
   public type: string = "password";
   public errors: any = {};
   public load: boolean = false;
-  public generalErrorMessage: string | null = null; // Para mostrar errores sin alert()
+  public generalErrorMessage: string | null = null;
 
-  // El constructor se mantiene simple si usamos inject()
   constructor() {}
 
   ngOnInit(): void {
@@ -85,7 +81,6 @@ export class LoginScreenComponent implements OnInit {
       },
       error: (error:any) => {
         this.load = false;
-        // Reemplazo de alert() por una variable de error en el componente
         console.error("Error en el login:", error);
         this.generalErrorMessage = "Credenciales inválidas. Por favor, inténtalo de nuevo. (" + (error.statusText || 'Error desconocido') + ")";
       }
@@ -99,6 +94,6 @@ export class LoginScreenComponent implements OnInit {
   }
 
   public registrar(): void {
-    this.router.navigate(["registro-usuarios"]);
+    this.router.navigate(["registro"]);
   }
 }
