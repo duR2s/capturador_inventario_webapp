@@ -1,1 +1,229 @@
-/* You can add global styles to this file, and also import other style files */
+// 1. IMPORTAR TUS VARIABLES DE COLOR (La única fuente de la verdad)
+@import './app/styles/color-variables.scss'; // Ajusta la ruta si es necesario
+
+// ==========================================
+// VARIABLES DE FUENTE Y TAMAÑO (Se mantienen aquí porque no son colores)
+// ==========================================
+$font-main: 'Nexa', 'Roboto', Arial, sans-serif;
+$font-size-base: 16px;
+$font-size-sm: 0.875rem;
+$font-size-lg: 1.25rem;
+$spacing-base: 8px;
+
+// ==========================================
+// FUENTES (FONTS)
+// ==========================================
+@font-face {
+  font-family: 'Nexa-Bold';
+  src: url('/assets/fonts/NexaBold.eot');
+  src: url('/assets/fonts/NexaBold.eot?#iefix') format('embedded-opentype'),
+      url('/assets/fonts/NexaBold.woff2') format('woff2'),
+      url('/assets/fonts/NexaBold.woff') format('woff'),
+      url('/assets/fonts/NexaBold.ttf') format('truetype'),
+      url('/assets/fonts/NexaBold.svg#NexaBold') format('svg');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Nexa-Light';
+  src: url('/assets/fonts/NexaLight.eot');
+  src: url('/assets/fonts/NexaLight.eot?#iefix') format('embedded-opentype'),
+    url('/assets/fonts/NexaLight.woff2') format('woff2'),
+    url('/assets/fonts/NexaLight.woff') format('woff'),
+    url('/assets/fonts/NexaLight.ttf') format('truetype'),
+    url('/assets/fonts/NexaLight.svg#NexaLight') format('svg');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Nexa';
+  src: url('/assets/fonts/NexaRegular.eot');
+  src: url('/assets/fonts/NexaRegular.eot?#iefix') format('embedded-opentype'),
+    url('/assets/fonts/NexaRegular.woff2') format('woff2'),
+    url('/assets/fonts/NexaRegular.woff') format('woff'),
+    url('/assets/fonts/NexaRegular.ttf') format('truetype'),
+    url('/assets/fonts/NexaRegular.svg#NexaRegular') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+// ==========================================
+// PALETTE SUPPORT (Variables CSS nativas mapeadas a SCSS)
+// ==========================================
+// Esto asegura que si usas estilos inline o librerías que busquen --var,
+// usen tus colores de marca.
+
+:root {
+  // Por defecto (Light theme) mapeado a tus variables SCSS
+  --table-bg: #{$color-white};
+  --table-header-bg: #{$color-primary-light-bg}; // Ahora es color Hueso, no Azul
+  --table-header-border: #{$color-text-title};
+  --text-main: #{$color-text-dark};
+  --sidebar-bg: #{$color-sidebar-bg};
+  --sidebar-active-bg: #{$color-sidebar-hover};
+  --sidebar-text: #{$color-sidebar-text};
+
+  --primary: #{$color-primary};
+  --secondary: #{$color-secondary};
+  --danger: #{$color-danger};
+  --success: #{$color-success};
+  --accent: #{$color-text-aquamarine};
+}
+
+// Soporte Dark Mode (Opcional - Ajustado para no romper la vista si se activa)
+[data-theme="dark"] {
+  --table-bg: #1e2b1f; // Verde muy oscuro
+  --table-header-bg: #2b3d2d;
+  --table-header-border: #415743;
+  --text-main: #f5f6fa;
+  --sidebar-bg: #181a1b;
+  --primary: #{$color-primary-light}; // Verde más claro para contrastar en oscuro
+  --secondary: #{$color-secondary-light};
+}
+
+// ==========================================
+// ESTILOS GLOBALES DE TABLAS
+// ==========================================
+.dashboard-content,
+.table-responsive,
+table,
+.mat-elevation-z8,
+.table {
+  background: var(--table-bg) !important;
+  color: var(--text-main) !important;
+}
+
+.mat-mdc-header-cell,
+th {
+  background: var(--table-header-bg) !important;
+  color: #{$color-text-title} !important; // Texto del header en verde oscuro
+  font-family: 'Nexa-Bold', sans-serif !important; // Forzar fuente de marca
+}
+
+// ==========================================
+// MIXINS
+// ==========================================
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// ==========================================
+// RESET CSS & BASE
+// ==========================================
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100%;
+  font-size: $font-size-base;
+  background-color: $color-bg-page; // Fondo cálido
+  color: $color-text-dark;
+}
+
+body {
+  min-height: 100vh;
+  font-family: $font-main;
+  background-color: $color-bg-page; // Fondo cálido
+  color: $color-text-dark;
+  line-height: 1.5;
+  letter-spacing: 0.01rem;
+}
+
+// ==========================================
+// TYPOGRAPHY
+// ==========================================
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Nexa-Bold', $font-main;
+  color: $color-text-title; // Verde oscuro de marca
+}
+
+a {
+  color: $color-secondary; // Enlaces en terracota para resaltar
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.2s;
+
+  &:hover {
+    color: $color-secondary-dark;
+    text-decoration: underline;
+  }
+}
+
+p, span, label, input, button {
+  font-family: $font-main;
+}
+
+// ==========================================
+// UTILITIES & FEEDBACK
+// ==========================================
+.invalid-feedback,
+.feedback-error {
+  display: block !important;
+  width: 100%;
+  font-size: $font-size-sm;
+  color: $color-error;
+  font-family: $font-main;
+  text-align: left;
+  margin-top: 4px;
+}
+
+.feedback-success {
+  display: block !important;
+  width: 100%;
+  font-size: $font-size-sm;
+  color: $color-success;
+  font-family: $font-main;
+  text-align: left;
+  margin-top: 4px;
+}
+
+// Clase genérica .button (Si aún se usa, armonizada)
+.button {
+  @include flex-center;
+  padding: $spacing-base ($spacing-base * 2);
+  background: $color-primary; // Verde
+  color: $color-white;
+  border: none;
+  border-radius: 8px; // Redondeado consistente con inputs
+  font-size: $font-size-base;
+  font-family: 'Nexa-Bold', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover, &:focus {
+    background: $color-primary-dark;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+}
+
+// ==========================================
+// MEDIA QUERIES GLOBALES
+// ==========================================
+@media (max-width: 600px) {
+  html {
+    font-size: 15px;
+  }
+  body {
+    padding: $spacing-base;
+  }
+  h1 {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 430px) {
+  body {
+    padding: 0 !important;
+  }
+}

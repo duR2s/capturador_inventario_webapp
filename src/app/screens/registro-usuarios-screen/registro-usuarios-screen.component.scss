@@ -1,11 +1,13 @@
+// Importar variables de color centralizadas
+@import '../../styles/color-variables';
+
 .wrapper {
   margin: 0;
   min-height: 100vh;
   width: 100%;
-  background-image: url('/assets/images/fondo-azul.jpg');
+  background-image: url('/assets/images/green-background.png');
   background-position: center;
   background-size: cover;
-  background-position: center;
   background-repeat: no-repeat;
 }
 
@@ -24,6 +26,11 @@ body {
 .role-card {
   width: min(100%, 980px);
   margin-inline: auto;
+  border-radius: 16px;
+
+  // Agregado: Fondo y Sombra harmonizados (necesario al cambiar el fondo del wrapper)
+  background-color: $color-white;
+  box-shadow: 0 16px 40px $color-shadow-dark;
 
   .role-card-header {
     // width: 100%;
@@ -34,6 +41,8 @@ body {
     align-items: center;
     gap: 4px;
     padding-bottom: 8px;
+    // Opcional: Agregar borde sutil harmonizado si deseas separación
+    // border-bottom: 1px solid $color-border-light;
   }
 
   .actions-header-colum {
@@ -44,7 +53,6 @@ body {
     gap: 2px;
     width: 100%;
   }
-
 
   .role-row {
     width: 100%;
@@ -68,13 +76,14 @@ body {
     font-family: Nexa-Bold, Arial, sans-serif;
     font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem); /* ~22–32px */
     margin-bottom: 0.25rem;
+    color: $color-text-title; // Cambio: Color título harmonizado
   }
 
   .subtitle-card {
     width: 100%;
     font-family: Nexa-Light, Arial, sans-serif;
     font-size: clamp(1rem, 0.8rem + 0.5vw, 1.25rem); /* ~16–20px */
-    color: #000000;
+    color: $color-text-light; // Cambio: Negro a gris cálido
     margin-top: 1rem;
   }
 
@@ -82,7 +91,7 @@ body {
     width: 100%;
     font-size: 1.25rem;
     font-family: Nexa, Arial, sans-serif;
-    color: #000000;
+    color: $color-text-dark; // Cambio: Negro a gris oscuro cálido
   }
 }
 
@@ -140,13 +149,21 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  // Agregado: Fondo sutil para el botón
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: all 0.2s;
+
+  &:hover {
+      background-color: $color-white;
+      box-shadow: 0 4px 12px $color-shadow-light;
+  }
 }
 
 .back-icon {
   width: auto!important;
   height: auto!important;
   font-size: 1.9rem;
-  color: #0092B8;
+  color: $color-secondary; // Cambio: #0092B8 a Primary
 }
 
 /* =========================
@@ -162,28 +179,28 @@ body {
 ::ng-deep .mat-mdc-radio-button mat-icon {
   text-align: center;
   font-size: 2.5rem; /* Tamaño del ícono */
-  color: #0092B8; /* Color del ícono */
+  color: $color-border-dark; // Cambio: #0092B8 a borde oscuro (inactivo)
   transition: color 0.3s ease; /* Suaviza el cambio de color */
 }
 
 /* Cambio de color del ícono cuando está seleccionado */
 ::ng-deep .mat-mdc-radio-button:hover mat-icon {
-  color: #0092B8; /* Color más oscuro en el ícono cuando se pasa el ratón */
+  color: $color-secondary; // Cambio: #0092B8 a Primary
 }
 
 ::ng-deep .mat-mdc-radio-button .mdc-form-field {
-  color: #231F20;
+  color: $color-text-dark; // Cambio: #231F20 a texto oscuro
   font-family: Nexa;
   font-size: 20px;
 }
 
 ::ng-deep .mat-mdc-radio-button.mat-accent {
-  --mdc-radio-selected-focus-icon-color: #0092B8;
-  --mdc-radio-selected-hover-icon-color: #0092B8;
-  --mdc-radio-selected-icon-color: #0092B8;
-  --mdc-radio-selected-pressed-icon-color: #0092B8;
-  --mat-radio-ripple-color: #000;
-  --mat-radio-checked-ripple-color: #0092B8;
+  --mdc-radio-selected-focus-icon-color: #{$color-secondary}; // Cambio: #0092B8
+  --mdc-radio-selected-hover-icon-color: #{$color-secondary};
+  --mdc-radio-selected-icon-color: #{$color-secondary};
+  --mdc-radio-selected-pressed-icon-color: #{$color-secondary};
+  --mat-radio-ripple-color: #{$color-shadow-dark}; // Cambio: #000 a sombra harmonizada
+  --mat-radio-checked-ripple-color: #{$color-secondary};
 }
 
 ::ng-deep .mdc-radio {
@@ -196,7 +213,6 @@ body {
   cursor: pointer;
   will-change: opacity,transform,border-color,color;
 }
-
 
 /* =========================
    Ajustes para la vista móvil (≤700px)
@@ -227,6 +243,7 @@ body {
     font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem); /* ~22–32px */
     line-height: 1.2;
     margin-bottom: 0.5rem;
+    color: $color-text-title; // Agregado para consistencia
   }
 
   .title-table {

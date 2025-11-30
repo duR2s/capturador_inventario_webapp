@@ -1,3 +1,6 @@
+// Importar variables de color centralizadas
+@import '../../../styles/color-variables';
+
 .wrapper {
   width: 100%;
   min-height: 100vh;
@@ -5,7 +8,9 @@
   flex-direction: row;
   justify-content: center;
   align-items: flex-start;
-  background-color: #fff;
+  // Cambio: Usamos el fondo de página cálido en lugar de blanco puro
+  background-color: $color-white;
+  border-radius: 16px;
 }
 
 .section-registro{
@@ -25,7 +30,8 @@
   align-items: flex-start;
   padding-top: 2.5rem;
   gap: 2.2rem;
-  background: #fff;
+  // Cambio: Fondo de contenedor blanco cálido
+  background: $color-white;
 }
 
 .title-user{
@@ -33,7 +39,8 @@
   text-align: left;
   font-family: Nexa-Bold;
   letter-spacing: 2px;
-  color: #231F20;
+  // Cambio: Color de título de marca (Verde oscuro)
+  color: $color-text-title;
   text-transform: capitalize;
   opacity: 1;
 }
@@ -59,8 +66,9 @@ mat-form-field{
 .btn-primary {
   width: 208px;
   height: 48px;
-  background-color: #0092B8!important;
-  border-color: #0092B8!important;
+  // Cambio: Usamos el color Secundario (Terracota) para match con Login
+  background-color: $color-primary!important;
+  border-color: $color-primary!important;
   border-radius: 8px!important;
   opacity: 1;
   //Fuente
@@ -69,19 +77,23 @@ mat-form-field{
   font-size: 16px;
   font-weight: bold;
   letter-spacing: 0px;
-  color: #FFFFFF;
+  color: $color-white;
   opacity: 1;
+  transition: background-color 0.2s;
 }
 
 .btn-primary:hover {
-  background-color: #017895!important;
-  border-color: #017895!important;
-
+  // Cambio: Hover consistente
+  background-color: $color-primary-light!important;
+  border-color: $color-primary-light!important;
 }
 
 .btn-danger{
   width: 208px;
   height: 48px;
+  // Agregado: Color de error/peligro (Faltaba background en tu código)
+  background-color: $color-danger!important;
+  border: 1px solid $color-danger!important;
   border-radius: 8px!important;
   opacity: 1;
   //Fuente
@@ -90,8 +102,14 @@ mat-form-field{
   font-size: 16px;
   font-weight: bold;
   letter-spacing: 0px;
-  color: #FFFFFF;
+  color: $color-white;
   opacity: 1;
+  transition: background-color 0.2s;
+}
+
+.btn-danger:hover {
+  background-color: $color-danger-dark!important;
+  border-color: $color-danger-dark!important;
 }
 
 .mat-hint-margin {
@@ -116,6 +134,7 @@ mat-form-field{
     font-size: 1.2rem; /* Asegura que el tamaño sea adecuado en dispositivos pequeños */
     text-align: left;
     margin-bottom: 1rem;
+    color: $color-text-dark;
   }
 
   .select-materias {
@@ -156,4 +175,6 @@ mat-form-field{
 
 .invalid-feedback, .feedback-error {
   margin-left: 2.5rem;
+  color: $color-error; // Asegurar color de error correcto
+  font-size: 0.875rem;
 }

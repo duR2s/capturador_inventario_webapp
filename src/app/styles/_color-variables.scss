@@ -1,89 +1,107 @@
 // ============================================================================
 // VARIABLES DE COLOR - Pantalla Centralizada para Cambios Rápidos
 // ============================================================================
-// Modifica los valores aquí y todos los estilos de la aplicación se actualizarán
-// automáticamente en toda la aplicación.
-// ============================================================================
 
-// COLORES PRIMARIOS Y DE MARCA
-$color-primary: #1976d2;           // Azul principal (botones, links, acentos)
-$color-primary-light: #90caf9;     // Azul claro (hover states)
-$color-primary-dark: #1565c0;      // Azul oscuro (active states)
-$color-primary-light-bg: #e3f2fd;  // Azul muy claro (fondos)
+// ----------------------------------------------------------------------------
+// 1. COLORES DE MARCA (INTOCABLES)
+// ----------------------------------------------------------------------------
 
-// COLORES SECUNDARIOS
-$color-secondary: #0092B8;         // Azul secundario (registro, acentos alternativos)
-$color-secondary-dark: #017895;    // Azul secundario oscuro (hover)
+// PRIMARIOS (Gama Verde Bosque)
+$color-primary: #6A994E;           // Verde principal
+$color-primary-light: #A7C957;     // Verde claro (hover)
+$color-primary-dark: #386641;      // Verde oscuro (active/textos fuertes)
+$color-primary-light-bg: #F2E8CF;  // Hueso/Crema (fondos de acento)
 
-// COLORES VERDES (Éxito, positivo)
-$color-success: #1abc9c;           // Verde turquesa (éxito, activo, hover)
-$color-green-light: #eef9e3;       // Verde muy claro (gradientes)
-$color-green-light-accent: #ccebb0; // Verde claro (gradientes)
+// SECUNDARIOS (Gama Terracota/Rojo)
+$color-secondary: #BC4749;         // Rojo Terracota principal
+$color-secondary-light: #C9696B;   // Rojo claro (hover) - (Mantenido typo 'light' para compatibilidad)
+$color-secondary-dark: #a53b3d;    // Rojo oscuro (active)
 
-// COLORES ROJOS (Error, crítico, peligro)
-$color-error: #d32f2f;             // Rojo de error
-$color-danger: #e74c3c;            // Rojo de peligro (botones de eliminar)
-$color-danger-dark: #c0392b;       // Rojo oscuro (hover de botones peligro)
-$color-critical: #be0000;          // Rojo crítico
+// ----------------------------------------------------------------------------
+// 2. GRADIENTES DE MARCA
+// ----------------------------------------------------------------------------
+$gradient-green-primary: linear-gradient(35deg, #6A994E, #97d076);
+$gradient-green-light: linear-gradient(215deg, #BDE59E, #cff4b3);
+$gradient-bone-primary: linear-gradient(215deg, #fbf3df, #f9f5ec); // Nuevo gradiente crema
 
-// COLORES NEUTROS
-$color-white: #ffffff;             // Blanco puro
-$color-black: #000000;             // Negro puro
-$color-text-dark: #222222;         // Texto oscuro principal
-$color-text-light: #666666;        // Texto gris claro
-$color-text-muted: #999999;        // Texto muy claro (secundario)
+// ----------------------------------------------------------------------------
+// 3. ESTADOS SEMÁNTICOS (ARMONIZADOS)
+// ----------------------------------------------------------------------------
+// Se han ajustado ligeramente para que no sean "neón", sino más naturales
 
-// COLORES DE FONDO
-$color-bg-light: #f7f9fa;          // Fondo muy claro
-$color-bg-light-2: #f5f5f5;        // Fondo claro alternativo
-$color-bg-light-3: #fafafa;        // Fondo claro alternativo 2
-$color-bg-page: #f4f7fa;           // Fondo de página (gris claro)
-$color-bg-container: #ffffff;      // Fondo de contenedores
+// ÉXITO (Sincronizado con la gama verde pero distintivo)
+$color-success: #558b2f;           // Un verde más "hoja" que el teal anterior
+$color-green-light: #e8f5e9;       // Fondo éxito muy suave
+$color-green-light-accent: #c5e1a5; // Borde éxito
 
-// COLORES DE SIDEBAR/NAVEGACIÓN
-$color-sidebar-bg: #2c3e50;        // Fondo sidebar (gris azulado oscuro)
-$color-sidebar-text: #ecf0f1;      // Texto sidebar (gris muy claro)
-$color-sidebar-hover: #34495e;     // Hover sidebar
-$color-nav-border: #34495e;        // Borde nav
+// ERROR / PELIGRO (Sincronizado con la gama terracota)
+$color-error: #d32f2f;             // Rojo estándar (mantenido por seguridad semántica)
+$color-danger: #BC4749;            // Usamos el secundario como color de peligro (es semánticamente correcto aquí)
+$color-danger-dark: #8c3234;       // Versión más oscura del secundario
+$color-critical: #9a0007;          // Rojo profundo para errores críticos
 
-// COLORES DE BORDES Y SOMBRAS
-$color-border-light: #e0e0e0;      // Borde claro
-$color-border-medium: #bdbdbd;     // Borde medio
-$color-border-dark: #ccc;          // Borde oscuro
-$color-border-sidebar: #34495e;    // Borde sidebar
-$color-shadow-light: rgba(44, 62, 80, 0.08);   // Sombra muy clara
-$color-shadow-medium: rgba(44, 62, 80, 0.12);  // Sombra media
-$color-shadow-dark: rgba(0, 0, 0, 0.06);       // Sombra oscura
-$color-shadow-stronger: rgba(0, 0, 0, 0.5);    // Sombra fuerte
-$color-shadow-input: rgba(0, 0, 0, 0.06);      // Sombra para inputs
+// ----------------------------------------------------------------------------
+// 4. NEUTROS Y TEXTOS (CÁLIDOS)
+// ----------------------------------------------------------------------------
+// En lugar de negros puros (#000) o grises azules, usamos "Grises Cálidos"
 
-// COLORES PARA TEXTOS ESPECÍFICOS
-$color-text-title: #37563d;        // Color títulos (verde oscuro)
-$color-text-label: #231f20;        // Color etiquetas (marrón oscuro)
-$color-text-aquamarine: mediumaquamarine; // Aquamarine
+$color-white: #ffffff;
+$color-black: #1a1c1a;             // Negro "suave" (casi imperceptiblemente verde)
 
-// COLORES PARA COMPONENTES ESPECÍFICOS
-$color-accent-blue: #0092b8;       // Acento azul (radio buttons, checkboxes)
-$color-accent-blue-ripple: #000;   // Ripple neutral
-$color-accent-blue-ripple-checked: #0092b8; // Ripple cuando está checkeado
+$color-text-dark: #292e29;         // Gris muy oscuro cálido (para párrafos principales)
+$color-text-light: #5e665e;        // Gris medio cálido (para subtítulos)
+$color-text-muted: #8c948c;        // Gris claro (placeholders)
 
-// GRADIENTES (COMBINACIONES DE COLORES)
-$gradient-green: linear-gradient(135deg, $color-green-light 0%, $color-green-light-accent 100%);
-$gradient-blue: linear-gradient(135deg, $color-primary-light-bg 0%, $color-white 100%);
+// Colores de Texto Específicos
+$color-text-title: #386641;        // Usamos el Primary Dark para títulos (Brand Consistency)
+$color-text-label: #4a4036;        // Un marrón muy oscuro para etiquetas
 
-// ============================================================================
-// NOTAS DE USO:
-// ============================================================================
-// 1. Para usar estas variables en cualquier archivo SCSS:
-//    @import 'path/to/_color-variables.scss';
-//    background-color: $color-primary;
-//
-// 2. Para cambiar un color globalmente:
-//    - Modifica el valor de la variable aquí
-//    - Todos los estilos que usen esa variable se actualizarán automáticamente
-//
-// 3. Mantén una nomenclatura consistente:
-//    - $color-{context}-{intensity}: para colores específicos
-//    - $color-{semantic}: para colores semánticos (success, error, etc)
-//    - Siempre usa camelCase o kebab-case, pero consistente
-// ============================================================================
+// ----------------------------------------------------------------------------
+// 5. FONDOS Y ESTRUCTURA (LA BASE DE LA ARMONÍA)
+// ----------------------------------------------------------------------------
+// Eliminados los fondos azules (#f4f7fa). Ahora son cremas/huesos.
+
+$color-bg-light: #fdfcf7;          // Casi blanco, con un toque de crema
+$color-bg-light-2: #f7f5ed;        // Crema muy suave
+$color-bg-light-3: #F2E8CF;        // El color 'Hueso' de la marca (Primary Light BG)
+$color-bg-page: #fcfbf6;           // Fondo general de la página (Blanco cálido)
+$color-bg-container: #ffffff;      // Fondo de tarjetas/contenedores
+
+// ----------------------------------------------------------------------------
+// 6. SIDEBAR Y NAVEGACIÓN
+// ----------------------------------------------------------------------------
+// Cambiado de Azul Marino (#2c3e50) a Verde Bosque Profundo
+
+$color-sidebar-bg: #2b3d2d;        // Verde bosque muy oscuro y desaturado
+$color-sidebar-text: #F2E8CF;      // Texto color hueso (excelente contraste sobre verde oscuro)
+$color-sidebar-hover: #386641;     // Primary Dark para hover
+$color-nav-border: #415743;        // Separadores dentro del sidebar
+
+// ----------------------------------------------------------------------------
+// 7. BORDES Y SOMBRAS
+// ----------------------------------------------------------------------------
+// Bordes cálidos en lugar de metálicos
+
+$color-border-light: #efebe0;      // Borde muy sutil crema
+$color-border-medium: #dcd6c8;     // Borde medio (tipo cartón suave)
+$color-border-dark: #b0aca2;       // Borde oscuro cálido
+$color-border-sidebar: #1e2b1f;    // Borde oscuro para el sidebar
+
+// Sombras tintadas ligeramente de verde/marrón en lugar de azul
+$color-shadow-light: rgba(56, 102, 65, 0.08);    // Sombra verdosa muy clara
+$color-shadow-medium: rgba(56, 102, 65, 0.15);   // Sombra verdosa media
+$color-shadow-dark: rgba(26, 28, 26, 0.2);       // Sombra oscura neutra
+$color-shadow-stronger: rgba(43, 61, 45, 0.5);   // Sombra fuerte
+$color-shadow-input: rgba(106, 153, 78, 0.15);   // Sombra focus inputs (Primary color)
+
+// ----------------------------------------------------------------------------
+// 8. COMPONENTES ESPECÍFICOS
+// ----------------------------------------------------------------------------
+
+// Acentos (Checkboxes, Radios, Toggles)
+// Cambiado de Azul (#0092b8) al Primary (#6A994E) para consistencia
+$color-accent-blue: #6A994E;                 // Ahora es verde (mantenemos nombre variable para no romper código)
+$color-accent-blue-ripple: rgba(106, 153, 78, 0.2);
+$color-accent-blue-ripple-checked: #6A994E;
+
+$color-text-aquamarine: #85c798;   // Ajustado a un verde agua más suave que combine
