@@ -34,13 +34,19 @@
 }
 
 .logo-container {
-  padding: 0 1.5rem 1.5rem 1.5rem;
+  padding: 0 1.5rem 0 1.5rem;
   text-align: center;
   border-bottom: 1px solid $color-nav-border;
   h3 {
     margin: 0;
     font-size: 1.5rem;
   }
+}
+
+.logo-VR {
+  width: 100px;
+  height: 80px;
+  object-fit: contain;
 }
 
 .navigation {

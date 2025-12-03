@@ -1,26 +1,23 @@
+// --- app.component.ts ---
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-
-// --- app.component.ts ---
-// Este es el componente principal. Ahora es muy simple.
-// Su única responsabilidad es mostrar el componente que corresponda
-// según la ruta activa.
+// 1. IMPORTAR EL MÓDULO AQUÍ TAMBIÉN
+import { MatIconRegistry, MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  // Importamos RouterOutlet para que el sistema de rutas funcione.
-  imports: [RouterOutlet],
+  // 2. AGREGAR MatIconModule AL ARRAY DE IMPORTS
+  imports: [RouterOutlet, MatIconModule],
   template: `
-    <!--
-      RouterOutlet es un marcador de posición.
-      Angular inyectará aquí el componente correspondiente a la ruta actual.
-      (Por ejemplo, AuthLayoutComponent o DashboardLayoutComponent).
-    -->
     <router-outlet></router-outlet>
   `,
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
   title = 'proyecto-angular';
+
+  constructor(private iconRegistry: MatIconRegistry) {
+    this.iconRegistry.setDefaultFontSetClass('material-symbols-outlined');
+  }
 }

@@ -31,23 +31,16 @@
             <!-- Administrador -->
             <mat-radio-button
               class="role-pill"
-              value="administrador"
-              *ngIf="!facadeService.getUserGroup() || facadeService.getUserGroup() === 'administrador'">
-              <mat-icon class="me-1" fontIcon="admin_panel_settings"></mat-icon>
-              <span class="text-radio">Administrador</span>
+              value="administrador">
+              <mat-icon class="me-1">person_apron</mat-icon>
+              <span class="text-radio">Empleado</span>
             </mat-radio-button>
-            <!-- Alumno -->
-             <mat-radio-button class="role-pill" value="alumno">
-              <mat-icon class="me-1" fontIcon="school"></mat-icon>
-              <span class="text-radio">Alumno</span>
-            </mat-radio-button>
-            <!-- Profesor -->
+            <!-- Otro -->
             <mat-radio-button
               class="role-pill"
-              value="maestro"
-              *ngIf="!facadeService.getUserGroup() || facadeService.getUserGroup() === 'administrador' || facadeService.getUserGroup() === 'maestro'">
-              <mat-icon class="me-1" fontIcon="person"></mat-icon>
-              <span class="text-radio">Maestro</span>
+              value="Otro">
+              <mat-icon class="me-1">person</mat-icon>
+              <span class="text-radio">Otro</span>
             </mat-radio-button>
 
           </mat-radio-group>

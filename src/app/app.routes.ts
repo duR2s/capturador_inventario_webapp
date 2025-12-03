@@ -5,7 +5,6 @@ import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component
 import { LoginScreenComponent } from './screens/login-screen/login-screen.component';
 import { RegistroUsuariosScreenComponent } from './screens/registro-usuarios-screen/registro-usuarios-screen.component';
 import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-layout.component';
-import { CapturaInventarioComponent } from './layouts/captura/captura-inventario-layout/captura-inventario-layout.component';
 import { CapturaCapturadoresScreenComponent } from './screens/captura/captura-capturadores-screen/captura-capturadores-screen.component';
 
 // --- app.routes.ts ---
@@ -35,18 +34,11 @@ export const routes: Routes = [
     children: [
       // Ejemplo de una ruta dentro del dashboard:
       { path: 'inicio', component: DashboardInicioScreenComponent},
-    ]
-  },
-
-  {
-    path: 'captura',
-    component: CapturaInventarioComponent,
-    // canActivate: [AuthGuard], // <-- Futuro: Aquí pondrías un guard para proteger la ruta
-    children: [
       // Ruta PRovisional
       { path: 'inicio', component: CapturaCapturadoresScreenComponent},
     ]
   },
+
 
   // Redirección para cualquier otra ruta no encontrada.
   // Es una buena práctica tener esto para manejar URLs incorrectas.
