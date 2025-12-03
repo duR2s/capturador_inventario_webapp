@@ -1,10 +1,10 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
 import { FacadeService } from '../facade.service';
 import { ErrorsService } from '../tools/errors.service';
 import { ValidatorService } from '../tools/validator.service';
-import { Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -13,7 +13,7 @@ const httpOptions = {
 @Injectable({
   providedIn: 'root'
 })
-export class AdministradoresService {
+export class CapturadoresService {
 
   constructor(
     private http: HttpClient,
@@ -22,29 +22,27 @@ export class AdministradoresService {
     private facadeService: FacadeService
   ) { }
 
-  public esquemaAdmin() {
+  public esquemaCapturador() {
     return {
-      'rol': 'ADMIN',
-      'clave_interna': '', // REFACTOR: Antes clave_admin
+      'rol': 'CAPTURADOR',
+      'clave_interna': '', // Antes id_trabajador
       'first_name': '',
       'last_name': '',
       'email': '',
       'password': '',
       'confirmar_password': '',
       'telefono': '',
-      'rfc': '', // Puede que este campo sea exclusivo de admin o se mueva a metadata
       'edad': '',
-      'fecha_nacimiento': '' // Asegurando compatibilidad con Empleado
+      'fecha_nacimiento': ''
     }
   }
 
-  //Validación para el formulario
-  public validarAdmin(data: any, editar: boolean) {
-    console.log("Validando admin... ", data);
+  // Validación para el formulario
+  public validarCapturador(data: any, editar: boolean) {
+    console.log("Validando capturador... ", data);
     let error: any = {};
 
-    //Validaciones
-    // REFACTOR: Validamos clave_interna
+    // Validaciones
     if (!this.validatorService.required(data["clave_interna"])) {
       error["clave_interna"] = this.errorService.required;
     }
@@ -75,21 +73,9 @@ export class AdministradoresService {
       }
     }
 
-    // RFC sigue siendo específico de la lógica de Admin en frontend, aunque en backend no esté en Empleado base
-    // Si el backend lo ignora, no pasa nada, pero si es requerido por negocio, aquí se valida.
-    if (!this.validatorService.required(data["rfc"])) {
-      error["rfc"] = this.errorService.required;
-    } else if (!this.validatorService.min(data["rfc"], 12)) {
-      error["rfc"] = this.errorService.min(12);
-      // alert("La longitud de caracteres deL RFC es menor, deben ser 12"); // Recomendable quitar alerts
-    } else if (!this.validatorService.max(data["rfc"], 13)) {
-      error["rfc"] = this.errorService.max(13);
-    }
-
     if (!this.validatorService.required(data["edad"])) {
       error["edad"] = this.errorService.required;
     } else if (!this.validatorService.numeric(data["edad"])) {
-      // alert("El formato es solo números");
       error["edad"] = this.errorService.numeric;
     } else if (data["edad"] < 18) {
       error["edad"] = "La edad debe ser mayor o igual a 18";
@@ -99,16 +85,14 @@ export class AdministradoresService {
       error["telefono"] = this.errorService.required;
     }
 
-    // Ocupación eliminada del esquema unificado
-    // if (!this.validatorService.required(data["ocupacion"])) { ... }
-
-    //Return arreglo
+    // Return arreglo
     return error;
   }
 
-  //Aquí van los servicios HTTP
-  //Servicio para registrar un nuevo usuario
-  public registrarAdmin(data: any): Observable<any> {
+  // --- Servicios HTTP ---
+
+  // Registrar un nuevo capturador
+  public registrarCapturador(data: any): Observable<any> {
     const token = this.facadeService.getSessionToken();
     let headers: HttpHeaders;
     if (token) {
@@ -116,12 +100,12 @@ export class AdministradoresService {
     } else {
       headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     }
-    // La URL sigue siendo /admin/ según tu backend actual
-    return this.http.post<any>(`${environment.url_api}/admin/`, data, { headers });
+    // Nota: Se asume que el backend mapeará 'clave_interna' o que la vista ha sido actualizada para recibirlo
+    return this.http.post<any>(`${environment.url_api}/capturador/`, data, { headers });
   }
 
-  // Petición para obtener la lista de administradores
-  public obtenerListaAdmins(): Observable<any> {
+  // Obtener lista de capturadores
+  public obtenerListaCapturadores(): Observable<any> {
     const token = this.facadeService.getSessionToken();
     let headers: HttpHeaders;
     if (token) {
@@ -130,11 +114,11 @@ export class AdministradoresService {
       headers = new HttpHeaders({ 'Content-Type': 'application/json' });
       console.log("No se encontró el token del usuario");
     }
-    return this.http.get<any>(`${environment.url_api}/lista-admins/`, { headers });
+    return this.http.get<any>(`${environment.url_api}/lista-capturadores/`, { headers });
   }
 
-  // Petición para obtener un administrador por su ID
-  public obtenerAdminPorID(idAdmin: number): Observable<any> {
+  // Obtener un capturador por ID
+  public obtenerCapturadorPorID(idUser: number): Observable<any> {
     const token = this.facadeService.getSessionToken();
     let headers: HttpHeaders;
     if (token) {
@@ -143,23 +127,11 @@ export class AdministradoresService {
       headers = new HttpHeaders({ 'Content-Type': 'application/json' });
       console.log("No se encontró el token del usuario");
     }
-    return this.http.get<any>(`${environment.url_api}/admin/?id=${idAdmin}`, { headers });
+    return this.http.get<any>(`${environment.url_api}/capturador/?id=${idUser}`, { headers });
   }
 
-  //Servicio para eliminar un maestro
-  public eliminarAdmin(idAdmin: number): Observable<any>{
-    const token = this.facadeService.getSessionToken();
-    let headers: HttpHeaders;
-    if (token) {
-      headers = new HttpHeaders({ 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token });
-    } else {
-      headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    }
-    return this.http.delete<any>(`${environment.url_api}/admin/?id=${idAdmin}`, { headers });
-  }
-
-  // Petición para actualizar un administrador
-  public actualizarAdmin(data: any): Observable<any> {
+  // Actualizar un capturador
+  public actualizarCapturador(data: any): Observable<any> {
     const token = this.facadeService.getSessionToken();
     let headers: HttpHeaders;
     if (token) {
@@ -168,6 +140,18 @@ export class AdministradoresService {
       headers = new HttpHeaders({ 'Content-Type': 'application/json' });
       console.log("No se encontró el token del usuario");
     }
-    return this.http.put<any>(`${environment.url_api}/admin/`, data, { headers });
+    return this.http.put<any>(`${environment.url_api}/capturador/`, data, { headers });
+  }
+
+  // Eliminar un capturador (Si existiera el endpoint DELETE)
+  public eliminarCapturador(idUser: number): Observable<any> {
+    const token = this.facadeService.getSessionToken();
+    let headers: HttpHeaders;
+    if (token) {
+      headers = new HttpHeaders({ 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token });
+    } else {
+      headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    }
+    return this.http.delete<any>(`${environment.url_api}/capturador/?id=${idUser}`, { headers });
   }
 }
