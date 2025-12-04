@@ -1,30 +1,21 @@
 <mat-sidenav-container class="dashboard-sidenav-container">
-  <mat-sidenav #sidenav class="app-sidenav" mode="side" >
-    <div class="logo-container">
-      <img src="../../../assets/images/VR_simbolo.png" alt="Logo" class="logo-VR" />
-    </div>
-    <mat-nav-list>
-      <a mat-list-item routerLink="/dashboard/inicio" routerLinkActive="active"><mat-icon>dashboard</mat-icon><span class="link-text">Dashboard</span></a>
-      <a mat-list-item routerLink="/usuarios" routerLinkActive="active"><mat-icon>people</mat-icon><span class="link-text">Usuarios</span></a>
-      <a mat-list-item routerLink="/config" routerLinkActive="active"><mat-icon>settings</mat-icon><span class="link-text">Configuración</span></a>
-      <a mat-list-item routerLink="/captura/inicio" routerLinkActive="active"><mat-icon>edit</mat-icon><span class="link-text">Captura</span></a>
-    </mat-nav-list>
+
+  <!-- SIDENAV: Usamos nuestro componente app-sidenav -->
+  <mat-sidenav #sidenav class="app-sidenav" mode="side">
+    <app-sidenav></app-sidenav>
   </mat-sidenav>
 
+  <!-- CONTENT: Contiene el toolbar y el router-outlet -->
   <mat-sidenav-content>
-    <mat-toolbar class="top-header" color="primary">
 
-      <button class="toolbar-hamburger" mat-icon-button (click)="sidenav.toggle()" aria-label="Toggle sidenav"><mat-icon>menu</mat-icon></button>
-      <span class="toolbar-title">Panel de Control</span>
-      <span class="spacer"></span>
-      <div class="user-info">
-        <span>Hola, Usuario</span>
-        <button mat-button class="logout-button">Salir</button>
-      </div>
-    </mat-toolbar>
+    <!-- TOOLBAR: Escuchamos el evento (menuClick) -->
+    <app-toolbar (menuClick)="sidenav.toggle()"></app-toolbar>
 
     <main class="content-area">
+      <!-- Aquí se carga el contenido de las páginas hijas -->
       <router-outlet></router-outlet>
     </main>
+
   </mat-sidenav-content>
+
 </mat-sidenav-container>

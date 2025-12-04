@@ -1,30 +1,84 @@
-<form [formGroup]="form" class="capture-area">
+<div class="wrapper-captura">
 
-  <div class="right-form">
-      <div class="row">
-        <mat-form-field appearance="fill" class="flex">
-          <mat-label>Código</mat-label>
-          <input matInput formControlName="codigo" />
-        </mat-form-field>
+  <!-- CARD PRINCIPAL -->
+  <div class="card-flotante">
 
-        <mat-form-field appearance="fill" class="flex">
-          <mat-label>Nombre</mat-label>
-          <input matInput formControlName="nombre" />
-        </mat-form-field>
+
+
+    <!-- SECCIÓN B: FORMULARIO -->
+    <div class="section-form">
+
+      <button class="mobile-toggle-btn" (click)="toggleMobileImage()">
+        <mat-icon>{{ isMobileImageExpanded ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}</mat-icon>
+      </button>
+
+      <div class="header">
+        <h2 class="title-captura">
+          {{ isEditMode ? 'Editar Captura' : 'Captura Rápida' }}
+        </h2>
+        <button mat-icon-button (click)="cerrar()" *ngIf="dialogRef" class="close-btn">
+          <mat-icon>close</mat-icon>
+        </button>
       </div>
 
-    <div class="row">
-        <mat-form-field appearance="fill" class="full">
-          <mat-label>Cantidad</mat-label>
-          <input matInput type="number" formControlName="cantidad" />
+      <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid">
+
+        <!-- 1. CÓDIGO -->
+        <mat-form-field appearance="outline" class="pill-input">
+          <mat-label>Código / Barras</mat-label>
+          <input matInput formControlName="codigo"
+                 (keydown.enter)="onCodigoEnter()"
+                 autocomplete="off"
+                 placeholder="Escanea...">
+          <mat-icon matPrefix>qr_code_scanner</mat-icon>
+          <mat-spinner *ngIf="isLoading" diameter="20" matSuffix></mat-spinner>
         </mat-form-field>
+
+        <!-- 2. NOMBRE -->
+        <mat-form-field appearance="outline" class="pill-input name-field">
+          <mat-label>Descripción</mat-label>
+          <input matInput formControlName="nombre" readonly tabindex="-1">
+          <button mat-icon-button matSuffix type="button" (click)="abrirBusqueda()" class="search-btn">
+            <mat-icon>search</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <!-- 3. CANTIDAD (Dispara guardar al dar Enter) -->
+        <mat-form-field appearance="outline" class="pill-input cantidad-field">
+          <mat-label>Cantidad</mat-label>
+          <input matInput #cantidadInput
+                 type="number"
+                 formControlName="cantidad"
+                 placeholder="0"
+                 (keydown.enter)="onCantidadEnter()"> <!-- Cambio Clave aquí -->
+          <span matSuffix class="unit-suffix">pzas</span>
+        </mat-form-field>
+
+        <!-- ERROR MESSAGE (Feedback visual rápido) -->
+        <div class="error-feedback" *ngIf="errorMessage">
+            {{ errorMessage }}
+        </div>
+
+        <!-- ACCIONES (Solo visibles en modo EDICIÓN) -->
+        <div class="actions" *ngIf="isEditMode">
+          <button type="submit" class="btn-guardar" [disabled]="form.invalid || isLoading">
+            <mat-icon>check</mat-icon>
+            CONFIRMAR CAMBIOS
+          </button>
+        </div>
+
+      </form>
     </div>
-  </div>
 
-<div class="separador"></div>
+    <!-- SECCIÓN A: IMAGEN -->
+    <div class="section-image" [class.expanded]="isMobileImageExpanded">
+      <div class="image-placeholder" *ngIf="!currentImageUrl">
+        <mat-icon>image_not_supported</mat-icon>
+        <span>Sin Imagen</span>
+      </div>
+      <img *ngIf="currentImageUrl" [src]="currentImageUrl" alt="Producto" class="product-image">
+      <div class="mobile-overlay"></div>
+    </div>
 
-  <div class="left-actions">
-    <button mat-raised-button color="primary" (click)="buscarProducto()"  id="buscar-button"><mat-icon>search</mat-icon> Buscar</button>
-    <button mat-raised-button color="accent" (click)="registrarCaptura()" id="registrar-button"><mat-icon>save</mat-icon> Registrar</button>
   </div>
-</form>
+</div>

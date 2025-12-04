@@ -1,0 +1,56 @@
+// Importar variables de color centralizadas (si existen)
+// @import '../../styles/color-variables';
+
+// Variables fallback para que el código sea funcional en la vista previa
+$color-nav-border: #e0e0e0;
+$color-sidebar-text: #333;
+$color-sidebar-hover: #f5f5f5;
+$color-success: #4caf50;
+
+:host {
+  display: block;
+}
+
+.logo-container {
+  padding: 0 1.5rem 0 1.5rem;
+  text-align: center;
+  border-bottom: 1px solid $color-nav-border;
+  margin-bottom: 1rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+}
+
+.logo-VR {
+  width: 100px;
+  height: 80px;
+  object-fit: contain;
+}
+
+// Estilos específicos para los items de la lista
+mat-icon {
+  color: $color-sidebar-text;
+  margin-right: 12px;
+}
+
+.link-text {
+  margin-left: 8px;
+}
+
+// Estilos para los enlaces de navegación
+a[mat-list-item] {
+  color: $color-sidebar-text;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: $color-sidebar-hover;
+  }
+
+  // Clase aplicada por routerLinkActive="active"
+  &.active {
+    background-color: $color-success;
+    font-weight: bold;
+  }
+}

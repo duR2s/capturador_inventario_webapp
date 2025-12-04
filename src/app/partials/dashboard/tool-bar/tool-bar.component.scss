@@ -1,0 +1,55 @@
+// @import '../../styles/color-variables';
+
+// Variables fallback
+$color-critical: #d32f2f;
+$color-accent-blue: #e3f2fd;
+$color-border-light: #e0e0e0;
+$color-text-aquamarine: #7fffd4;
+$color-danger: #f44336;
+$color-danger-dark: #d32f2f;
+$color-white: #ffffff;
+
+.top-header {
+  height: 70px;
+  background-color: $color-critical;
+  border-bottom: 1px solid $color-border-light;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem; // Ajuste de padding
+  flex-shrink: 0;
+
+  .toolbar-title {
+    color: $color-accent-blue;
+    margin-left: 10px;
+  }
+}
+
+.toolbar-hamburger {
+  color: $color-text-aquamarine;
+  cursor: pointer;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: $color-white;
+}
+
+.logout-button {
+  padding: 0 1rem;
+  background-color: $color-danger;
+  color: $color-white;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $color-danger-dark;
+  }
+}

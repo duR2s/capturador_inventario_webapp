@@ -1,0 +1,21 @@
+import { Component, EventEmitter, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+
+@Component({
+  selector: 'app-toolbar',
+  standalone: true,
+  imports: [CommonModule, MatToolbarModule, MatButtonModule, MatIconModule],
+  templateUrl: './tool-bar.component.html',
+  styleUrls: ['./tool-bar.component.scss']
+})
+export class ToolbarComponent {
+  // Evento para comunicar al padre que se hizo click en el menú
+  @Output() menuClick = new EventEmitter<void>();
+
+  onToggleClick(): void {
+    this.menuClick.emit();
+  }
+}

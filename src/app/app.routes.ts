@@ -1,5 +1,4 @@
 import { DashboardInicioScreenComponent } from './screens/dashboard/dashboard-inicio-screen/dashboard-inicio-screen.component';
-import { DashboardSidebarAdministradoresComponent } from './partials/dashboard/dashboard-sidebar-administradores/dashboard-sidebar-administradores.component';
 import { Routes } from '@angular/router';
 import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component';
 import { LoginScreenComponent } from './screens/login-screen/login-screen.component';
@@ -35,7 +34,7 @@ export const routes: Routes = [
       // Ejemplo de una ruta dentro del dashboard:
       { path: 'inicio', component: DashboardInicioScreenComponent},
       // Ruta PRovisional
-      { path: 'inicio', component: CapturaCapturadoresScreenComponent},
+      { path: 'captura', component: CapturaCapturadoresScreenComponent},
     ]
   },
 
