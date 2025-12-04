@@ -1,42 +1,69 @@
+// ==========================================
+// LAYOUT DE PANTALLA COMPLETA (Flex Column)
+// ==========================================
+
 :host {
-	display: block;
-	/* fill viewport so bottom actions can stick to bottom of screen */
-	height: 100%;
+  display: block;
+  height: 100%;
+  width: 100%;
+  overflow: hidden; // Evita scroll en la ventana principal
 }
 
 .screen-container {
-	height: 100%;
-	display: flex;
-	flex-direction: column;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: transparent; // Contenedor invisible como pediste
+  //padding: 10px; // Un poco de aire general
+  box-sizing: border-box;
 }
 
-/* Top card: grow and allow internal scrolling for the table */
-.screen-container > mat-card:first-child {
-	display: flex;
-	flex-direction: column;
-	flex: 1 1 0;
-	min-height: 0; /* important for overflow to work */
+// ------------------------------------------
+// ZONA SUPERIOR: TABLA (Crecimiento Flexible)
+// ------------------------------------------
+.table-wrapper {
+  flex: 1 1 auto; // Crece para ocupar todo el espacio libre
+  display: flex;
+  flex-direction: column;
+  min-height: 0; // CRÍTICO: Permite que el scroll interno funcione dentro de Flexbox
+  overflow: hidden; // Corta el contenido para que el hijo maneje el scroll
+  margin-bottom: 10px; // Separación con los inputs
+
+  // Aseguramos que el componente hijo se estire
+  app-tabla-captura-partial {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 0px; // Centrado horizontal si sobra espacio
+  }
 }
 
-.captura-container {
-  padding-top: 0;
+// ------------------------------------------
+// ZONA INFERIOR: ACCIONES (Fijo)
+// ------------------------------------------
+.bottom-actions {
+  flex: 0 0 auto; // No crece ni se encoge, altura según contenido
+  width: 100%;
+  z-index: 10; // Asegura que quede por encima si algo se cruza
+
+  // Opcional: Centrar el input si la pantalla es muy ancha
+  //display: flex;
+  justify-content: center;
 }
 
-.screen-container > mat-card:first-child .table-wrapper {
-	flex: 1 1 0;
-	overflow: hidden;
-	min-height: 0;
-}
-
-/* Bottom actions card: fixed at bottom inside this screen (does not scroll away) */
-.screen-container > div.bottom-actions {
-	//flex: 0 1 auto;
-	width: 100%;
-  max-height: 15rem;
-}
-
-/* Small screens: make bottom actions full width and stacked if needed */
+// ------------------------------------------
+// RESPONSIVE
+// ------------------------------------------
 @media (max-width: 600px) {
-	.screen-container > mat-card.bottom-actions { position: sticky; bottom: 0; }
-}
+  .screen-container {
+    padding: 0; // En móvil aprovechamos cada pixel
+  }
 
+  .bottom-actions {
+    position: sticky;
+    bottom: 0;
+    background: transparent; // O un color si necesitas tapar lo de atrás
+  }
+}

@@ -1,16 +1,13 @@
 <div class="screen-container">
-  <mat-card>
-    <mat-card-content class="captura-container">
-      <!-- Tabla superior -->
-       <p>Folio de captura - 0000 </p>
-      <div class="table-wrapper">
-        <app-tabla-captura-partial> </app-tabla-captura-partial>
-      </div>
-    </mat-card-content>
-  </mat-card>
 
-  <div class="wrapper bottom-actions">
-        <!-- Area inferior: botones a la izquierda, campos a la derecha -->
-         <app-inputs-captura-partial> </app-inputs-captura-partial>
+  <!-- ZONA A: Tabla (Ocupa todo el espacio restante) -->
+  <div class="table-wrapper">
+    <app-tabla-captura-partial></app-tabla-captura-partial>
   </div>
+
+  <!-- ZONA B: Inputs (Fijo abajo) -->
+  <div class="wrapper bottom-actions">
+    <app-inputs-captura-partial></app-inputs-captura-partial>
+  </div>
+
 </div>

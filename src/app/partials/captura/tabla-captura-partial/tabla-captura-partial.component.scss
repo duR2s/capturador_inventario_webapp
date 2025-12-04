@@ -1,17 +1,198 @@
-.table-container {
+@import '../../../styles/color-variables';
+
+// ==========================================
+// CONFIGURACIÓN DEL WIDGET
+// ==========================================
+$widget-max-width: 1300px;
+$widget-bg: $color-white;
+$widget-radius: 20px;
+$row-height: 35px;
+$input-height: 32px;
+$font-size-base: 13px;
+
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   width: 100%;
-  max-width: 1500px;
-  margin: 0 auto;
-  max-height: 400px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  border: 1px solid;
-  flex: 1 1 0;
+  height: 100%;
 }
 
-.pagination-container {
-  flex: 0 1 auto;
-	width: 100%;
-	/* optional visual separation */
-	box-shadow: 0 -2px 6px rgba(0,0,0,0.06);
+// Contenedor Principal
+.captura-widget {
+  width: 100%;
+  max-width: $widget-max-width;
+  height: 100%;
+  background: $widget-bg;
+  border-radius: $widget-radius;
+  box-shadow: 0 8px 30px $color-shadow-medium;
+  padding: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid $color-border-light;
+}
+
+// ==========================================
+// 1. HEADER UNIFICADO (Horizontal)
+// ==========================================
+.header-row {
+  flex: 0 0 auto; // Altura fija según contenido
+  display: flex;
+  align-items: center; // Alineación vertical centrada
+  justify-content: space-between;
+  gap: 15px; // Separación entre folio y buscador
+  padding-bottom: 4px;
+  border-bottom: 1px solid $color-border-light;
+
+  // -- Sección Izquierda: Folio --
+  .folio-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap; // Evita que se rompa en dos líneas
+
+    .folio-label {
+      font-family: 'Nexa-Bold', sans-serif;
+      font-size: 11px;
+      color: $color-text-light;
+      text-transform: uppercase;
+    }
+
+    .folio-value {
+      font-family: 'Nexa-Bold', sans-serif;
+      font-size: 13px;
+      color: $color-primary-dark;
+      background: $color-primary-light-bg;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+  }
+
+  // -- Sección Derecha: Buscador --
+  .search-section {
+    flex: 1; // Toma todo el espacio restante
+    display: flex;
+    justify-content: flex-end; // Alinea el input a la derecha (opcional, o width 100%)
+
+    // Sobreescritura profunda de Material para input compacto
+    ::ng-deep {
+      .mat-mdc-form-field.dense-search {
+        width: 100%; // Ocupa el espacio disponible en flex
+        max-width: 400px; // Límite para que no sea inmensamente largo en pantallas grandes
+
+        .mat-mdc-text-field-wrapper {
+          height: $input-height !important;
+          padding: 0 12px !important;
+          background-color: #e8e8e6 !important;
+          border: 1px solid #cfcfcf;
+          border-radius: 100px !important;
+        }
+
+        .mat-mdc-form-field-flex {
+          height: $input-height !important;
+          align-items: center !important;
+        }
+
+        .mdc-line-ripple, .mat-mdc-form-field-subscript-wrapper { display: none; }
+
+        input.mat-mdc-input-element {
+          font-size: 12px !important;
+          height: 100% !important;
+          margin-top: -2px;
+          color: $color-text-dark;
+        }
+
+        .mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          margin-right: 6px;
+          color: $color-text-muted;
+        }
+
+        .mat-mdc-form-field-infix {
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+          min-height: $input-height !important;
+          display: flex;
+          align-items: center;
+        }
+      }
+    }
+  }
+}
+
+// ==========================================
+// 2. TABLA (Maximizado)
+// ==========================================
+.table-scroll-container {
+  width: 100%;
+  flex: 1 1 auto; // Crece para ocupar TODO el resto del widget
+  overflow: auto;
+  border-radius: 12px;
+  border: 1px solid $color-border-light;
+  background: $color-white;
+  min-height: 0; // Fix para flexbox scroll
+}
+
+table.mat-mdc-table {
+  width: 100%;
+  min-width: 600px; // Reduje un poco para pantallas pequeñas
+
+  .mat-mdc-header-row {
+    height: 30px !important;
+    background: $color-bg-light-2 !important;
+  }
+
+  .mat-mdc-header-cell {
+    font-size: 11px !important;
+    font-family: 'Nexa-Bold', sans-serif;
+    color: $color-text-light;
+    padding: 0 8px !important; // Padding un poco más compacto
+    border-bottom: 1px solid $color-border-medium;
+    white-space: nowrap;
+  }
+
+  .mat-mdc-row {
+    height: $row-height !important;
+    &:hover { background-color: $color-bg-light-3 !important; }
+  }
+
+  .mat-mdc-cell {
+    font-size: $font-size-base !important;
+    padding: 0 8px !important;
+    border-bottom: 1px solid $color-border-light;
+    color: $color-text-dark;
+
+    .mat-mdc-icon-button {
+      width: 26px; height: 26px; padding: 0; line-height: 26px;
+      .mat-icon { font-size: 18px; width: 18px; height: 18px; }
+      &.btn-edit { color: $color-primary; }
+      &.btn-ticket { color: $color-secondary; }
+      &.btn-delete { color: $color-text-muted; &:hover { color: $color-error; } }
+    }
+  }
+
+  .last-added-row {
+    background-color: rgba($color-primary, 0.1) !important;
+    font-weight: bold;
+  }
+}
+
+// ==========================================
+// 3. RESPONSIVE
+// ==========================================
+@media (max-width: 600px) {
+  // En móvil, tal vez queramos que bajen a dos líneas si no caben
+  .header-row {
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .search-section {
+      min-width: 100%; // El buscador baja y ocupa todo el ancho
+      ::ng-deep .mat-mdc-form-field.dense-search { max-width: 100%; }
+    }
+  }
 }

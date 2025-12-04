@@ -1,97 +1,101 @@
-<div class="main-container">
-  <div>
-    <mat-form-field>
-      <mat-label>Buscar Producto</mat-label>
-      <input matInput (keyup)="applyFilter($event)" placeholder="Ingresa código o nombre del producto">
-    </mat-form-field>
+<div class="captura-widget">
+
+  <!-- 1. ENCABEZADO UNIFICADO (Folio + Buscador) -->
+  <!-- Esto ahorra espacio vertical al poner todo en una fila -->
+  <div class="header-row">
+
+    <!-- Bloque Folio -->
+    <div class="folio-section">
+      <span class="folio-label">Folio:</span>
+      <span class="folio-value">#C-2023-001</span>
+    </div>
+
+    <!-- Bloque Buscador (Flexible) -->
+    <div class="search-section">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dense-search">
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput
+               (keyup)="applyFilter($event)"
+               placeholder="Buscar..."
+               autocomplete="off">
+      </mat-form-field>
+    </div>
+
   </div>
 
+  <!-- 2. TABLA (Maximizado espacio vertical) -->
+  <div class="table-scroll-container">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z0">
 
-  <div class="table-container">
-    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 full-width">
-
-      <!-- Codigo Column -->
+      <!-- Codigo -->
       <ng-container matColumnDef="codigo">
         <th mat-header-cell *matHeaderCellDef> Código </th>
-        <td mat-cell *matCellDef="let element"> {{element.codigo}} </td>
+        <td mat-cell *matCellDef="let element"> <strong>{{element.codigo}}</strong> </td>
       </ng-container>
 
-      <!-- Nombre Column -->
+      <!-- Nombre -->
       <ng-container matColumnDef="nombre">
-        <th mat-header-cell *matHeaderCellDef> Nombre del Producto </th>
+        <th mat-header-cell *matHeaderCellDef> Descripción </th>
         <td mat-cell *matCellDef="let element"> {{element.nombre}} </td>
       </ng-container>
 
-      <!-- Existencia previa Column -->
+      <!-- Prev -->
       <ng-container matColumnDef="existencia_previa">
-        <th mat-header-cell *matHeaderCellDef> Existencia previa </th>
-        <td mat-cell *matCellDef="let element"> {{element.existencia_previa}} </td>
+        <th mat-header-cell *matHeaderCellDef class="text-center"> Ex. Previa </th>
+        <td mat-cell *matCellDef="let element" class="text-center"> {{element.existencia_previa}} </td>
       </ng-container>
 
-      <!-- Existencia capturada Column -->
+      <!-- Capt -->
       <ng-container matColumnDef="existencia_capturada">
-        <th mat-header-cell *matHeaderCellDef> Existencia capturada </th>
-        <td mat-cell *matCellDef="let element"> {{element.existencia_capturada}} </td>
+        <th mat-header-cell *matHeaderCellDef class="text-center"> Capt. </th>
+        <td mat-cell *matCellDef="let element" class="text-center font-bold text-primary"> {{element.existencia_capturada}} </td>
       </ng-container>
 
-      <!-- Diferencia Column -->
+      <!-- Dif -->
       <ng-container matColumnDef="diferencia">
-        <th mat-header-cell *matHeaderCellDef> Diferencia </th>
-        <td mat-cell *matCellDef="let element"> {{element.diferencia}} </td>
+        <th mat-header-cell *matHeaderCellDef class="text-center"> Dif. </th>
+        <td mat-cell *matCellDef="let element" class="text-center"
+            [style.color]="element.diferencia < 0 ? 'var(--danger)' : 'var(--success)'">
+          {{element.diferencia > 0 ? '+' : ''}}{{element.diferencia}}
+        </td>
       </ng-container>
 
-      <!-- NUEVA COLUMNA DE ACCIONES -->
-        <ng-container matColumnDef="editar">
-          <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700 text-center"> Editar </th>
-          <td mat-cell *matCellDef="let element" class="text-center">
-            <!-- Usamos mat-icon-button para un botón de icono con estilo Material -->
-            <button mat-icon-button
-                    color="primary"
-                    (click)="editarFila(element)"
-                    aria-label="Editar fila">
-              <mat-icon>edit</mat-icon>
-            </button>
-          </td>
-        </ng-container>
+      <!-- ACCIONES -->
+      <ng-container matColumnDef="editar">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let element" class="text-center">
+          <button mat-icon-button class="btn-edit" (click)="editarFila(element)">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </td>
+      </ng-container>
 
-        <!-- NUEVA COLUMNA DE ACCIONES -->
-        <ng-container matColumnDef="ticket">
-          <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700 text-center"> Ticket </th>
-          <td mat-cell *matCellDef="let element" class="text-center">
-            <!-- Usamos mat-icon-button para un botón de icono con estilo Material -->
-            <button mat-icon-button
-                    color="primary"
-                    (click)="ticketProducto(element)"
-                    aria-label="Editar fila">
-              <mat-icon>add</mat-icon>
-            </button>
-          </td>
-        </ng-container>
+      <ng-container matColumnDef="ticket">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let element" class="text-center">
+          <button mat-icon-button class="btn-ticket" (click)="ticketProducto(element)">
+            <mat-icon>receipt</mat-icon>
+          </button>
+        </td>
+      </ng-container>
 
-        <!-- NUEVA COLUMNA DE ACCIONES -->
-        <ng-container matColumnDef="eliminar">
-          <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700 text-center"> Eliminar </th>
-          <td mat-cell *matCellDef="let element" class="text-center">
-            <!-- Usamos mat-icon-button para un botón de icono con estilo Material -->
-            <button mat-icon-button
-                    color="primary"
-                    (click)="eliminarFila(element)"
-                    aria-label="Editar fila">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
+      <ng-container matColumnDef="eliminar">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let element" class="text-center">
+          <button mat-icon-button class="btn-delete" (click)="eliminarFila(element)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </td>
+      </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.last-added-row]="false"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell text-center py-4 text-muted" [attr.colspan]="displayedColumns.length">
+          Sin resultados.
+        </td>
+      </tr>
     </table>
   </div>
-
-  <div class="paginator-container">
-    <mat-paginator [pageSizeOptions]="[5, 10, 20]"
-                  showFirstLastButtons
-                  aria-label="Select page of periodic elements">
-    </mat-paginator>
-  </div>
 </div>
-

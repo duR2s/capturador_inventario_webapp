@@ -1,122 +1,69 @@
+// ==========================================
+// LAYOUT DE PANTALLA COMPLETA (Flex Column)
+// ==========================================
+
 :host {
   display: block;
-  height: 100vh;
-  width: 100vw;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
-// --- Panel Lateral (Sidebar) ---
-.sidebar {
-  grid-area: sidebar;
-  width: 250px;
-  background-color: #2c3e50;
-  color: #ecf0f1;
+.screen-container {
+  height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  padding: 1.5rem 0;
-  flex-shrink: 0; /* Evita que el sidebar se encoja */
+  background-color: transparent;
+  box-sizing: border-box;
 }
 
-.logo-container {
-  padding: 0 1.5rem 1.5rem 1.5rem;
-  text-align: center;
-  border-bottom: 1px solid #34495e;
-  h3 {
-    margin: 0;
-    font-size: 1.5rem;
-  }
-}
-
-.navigation {
-  margin-top: 1.5rem;
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  a {
-    display: block;
-    padding: 1rem 1.5rem;
-    color: #ecf0f1;
-    text-decoration: none;
-    transition: background-color 0.2s ease-in-out;
-
-    &:hover {
-      background-color: #34495e;
-    }
-
-    &.active {
-      background-color: #1abc9c;
-      font-weight: bold;
-    }
-  }
-}
-
-
-// --- Contenido Principal ---
-.main-content,
-.main-area {
-  grid-area: main;
+// ------------------------------------------
+// ZONA SUPERIOR: TABLA
+// ------------------------------------------
+.table-wrapper {
+  flex: 1 1 auto; // Crece para ocupar todo el espacio libre
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Evita dobles barras de scroll */
-}
+  min-height: 0;
+  overflow: hidden;
 
-// --- Encabezado Superior ---
-.top-header {
-  height: 70px;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 2rem;
-  flex-shrink: 0; /* Evita que el header se encoja */
-}
+  // AQUÍ EL CAMBIO SOLICITADO:
+  // Aumentamos el margen inferior de 10px a 18px.
+  // Esto visualmente le "quita" 8px de altura a la tabla y se los "da" (como espacio vacío)
+  // encima de los inputs, haciendo que el área inferior se sienta más amplia.
+  margin-bottom: 18px;
 
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.logout-button {
-  padding: 0.5rem 1rem;
-  border: none;
-  background-color: #e74c3c;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  &:hover {
-    background-color: #c0392b;
-  }
-}
-
-
-// --- Área de Contenido Dinámico ---
-.content-area {
-  flex-grow: 1;
-  padding: 2rem;
-  overflow-y: auto; /* Permite scroll solo en esta área si el contenido es muy largo */
-}
-
-/* Responsive: en pantallas pequeñas apilamos main encima del sidebar */
-@media (max-width: 767px) {
-  .dashboard-container {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-    grid-template-areas:
-      "main"
-      "sidebar";
-  }
-
-  .sidebar {
+  app-tabla-captura-partial {
+    height: 100%;
     width: 100%;
-    order: 2;
+    display: flex;
+    justify-content: center;
+    padding: 0px;
+  }
+}
+
+// ------------------------------------------
+// ZONA INFERIOR: ACCIONES
+// ------------------------------------------
+.bottom-actions {
+  flex: 0 0 auto;
+  width: 100%;
+  z-index: 10;
+  justify-content: center;
+}
+
+// ------------------------------------------
+// RESPONSIVE
+// ------------------------------------------
+@media (max-width: 600px) {
+  .screen-container {
+    padding: 0;
   }
 
-  .main-content,
-  .main-area {
-    order: 1;
+  .bottom-actions {
+    position: sticky;
+    bottom: 0;
+    background: transparent;
   }
 }
