@@ -20,10 +20,7 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
   display: flex;
   flex-direction: row;
   width: 100%;
-  // ---------------------------------------------------------
-  // AJUSTE: Regresado a 900px (más compacto)
-  // ---------------------------------------------------------
-  max-width: 900px;
+  min-width: 900px;
   height: 190px; // Reduje un poco la altura total de la tarjeta (antes 210px) para que no se vea vacía
   background: $color-white;
   border-radius: $card-radius;
@@ -247,38 +244,49 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
 @media (max-width: 768px) {
   .card-flotante {
     flex-direction: column;
-    height: 100vh;
+    height: auto;
     max-height: none;
     background: transparent;
     box-shadow: none;
     border-radius: 0;
-    max-width: 100%;
+    max-width: 95%;
   }
 
   .section-image {
     position: fixed;
-    top: 0;
+    bottom: -11rem;
     left: 0;
-    width: 100%;
-    height: 60%;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+    height: 48%;
     z-index: 5;
     border-radius: 0;
     transition: transform 0.4s ease;
     box-shadow: inset 0 -20px 20px -10px rgba(0,0,0,0.3);
 
     &.expanded {
-      z-index: 15;
-      height: 85%;
+      //z-index: 15;
+      height: auto;
+      width: auto;
+      top: 0;
+      bottom: 0;
+      margin-top: auto; margin-bottom: auto;
+      margin: 15% auto; ;
     }
   }
 
   .section-form {
     position: fixed;
     bottom: 0;
-    left: 0;
-    width: 100%;
+    left: 0;            // Anclado a la izquierda
+    right: 0;           // Anclado a la derecha
+    margin-left: auto;  // Margen automático izquierda
+    margin-right: auto; // Margen automático derecha
+    width: 95%;
     height: auto;
-    min-height: 45%;
+    //min-height: 45%;
     background: $color-white;
     z-index: 10;
     border-radius: 24px 24px 0 0;
@@ -305,6 +313,16 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
   }
 
   .section-image.expanded + .section-form {
-    transform: translateY(80%);
+    transform: translateY(100%);
   }
+}
+
+@media (max-width: 480px) {
+    .section-image {
+    bottom: -8rem;
+
+      &.expanded {
+        margin: 40% auto;
+      }
+    }
 }

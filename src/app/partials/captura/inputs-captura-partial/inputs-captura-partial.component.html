@@ -70,13 +70,25 @@
       </form>
     </div>
 
+<!--
+=========================
+Invertir validaciones, estan puestas para demo, no es
+version Final.
+
+Url hardcodeada de imagen temporal.
+=========================
+
+-->
+
+
     <!-- SECCIÓN A: IMAGEN -->
     <div class="section-image" [class.expanded]="isMobileImageExpanded">
-      <div class="image-placeholder" *ngIf="!currentImageUrl">
+      <div class="image-placeholder" *ngIf="currentImageUrl">
         <mat-icon>image_not_supported</mat-icon>
         <span>Sin Imagen</span>
       </div>
-      <img *ngIf="currentImageUrl" [src]="currentImageUrl" alt="Producto" class="product-image">
+      <!-- <img *ngIf="currentImageUrl" [src]="currentImageUrl" alt="Producto" class="product-image"> -->
+      <img *ngIf="!currentImageUrl" src="../../../../assets/images/product-template.jpeg" alt="Producto" class="product-image">
       <div class="mobile-overlay"></div>
     </div>
 

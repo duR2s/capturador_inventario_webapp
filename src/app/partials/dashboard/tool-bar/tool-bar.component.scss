@@ -53,3 +53,9 @@ $color-white: #ffffff;
     background-color: $color-danger-dark;
   }
 }
+
+@media (max-width: 480px) {
+  .toolbar-title {
+    font-size: 0;
+  }
+}

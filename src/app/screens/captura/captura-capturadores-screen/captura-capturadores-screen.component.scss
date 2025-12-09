@@ -15,7 +15,6 @@
   display: flex;
   flex-direction: column;
   background-color: transparent; // Contenedor invisible como pediste
-  //padding: 10px; // Un poco de aire general
   box-sizing: border-box;
 }
 
@@ -49,7 +48,7 @@
   z-index: 10; // Asegura que quede por encima si algo se cruza
 
   // Opcional: Centrar el input si la pantalla es muy ancha
-  //display: flex;
+  display: flex;
   justify-content: center;
 }
 

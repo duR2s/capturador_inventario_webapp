@@ -35,10 +35,22 @@ $color-sidebar-text: #333;
   box-sizing: border-box;
 }
 
+@media (max-width: 780px) {
+  .content-area {
+    padding: 1rem;
+    //height: calc(100vh - 60px); // Altura del header móvil (60px)
+  }
+}
+
 // Responsive: Ajustes para móvil
-@media (max-width: 767px) {
+@media (max-width: 780px) {
   .app-sidenav {
     width: 100%;
     max-width: 280px;
+  }
+
+  .content-area {
+    padding: .5rem;
+    //height: calc(100vh - 60px); // Altura del header móvil (60px)
   }
 }
