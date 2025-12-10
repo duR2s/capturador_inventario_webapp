@@ -1,5 +1,4 @@
-import { CapturaService } from './../../../services/documents/captura.service';
-import { Component, ElementRef, Inject, OnInit, Optional, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, OnInit, Optional, ViewChild, Output, EventEmitter, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -10,12 +9,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
-// RxJS
-import { finalize } from 'rxjs';
-
-// Services
-import { DetalleCapturaService } from '../../../services/documents/detalle-captura.service'; // Ajusta ruta si es necesario
 
 @Component({
   selector: 'app-inputs-captura-partial',
@@ -35,39 +28,39 @@ import { DetalleCapturaService } from '../../../services/documents/detalle-captu
 })
 export class InputsCapturaPartialComponent implements OnInit {
 
+  // --- INPUTS & OUTPUTS (Comunicación con Padre) ---
+  @Input() isLoading: boolean = false;
+  @Output() onEscanear = new EventEmitter<{ codigo: string, cantidad: number }>();
+
+  // --- VIEW CHILDS ---
   @ViewChild('cantidadInput') cantidadInput!: ElementRef<HTMLInputElement>;
   @ViewChild('codigoInput') codigoInput!: ElementRef<HTMLInputElement>;
 
+  // --- ESTADO INTERNO ---
   form: FormGroup;
-  isLoading = false;
   isMobileImageExpanded = false;
   currentImageUrl: string | null = null;
   errorMessage: string = '';
-
-  // Nueva bandera para controlar la visibilidad del botón
   isEditMode: boolean = false;
 
   constructor(
     private fb: FormBuilder,
-    private detalleCapturaService: DetalleCapturaService,
     @Optional() public dialogRef: MatDialogRef<InputsCapturaPartialComponent>,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.form = this.fb.group({
       codigo: ['', [Validators.required]],
-      nombre: [{ value: '', disabled: true }],
-      cantidad: ['', [Validators.required, Validators.pattern(/^[0-9]+$/)]]
+      nombre: [{ value: '', disabled: true }], // Campo solo lectura para feedback visual
+      cantidad: [1, [Validators.required, Validators.pattern(/^[0-9]+$/), Validators.min(1)]]
     });
   }
 
   ngOnInit(): void {
-    // Detectar si es modo edición basándonos en si llega data (un ID o un folio)
+    // Detectar si es modo edición basándonos en si llega data
     if (this.data && (this.data.id || this.data.codigo)) {
       this.isEditMode = true;
       this.form.patchValue(this.data);
-      if(this.data.imagen) this.currentImageUrl = this.data.imagen;
-    } else {
-      this.isEditMode = false;
+      if (this.data.imagen) this.currentImageUrl = this.data.imagen;
     }
 
     // Listener para limpiar UI si borran código manualmente
@@ -76,134 +69,95 @@ export class InputsCapturaPartialComponent implements OnInit {
         this.resetUIFields();
       }
     });
+
+    // Foco inicial
+    setTimeout(() => this.focarInputCodigo(), 500);
   }
 
   // --- LÓGICA DE FLUJO ---
 
+  /**
+   * Se dispara al dar ENTER en el input de Código.
+   * En flujo masivo, esto podría pasar el foco a cantidad o enviar directo.
+   * Aquí mantenemos tu flujo de "Pasar a Cantidad".
+   */
   onCodigoEnter(): void {
     const codigoVal = this.form.get('codigo')?.value;
     if (!codigoVal) return;
 
-    this.isLoading = true;
     this.errorMessage = '';
 
-    // Bloquear input código temporalmente
-    this.form.get('codigo')?.disable({ emitEvent: false });
-
-    // Foco inmediato a cantidad (Optimistic UI)
+    // Optimistic UI: Asumimos éxito y pasamos foco a cantidad
     setTimeout(() => {
-      this.cantidadInput.nativeElement.focus();
-      this.cantidadInput.nativeElement.select();
+      if (this.cantidadInput) {
+        this.cantidadInput.nativeElement.focus();
+        this.cantidadInput.nativeElement.select();
+      }
     }, 50);
 
-    // Buscar en backend
-    this.detalleCapturaService.buscarArticulo(codigoVal)
-      .pipe(
-        finalize(() => {
-          this.isLoading = false;
-          this.form.get('codigo')?.enable({ emitEvent: false });
-        })
-      )
-      .subscribe({
-        next: (response: any) => {
-          const articulo = Array.isArray(response) ? response[0] : response;
-
-          if (articulo) {
-            this.form.patchValue({ nombre: articulo.nombre });
-            this.currentImageUrl = articulo.imagen_url || null;
-          } else {
-            this.handleErrorProductoNoEncontrado();
-          }
-        },
-        error: (err) => {
-          console.error("Error buscando artículo", err);
-          this.handleErrorProductoNoEncontrado();
-        }
-      });
+    // NOTA: Si necesitas buscar la info del producto (nombre/foto) ANTES de confirmar cantidad,
+    // el padre debería proveer esa info o un método de búsqueda.
+    // Por simplicidad y rendimiento en PWA, asumimos flujo rápido.
   }
 
-  // Evento disparado al dar ENTER en el campo Cantidad
+  /**
+   * Se dispara al dar ENTER en Cantidad o clic en Guardar.
+   */
   onCantidadEnter(): void {
-    if (this.form.valid) {
+    if (this.form.valid && !this.isLoading) {
       this.guardar();
     } else {
-      // Si dan enter y no es válido (ej. vacío), forzamos validación visual
       this.form.markAllAsTouched();
     }
   }
 
   guardar() {
-    // Validaciones extra del servicio
-    const errors = this.detalleCapturaService.validarCaptura(this.form.getRawValue());
-    if (Object.keys(errors).length > 0) {
-      console.log("Errores de validación:", errors);
-      return;
-    }
+    const { codigo, cantidad } = this.form.getRawValue();
 
-    if (this.form.invalid) return;
+    // EMITIR EVENTO AL PADRE (Quien tiene la lógica Online/Offline)
+    this.onEscanear.emit({
+      codigo: codigo.trim(),
+      cantidad: Number(cantidad)
+    });
 
-    this.isLoading = true;
-    const dataCaptura = this.form.getRawValue();
-
-    // Guardar en Backend
-    this.detalleCapturaService.registrarConteo(dataCaptura)
-      .pipe(finalize(() => this.isLoading = false))
-      .subscribe({
-        next: (res) => {
-          console.log('Captura guardada:', res);
-          this.postGuardadoExitoso();
-        },
-        error: (err) => {
-          console.error('Error al guardar:', err);
-          this.errorMessage = 'Error al guardar. Intente de nuevo.';
-        }
-      });
+    // Acciones Post-Envío (UI)
+    this.postGuardadoExitoso();
   }
 
-  // --- UTILIDADES ---
+  // --- UI HELPERS & VISUALS (Tu código original preservado) ---
 
   private resetUIFields() {
-    this.form.patchValue({ nombre: '', cantidad: '' }, { emitEvent: false });
+    this.form.patchValue({ nombre: '', cantidad: 1 }, { emitEvent: false });
     this.currentImageUrl = null;
     this.errorMessage = '';
   }
 
-  private handleErrorProductoNoEncontrado() {
-    this.form.patchValue({ nombre: 'PRODUCTO NO ENCONTRADO' });
-    this.errorMessage = 'Código no válido.';
-    this.cantidadInput.nativeElement.blur();
-
-    // Regresar foco al código para corregir
-    setTimeout(() => {
-        const inputCodigo = document.querySelector('input[formControlName="codigo"]') as HTMLInputElement;
-        inputCodigo?.focus();
-        inputCodigo?.select();
-    }, 100);
-  }
-
   private postGuardadoExitoso() {
     if (this.isEditMode && this.dialogRef) {
-      // Si estamos editando, cerramos el modal al terminar
       this.dialogRef.close(true);
     } else {
-      // Flujo continuo de captura rápida
+      // Flujo continuo
       this.resetUIFields();
       this.form.get('codigo')?.setValue('');
-
-      // Enfocar código para el siguiente producto inmediatamente
-      setTimeout(() => {
-        const inputCodigo = document.querySelector('input[formControlName="codigo"]') as HTMLInputElement;
-        inputCodigo?.focus();
-      }, 50); // Un pequeño delay ayuda a la UI a refrescarse
+      this.focarInputCodigo();
     }
   }
 
-  abrirBusqueda() {
-    console.log("Abrir modal de búsqueda avanzada...");
+  private focarInputCodigo() {
+    setTimeout(() => {
+      if (this.codigoInput) {
+        this.codigoInput.nativeElement.focus();
+      }
+    }, 50);
   }
 
   toggleMobileImage() {
     this.isMobileImageExpanded = !this.isMobileImageExpanded;
+  }
+
+  abrirBusqueda() {
+    // Aquí podrías emitir otro evento al padre si quieres manejar la búsqueda global
+    console.log("Abrir modal de búsqueda...");
   }
 
   cerrar() {

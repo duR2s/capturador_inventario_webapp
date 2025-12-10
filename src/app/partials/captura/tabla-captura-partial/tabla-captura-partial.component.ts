@@ -10,114 +10,124 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog'; // <- USANDO MatDialog
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
-// Componente del Diálogo (Manteniendo la ruta original del usuario)
-import { TicketCapturaPartialsComponent } from 'src/app/partials/captura/ticket-captura-partials/ticket-captura-partials.component';
+// Componentes
+import { TicketCapturaPartialsComponent } from '../ticket-captura-partials/ticket-captura-partials.component';
 
-
-// Interfaz de la fila de la tabla
-export interface CaptureRow {
-  codigo: string;
-  nombre: string;
-  existencia_previa: number;
-  existencia_capturada: number;
-  diferencia: number;
-}
+// Servicios e Interfaces Nuevos
+import { CapturaService } from '../../../services/documents/captura.service';
+import { DetalleCaptura } from '../../../captura.interfaces';
 
 @Component({
   selector: 'app-tabla-captura-partial',
   standalone: true,
   imports: [
-      CommonModule,
-      ReactiveFormsModule,
-      MatTableModule,
-      MatFormFieldModule,
-      MatCardModule,
-      MatIconModule,
-      MatPaginatorModule,
-      MatInputModule,
-      MatButtonModule,
-      MatDialogModule, // <- USANDO MatDialogModule
-    ],
+    CommonModule,
+    ReactiveFormsModule,
+    MatTableModule,
+    MatFormFieldModule,
+    MatCardModule,
+    MatIconModule,
+    MatPaginatorModule,
+    MatInputModule,
+    MatButtonModule,
+    MatDialogModule,
+  ],
   templateUrl: './tabla-captura-partial.component.html',
   styleUrls: ['./tabla-captura-partial.component.scss']
 })
-export class TablaCapturaPartialComponent implements AfterViewInit { // Agregamos implements AfterViewInit
+export class TablaCapturaPartialComponent implements AfterViewInit {
 
-  // ...dentro de tu clase de componente...
+  // Inyección del servicio híbrido (Fuente de Verdad)
+  private capturaService = inject(CapturaService);
+  private dialog = inject(MatDialog);
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  // Columnas a mostrar
+  displayedColumns: string[] = ['codigo', 'nombre', 'existencia_previa', 'existencia_capturada', 'diferencia', 'editar', 'ticket', 'eliminar'];
+
+  // DataSource inicializado vacío, se llenará con el servicio
+  dataSource = new MatTableDataSource<DetalleCaptura>([]);
+
+  constructor() {
+    // SUSCRIPCIÓN REACTIVA:
+    // Conectamos la tabla al BehaviorSubject del servicio.
+    // Cada vez que se escanea algo (online) o se sincroniza, la tabla se actualiza sola.
+    this.capturaService.detalles$.subscribe((detalles) => {
+      this.dataSource.data = detalles;
+      // Si la tabla crece mucho, podríamos necesitar reasignar el paginador o llamar a _updateChangeSubscription
+      if (this.paginator) {
+        this.dataSource.paginator = this.paginator;
+      }
+    });
+  }
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
   }
-
-  displayedColumns: string[] = ['codigo', 'nombre', 'existencia_previa', 'existencia_capturada', 'diferencia', 'editar', 'ticket', 'eliminar'];
-  dataSource = new MatTableDataSource<CaptureRow>([
-      { codigo: 'P001', nombre: 'Producto A', existencia_previa: 10, existencia_capturada: 0, diferencia: -10 },
-      { codigo: 'P002', nombre: 'Producto B', existencia_previa: 5, existencia_capturada: 0, diferencia: -5 },
-      { codigo: 'P003', nombre: 'Producto C', existencia_previa: 20, existencia_capturada: 15, diferencia: -5 },
-      { codigo: 'P004', nombre: 'Producto D', existencia_previa: 1, existencia_capturada: 1, diferencia: 0 },
-      { codigo: 'P005', nombre: 'Producto E', existencia_previa: 12, existencia_capturada: 15, diferencia: 3 },
-      { codigo: 'P006', nombre: 'Producto F', existencia_previa: 8, existencia_capturada: 0, diferencia: -8 },
-      { codigo: 'P007', nombre: 'Producto G', existencia_previa: 50, existencia_capturada: 45, diferencia: -5 },
-      { codigo: 'P008', nombre: 'Producto H', existencia_previa: 15, existencia_capturada: 20, diferencia: 5 },
-      { codigo: 'P009', nombre: 'Producto I', existencia_previa: 30, existencia_capturada: 30, diferencia: 0 },
-      { codigo: 'P010', nombre: 'Producto J', existencia_previa: 2, existencia_capturada: 0, diferencia: -2 },
-      { codigo: 'P011', nombre: 'Producto K', existencia_previa: 18, existencia_capturada: 18, diferencia: 0 },
-      { codigo: 'P012', nombre: 'Producto L', existencia_previa: 7, existencia_capturada: 5, diferencia: -2 },
-      { codigo: 'P013', nombre: 'Producto M', existencia_previa: 40, existencia_capturada: 42, diferencia: 2 },
-      { codigo: 'P014', nombre: 'Producto N', existencia_previa: 3, existencia_capturada: 0, diferencia: -3 },
-      { codigo: 'P015', nombre: 'Producto O', existencia_previa: 10, existencia_capturada: 12, diferencia: 2 },
-    ]);
-
-  // Utilizamos MatDialog inyectado
-  private dialog = inject(MatDialog);
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
+  // --- ACCIONES DE UI (Diálogos) ---
 
-  ticketProducto(element: CaptureRow): void {
-    console.log(`Editando fila con código: ${element.codigo}`);
+  ticketProducto(element: DetalleCaptura): void {
+    console.log(`Generando ticket para: ${element.producto_codigo}`);
     this.dialog.open(TicketCapturaPartialsComponent, {
       data: { filaSeleccionada: element, generarTicket: true },
-      width: '400px', // Opcional: añade un ancho para que el diálogo se vea bien
-    }
-    );
+      width: '400px',
+    });
   }
 
-  editarFila(element: CaptureRow): void {
-    console.log(`Editando fila con código: ${element.codigo}`);
+  editarFila(element: DetalleCaptura): void {
+    console.log(`Editando fila: ${element.producto_codigo}`);
+    // Nota: Aquí podrías abrir el mismo diálogo de Input para editar cantidad
     this.dialog.open(TicketCapturaPartialsComponent, {
       data: { filaSeleccionada: element, generarTicket: false },
-      width: '400px', // Opcional: añade un ancho para que el diálogo se vea bien
-    }
-    );
+      width: '400px',
+    });
   }
 
-  eliminarFila(element: CaptureRow): void {
-    console.log(`Editando fila con código: ${element.codigo}`);
-    // 1. Obtener la referencia al array de datos
-    const data = this.dataSource.data;
+  // --- LÓGICA HÍBRIDA DE ELIMINACIÓN ---
 
-    // 2. 🚨 CLAVE: Usar indexOf() para encontrar el índice del objeto
-    //    indexOf() busca la referencia exacta del objeto en memoria.
-    const index = data.indexOf(element);
+  eliminarFila(element: DetalleCaptura): void {
+    console.log(`Solicitando eliminar: ${element.producto_codigo}`);
 
-    // 3. Verificar si se encontró el elemento
-    if (index > -1) {
-      // 4. Eliminar el elemento del array usando splice
-      data.splice(index, 1);
-
-      // 5. Asignar los datos modificados para forzar la actualización de la tabla
-      this.dataSource.data = data;
-
-      console.log(`Elemento '${element.nombre}' eliminado por referencia.`);
-    } else {
-      console.log(`Elemento '${element.nombre}' no encontrado.`);
+    // CASO 1: Elemento pendiente de sincronización (Offline/Cola)
+    if (this.esPendiente(element)) {
+      alert("Este ítem está pendiente de sincronización. No se puede eliminar hasta que se suba al servidor.");
+      return;
     }
+
+    // CASO 2: Elemento ya guardado en BD (Online)
+    if (element.id) {
+      const confirmacion = confirm(`¿Estás seguro de eliminar el producto ${element.producto_codigo}?`);
+
+      if (confirmacion) {
+        // Llamamos al servicio para borrar del backend
+        this.capturaService.eliminarDetalle(element.id).subscribe({
+          next: () => {
+            console.log('Elemento eliminado exitosamente del servidor.');
+            // No hace falta actualizar this.dataSource manualmente aquí,
+            // el servicio emitirá el nuevo array en 'detalles$' y el constructor lo capturará.
+          },
+          error: (err) => {
+            console.error('Error al eliminar:', err);
+            alert('No se pudo eliminar el registro. Intente nuevamente.');
+          }
+        });
+      }
+    }
+  }
+
+  /**
+   * Helper para identificar visualmente si un ítem es local (sin ID real)
+   */
+  esPendiente(detalle: DetalleCaptura): boolean {
+    return !detalle.id || !!detalle.pendiente_sync;
   }
 }

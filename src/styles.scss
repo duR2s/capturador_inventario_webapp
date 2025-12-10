@@ -218,6 +218,27 @@ p, span, label, input, button {
   margin-top: 4px;
 }
 
+/* src/styles.scss */
+
+/* Estilos para notificaciones (SnackBars) */
+.snackbar-error {
+  --mdc-snackbar-container-color: #d32f2f; /* Rojo Material */
+  --mdc-snackbar-supporting-text-color: white;
+  --mat-snack-bar-button-color: white;
+}
+
+.snackbar-success {
+  --mdc-snackbar-container-color: #388e3c; /* Verde Material */
+  --mdc-snackbar-supporting-text-color: white;
+  --mat-snack-bar-button-color: white;
+}
+
+.snackbar-warning {
+  --mdc-snackbar-container-color: #f57c00; /* Naranja Material */
+  --mdc-snackbar-supporting-text-color: white;
+  --mat-snack-bar-button-color: white;
+}
+
 // Clase genérica .button (Si aún se usa, armonizada)
 .button {
   @include flex-center;

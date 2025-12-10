@@ -1,113 +1,161 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
-import { FacadeService } from '../facade.service';
-import { ErrorsService } from '../tools/errors.service';
-import { ValidatorService } from '../tools/validator.service';
-
-const httpOptions = {
-  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-};
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { catchError, tap, map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
+import { Captura, DetalleCaptura, PayloadEscaner, PayloadDetalleBatch } from '../../captura.interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
-// CLASE RENOMBRADA para evitar conflicto con CapturadoresService (Gestión de usuarios)
 export class CapturaService {
+  // Configuración de Endpoints
+  private readonly API_URL = `${environment.url_api || 'http://localhost:8000'}/api`;
 
-  constructor(
-    private http: HttpClient,
-    private validatorService: ValidatorService,
-    private errorService: ErrorsService,
-    private facadeService: FacadeService
-  ) { }
+  // Endpoint base: /api/inventario/captura/
+  private readonly CAPTURA_ENDPOINT = `${this.API_URL}/inventario/captura/`;
+  private readonly DETALLE_ENDPOINT = `${this.API_URL}/inventario/detalle/`;
 
-  // Esquema base del objeto JSON para la captura
-  public esquemaCaptura() {
-    return {
-      'folio': '',
-      'capturador': this.facadeService.getUserId(), // ID del usuario logueado
-      'estado': 'PROGRESO',
-      'modo_offline': false,
-      'fecha_reportada': new Date().toISOString(),
-      'detalles': [] // Array de { producto_codigo, cantidad_contada }
-    }
+  // --- STATE MANAGEMENT ---
+  private _detallesSubject = new BehaviorSubject<DetalleCaptura[]>([]);
+  public detalles$ = this._detallesSubject.asObservable();
+
+  private _capturaActualSubject = new BehaviorSubject<Captura | null>(null);
+  public capturaActual$ = this._capturaActualSubject.asObservable();
+
+  constructor(private http: HttpClient) {}
+
+  public get capturaActualValue(): Captura | null {
+    return this._capturaActualSubject.value;
   }
 
-  // Validación para el formulario de captura
-  public validarCaptura(data: any) {
-    console.log("Validando captura... ", data);
-    let error: any = {};
+  // -------------------------------------------------------------------------
+  // MÉTODOS DE GESTIÓN DE CAPTURA (CABECERA)
+  // -------------------------------------------------------------------------
 
-    // Validar cabecera
-    if (!this.validatorService.required(data["folio"])) {
-      error["folio"] = this.errorService.required;
-    }
+  iniciarCaptura(folio: string, capturadorId: number): Observable<Captura> {
+    const payload: Partial<Captura> = {
+      folio: folio,
+      capturador: capturadorId,
+      estado: 'PROGRESO',
+      detalles: []
+    };
 
-    if (!this.validatorService.required(data["capturador"])) {
-      error["capturador"] = "Es necesario iniciar sesión para capturar";
-    }
-
-    if (!data["detalles"] || data["detalles"].length === 0) {
-      error["detalles"] = "Debe agregar al menos un producto a la lista";
-    } else {
-      // Validar detalles internos si existen
-      // (Opcional: devolver errores específicos por índice si la UI lo soporta)
-      for (let item of data["detalles"]) {
-        if (!this.validatorService.required(item["producto_codigo"])) {
-          error["lista_productos"] = "Uno de los productos no tiene código";
-          break;
+    return this.http.post<Captura>(this.CAPTURA_ENDPOINT, payload).pipe(
+      tap((captura) => {
+        this._capturaActualSubject.next(captura);
+        if (captura.detalles && captura.detalles.length > 0) {
+          this._detallesSubject.next(captura.detalles);
+        } else {
+          this._detallesSubject.next([]);
         }
-        if (!this.validatorService.required(item["cantidad_contada"])) {
-            error["lista_productos"] = "Uno de los productos no tiene cantidad";
-            break;
-        } else if (!this.validatorService.numeric(item["cantidad_contada"])) {
-            error["lista_productos"] = this.errorService.numeric;
-            break;
-        } else if (item["cantidad_contada"] < 0) {
-            error["lista_productos"] = "La cantidad no puede ser negativa";
-            break;
-        }
-      }
-    }
-
-    return error;
+      }),
+      catchError(this.handleError)
+    );
   }
 
-  // Validar un item individual (útil para validar al momento de agregar a la tabla)
-  public validarItemDetalle(item: any) {
-    let error: any = {};
-    if (!this.validatorService.required(item["producto_codigo"])) {
-      error["producto_codigo"] = this.errorService.required;
-    }
+  /**
+   * Finaliza la sesión de captura en el backend.
+   * Actualiza el estado a 'COMPLETADO' y limpia el estado local.
+   */
+  terminarCaptura(capturaId: number): Observable<any> {
+    // Asumimos un PATCH estándar al ID del recurso para actualizar el estado
+    // OJO: Asegúrate que tu backend soporte PATCH en esta ruta o ajusta a un endpoint específico
+    const url = `${this.CAPTURA_ENDPOINT}${capturaId}/`;
 
-    if (!this.validatorService.required(item["cantidad_contada"])) {
-      error["cantidad_contada"] = this.errorService.required;
-    } else if (!this.validatorService.numeric(item["cantidad_contada"])) {
-      error["cantidad_contada"] = this.errorService.numeric;
-    }
-
-    return error;
+    return this.http.patch(url, { estado: 'COMPLETADO' }).pipe(
+      tap(() => {
+        // Limpiar estado al terminar exitosamente
+        this._capturaActualSubject.next(null);
+        this._detallesSubject.next([]);
+      }),
+      catchError(this.handleError)
+    );
   }
 
-  // --- Servicios HTTP ---
+  cargarDetalles(capturaId: number): Observable<DetalleCaptura[]> {
+    const url = `${this.CAPTURA_ENDPOINT}${capturaId}/detalles/`; // Asumiendo endpoint GET anidado o filtro
+    return this.http.get<DetalleCaptura[]>(url).pipe(
+      tap(detalles => this._detallesSubject.next(detalles)),
+      catchError(this.handleError)
+    );
+  }
 
-  // Servicio para registrar la captura de inventario
-  public registrarCaptura(data: any): Observable<any> {
-    const token = this.facadeService.getSessionToken();
-    let headers: HttpHeaders;
+  // -------------------------------------------------------------------------
+  // MODO ONLINE (Línea por Línea)
+  // -------------------------------------------------------------------------
 
-    if (token) {
-      headers = new HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
-      });
+  escanearArticulo(codigo: string, cantidad: number): Observable<DetalleCaptura> {
+    const capturaActual = this.capturaActualValue;
+
+    if (!capturaActual || !capturaActual.id) {
+      return throwError(() => new Error("No hay una captura activa."));
+    }
+
+    const payload: PayloadEscaner = {
+      captura_id: capturaActual.id,
+      producto_codigo: codigo,
+      cantidad_contada: cantidad
+    };
+
+    return this.http.post<DetalleCaptura>(this.DETALLE_ENDPOINT, payload).pipe(
+      tap((nuevoDetalle) => {
+        const listaActual = this._detallesSubject.value;
+        this._detallesSubject.next([nuevoDetalle, ...listaActual]);
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // MODO OFFLINE / RECUPERACIÓN (Batch Sync)
+  // -------------------------------------------------------------------------
+
+  sincronizarMasivo(detallesBatch: PayloadDetalleBatch[]): Observable<DetalleCaptura[]> {
+    const capturaActual = this.capturaActualValue;
+
+    if (!capturaActual || !capturaActual.id) {
+      return throwError(() => new Error("No se puede sincronizar sin una captura activa (ID faltante)."));
+    }
+
+    if (!detallesBatch || detallesBatch.length === 0) {
+      return throwError(() => new Error("La lista de sincronización está vacía."));
+    }
+
+    const url = `${this.CAPTURA_ENDPOINT}${capturaActual.id}/sincronizar/`;
+
+    return this.http.post<DetalleCaptura[]>(url, detallesBatch).pipe(
+      tap((listaActualizadaServer) => {
+        console.log('Sincronización exitosa. Actualizando estado local...');
+        this._detallesSubject.next(listaActualizadaServer);
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // CRUD & HELPERS
+  // -------------------------------------------------------------------------
+
+  eliminarDetalle(detalleId: number): Observable<void> {
+    const url = `${this.DETALLE_ENDPOINT}${detalleId}/`;
+    return this.http.delete<void>(url).pipe(
+      tap(() => {
+        const listaActual = this._detallesSubject.value;
+        this._detallesSubject.next(listaActual.filter(d => d.id !== detalleId));
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    let msg = 'Error desconocido';
+    if (error.error instanceof ErrorEvent) {
+      msg = `Error cliente: ${error.error.message}`;
     } else {
-      headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-      console.log("No se encontró el token del usuario");
+      msg = error.error?.detail || error.error?.error || `Error Servidor: ${error.status}`;
     }
-
-    return this.http.post<any>(`${environment.url_api}/inventario/captura/`, data, { headers });
+    console.error(msg);
+    return throwError(() => new Error(msg));
   }
 }

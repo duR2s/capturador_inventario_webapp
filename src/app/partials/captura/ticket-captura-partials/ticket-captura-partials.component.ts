@@ -11,13 +11,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 // Componente Padre (Asegúrate que la ruta de importación sea correcta)
-import { CaptureRow } from '../tabla-captura-partial/tabla-captura-partial.component';
+import { DetalleCaptura } from '../../../captura.interfaces';
 
 // --------------------------------------------------------------------------
 // 1. Interfaz de Datos que esperamos recibir (antes del decorador)
 // --------------------------------------------------------------------------
 interface DialogData {
-  filaSeleccionada: CaptureRow;
+  filaSeleccionada: DetalleCaptura;
   generarTicket: boolean;
 }
 
@@ -42,7 +42,7 @@ interface DialogData {
 export class TicketCapturaPartialsComponent { // Se eliminó 'implements OnInit'
 
   // Propiedad para almacenar los datos de la fila seleccionada
-  public datosFila: CaptureRow;
+  public datosFila: DetalleCaptura;
   // Form
   form: FormGroup;
 
@@ -64,13 +64,13 @@ export class TicketCapturaPartialsComponent { // Se eliminó 'implements OnInit'
     // Inicialización del FormGroup, ahora usando los datos recibidos
     this.form = this.fb.group({
       // Precarga el 'código' y lo hace requerido
-      codigo: [this.datosFila.codigo, Validators.required],
+      codigo: [this.datosFila.producto_codigo, Validators.required],
 
       // Precarga el 'nombre'
-      nombre: [this.datosFila.nombre],
+      nombre: [this.datosFila.nombre_articulo],
 
       // El campo 'cantidad' inicia con el valor capturado previamente o 0
-      cantidad: [this.datosFila.existencia_capturada || 0, [Validators.required, Validators.min(0)]]
+      cantidad: [this.datosFila.cantidad_contada || 0, [Validators.required, Validators.min(0)]]
     });
 
     // Deshabilitar campos que no deben ser editados
