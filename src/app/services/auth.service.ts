@@ -45,7 +45,7 @@ export class AuthService {
 
   // Iniciar sesión
   public login(data: any): Observable<any> {
-    return this.http.post<any>(`${environment.url_api}/login/`, data, httpOptions);
+    return this.http.post<any>(`${environment.url_api}/api/login/`, data, httpOptions);
   }
 
   // Obtener usuario firmado (Me)
@@ -68,6 +68,6 @@ export class AuthService {
     } else {
       headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     }
-    return this.http.get<any>(`${environment.url_api}/logout/`, { headers });
+    return this.http.get<any>(`${environment.url_api}/api/logout/`, { headers });
   }
 }

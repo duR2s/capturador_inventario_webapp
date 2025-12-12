@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { routes } from './app.routes';
 
@@ -22,6 +23,9 @@ export const appConfig: ApplicationConfig = {
     // 3. Importa los módulos necesarios para que estén disponibles en toda la app.
     //    - FormsModule: para usar ngModel en formularios.
     //    - HttpClientModule: para hacer peticiones HTTP a un backend.
-    importProvidersFrom(FormsModule, HttpClientModule)
+    importProvidersFrom(FormsModule, HttpClientModule),
+
+    // 4. Provee el MatSnackBarModule globalmente para que los servicios 'root' puedan inyectarlo
+    importProvidersFrom(MatSnackBarModule)
   ]
 };

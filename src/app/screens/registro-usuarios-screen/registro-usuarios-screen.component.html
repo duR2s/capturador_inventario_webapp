@@ -31,14 +31,14 @@
             <!-- Administrador -->
             <mat-radio-button
               class="role-pill"
-              value="administrador">
+              value="empleado">
               <mat-icon class="me-1">person_apron</mat-icon>
               <span class="text-radio">Empleado</span>
             </mat-radio-button>
             <!-- Otro -->
             <mat-radio-button
               class="role-pill"
-              value="Otro">
+              value="otro">
               <mat-icon class="me-1">person</mat-icon>
               <span class="text-radio">Otro</span>
             </mat-radio-button>
@@ -50,11 +50,10 @@
     <!-- Formularios de registro según el tipo seleccionado -->
     <div class="forms-area">
       <!-- Formularios (vistas) de cada usuario (inyección dinámica) -->
-      <app-registro-admin *ngIf="isAdmin" [rol]="tipo_user" [datos_user]="user"></app-registro-admin>
+      <app-registro-admin *ngIf="isOtro" [rol]="tipo_user" [datos_user]="user"></app-registro-admin>
 
-      <!-- <app-registro-alumnos *ngIf="isAlumno" [rol]="tipo_user" [datos_user]="editar ? user : null"></app-registro-alumnos> -->
+      <app-registro-empleados *ngIf="isEmpleado" [rol]="tipo_user" [datos_user]="editar ? user : null"></app-registro-empleados>
 
-      <!-- <app-registro-maestros *ngIf="isMaestro" [rol]="tipo_user" [datos_user]="editar ? user : null"></app-registro-maestros> -->
     </div>
   </div>
 </div>

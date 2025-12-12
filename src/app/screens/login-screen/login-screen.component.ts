@@ -68,13 +68,6 @@ export class LoginScreenComponent implements OnInit {
         const role = response.rol;
         let route = "/home"; // Ruta por defecto
 
-        if (role === 'administrador') {
-          route = "/administrador";
-        } else if (role === 'maestro') {
-          route = "/maestros";
-        } else if (role === 'alumno') {
-          route = "/alumnos";
-        }
 
         this.router.navigate([route]);
         this.load = false;

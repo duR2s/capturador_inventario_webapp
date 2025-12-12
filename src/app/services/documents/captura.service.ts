@@ -1,71 +1,99 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, Observable, throwError, forkJoin } from 'rxjs';
 import { catchError, tap, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { Captura, DetalleCaptura, PayloadEscaner, PayloadDetalleBatch } from '../../captura.interfaces';
+// Importamos FacadeService para obtener el token
+import { FacadeService } from 'src/app/services/facade.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CapturaService {
-  // Configuración de Endpoints
   private readonly API_URL = `${environment.url_api || 'http://localhost:8000'}/api`;
 
-  // Endpoint base: /api/inventario/captura/
   private readonly CAPTURA_ENDPOINT = `${this.API_URL}/inventario/captura/`;
   private readonly DETALLE_ENDPOINT = `${this.API_URL}/inventario/detalle/`;
+  private readonly ALMACENES_ENDPOINT = `${this.API_URL}/inventario/almacenes/`;
+  private readonly EMPLEADOS_ENDPOINT = `${this.API_URL}/lista-empleados/`;
 
-  // --- STATE MANAGEMENT ---
   private _detallesSubject = new BehaviorSubject<DetalleCaptura[]>([]);
   public detalles$ = this._detallesSubject.asObservable();
 
   private _capturaActualSubject = new BehaviorSubject<Captura | null>(null);
   public capturaActual$ = this._capturaActualSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private facadeService: FacadeService // Inyectamos FacadeService
+  ) {}
 
   public get capturaActualValue(): Captura | null {
     return this._capturaActualSubject.value;
   }
 
+  // --- HELPER DE HEADERS ---
+  private getHeaders(): HttpHeaders {
+    const token = this.facadeService.getSessionToken();
+    if (token) {
+      return new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      });
+    }
+    return new HttpHeaders({ 'Content-Type': 'application/json' });
+  }
+
   // -------------------------------------------------------------------------
-  // MÉTODOS DE GESTIÓN DE CAPTURA (CABECERA)
+  // CATÁLOGOS
   // -------------------------------------------------------------------------
 
-  iniciarCaptura(folio: string, capturadorId: number): Observable<Captura> {
-    const payload: Partial<Captura> = {
+  getAlmacenes(): Observable<any[]> {
+    return this.http.get<any[]>(this.ALMACENES_ENDPOINT, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getCapturadores(): Observable<any[]> {
+    return this.http.get<any[]>(this.EMPLEADOS_ENDPOINT, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  cargarCatalogosIniciales(): Observable<{ almacenes: any[], capturadores: any[] }> {
+    return forkJoin({
+      almacenes: this.getAlmacenes(),
+      capturadores: this.getCapturadores()
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // MÉTODOS DE GESTIÓN DE CAPTURA
+  // -------------------------------------------------------------------------
+
+  iniciarCaptura(folio: string, capturadorId: number, almacenId: number): Observable<Captura> {
+    const payload: any = {
       folio: folio,
       capturador: capturadorId,
-      estado: 'PROGRESO',
+      almacen: almacenId,
+      estado: 'BORRADOR',
       detalles: []
     };
 
-    return this.http.post<Captura>(this.CAPTURA_ENDPOINT, payload).pipe(
+    return this.http.post<Captura>(this.CAPTURA_ENDPOINT, payload, { headers: this.getHeaders() }).pipe(
       tap((captura) => {
         this._capturaActualSubject.next(captura);
-        if (captura.detalles && captura.detalles.length > 0) {
-          this._detallesSubject.next(captura.detalles);
-        } else {
-          this._detallesSubject.next([]);
-        }
+        this._detallesSubject.next([]);
       }),
       catchError(this.handleError)
     );
   }
 
-  /**
-   * Finaliza la sesión de captura en el backend.
-   * Actualiza el estado a 'COMPLETADO' y limpia el estado local.
-   */
   terminarCaptura(capturaId: number): Observable<any> {
-    // Asumimos un PATCH estándar al ID del recurso para actualizar el estado
-    // OJO: Asegúrate que tu backend soporte PATCH en esta ruta o ajusta a un endpoint específico
     const url = `${this.CAPTURA_ENDPOINT}${capturaId}/`;
-
-    return this.http.patch(url, { estado: 'COMPLETADO' }).pipe(
+    return this.http.patch(url, { estado: 'CONFIRMADO' }, { headers: this.getHeaders() }).pipe(
       tap(() => {
-        // Limpiar estado al terminar exitosamente
         this._capturaActualSubject.next(null);
         this._detallesSubject.next([]);
       }),
@@ -74,16 +102,13 @@ export class CapturaService {
   }
 
   cargarDetalles(capturaId: number): Observable<DetalleCaptura[]> {
-    const url = `${this.CAPTURA_ENDPOINT}${capturaId}/detalles/`; // Asumiendo endpoint GET anidado o filtro
-    return this.http.get<DetalleCaptura[]>(url).pipe(
-      tap(detalles => this._detallesSubject.next(detalles)),
-      catchError(this.handleError)
+    const url = `${this.CAPTURA_ENDPOINT}${capturaId}/`;
+    return this.http.get<Captura>(url, { headers: this.getHeaders() }).pipe(
+        map(captura => captura.detalles || []),
+        tap(detalles => this._detallesSubject.next(detalles)),
+        catchError(this.handleError)
     );
   }
-
-  // -------------------------------------------------------------------------
-  // MODO ONLINE (Línea por Línea)
-  // -------------------------------------------------------------------------
 
   escanearArticulo(codigo: string, cantidad: number): Observable<DetalleCaptura> {
     const capturaActual = this.capturaActualValue;
@@ -98,7 +123,7 @@ export class CapturaService {
       cantidad_contada: cantidad
     };
 
-    return this.http.post<DetalleCaptura>(this.DETALLE_ENDPOINT, payload).pipe(
+    return this.http.post<DetalleCaptura>(this.DETALLE_ENDPOINT, payload, { headers: this.getHeaders() }).pipe(
       tap((nuevoDetalle) => {
         const listaActual = this._detallesSubject.value;
         this._detallesSubject.next([nuevoDetalle, ...listaActual]);
@@ -106,10 +131,6 @@ export class CapturaService {
       catchError(this.handleError)
     );
   }
-
-  // -------------------------------------------------------------------------
-  // MODO OFFLINE / RECUPERACIÓN (Batch Sync)
-  // -------------------------------------------------------------------------
 
   sincronizarMasivo(detallesBatch: PayloadDetalleBatch[]): Observable<DetalleCaptura[]> {
     const capturaActual = this.capturaActualValue;
@@ -124,7 +145,7 @@ export class CapturaService {
 
     const url = `${this.CAPTURA_ENDPOINT}${capturaActual.id}/sincronizar/`;
 
-    return this.http.post<DetalleCaptura[]>(url, detallesBatch).pipe(
+    return this.http.post<DetalleCaptura[]>(url, detallesBatch, { headers: this.getHeaders() }).pipe(
       tap((listaActualizadaServer) => {
         console.log('Sincronización exitosa. Actualizando estado local...');
         this._detallesSubject.next(listaActualizadaServer);
@@ -133,13 +154,9 @@ export class CapturaService {
     );
   }
 
-  // -------------------------------------------------------------------------
-  // CRUD & HELPERS
-  // -------------------------------------------------------------------------
-
   eliminarDetalle(detalleId: number): Observable<void> {
     const url = `${this.DETALLE_ENDPOINT}${detalleId}/`;
-    return this.http.delete<void>(url).pipe(
+    return this.http.delete<void>(url, { headers: this.getHeaders() }).pipe(
       tap(() => {
         const listaActual = this._detallesSubject.value;
         this._detallesSubject.next(listaActual.filter(d => d.id !== detalleId));
@@ -154,6 +171,9 @@ export class CapturaService {
       msg = `Error cliente: ${error.error.message}`;
     } else {
       msg = error.error?.detail || error.error?.error || `Error Servidor: ${error.status}`;
+      if (typeof error.error === 'object' && !error.error.detail && !error.error.error) {
+          msg = JSON.stringify(error.error);
+      }
     }
     console.error(msg);
     return throwError(() => new Error(msg));

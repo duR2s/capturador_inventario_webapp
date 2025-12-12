@@ -1,0 +1,74 @@
+<div class="wrapper-sesion">
+
+  <div class="card-flotante-sesion">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="icon-container">
+        <mat-icon>inventory_2</mat-icon>
+      </div>
+      <div class="title-container">
+        <h2>Nueva Sesión</h2>
+        <p>Configura los datos iniciales de la captura</p>
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <form [formGroup]="form" (ngSubmit)="crearSesion()" class="form-grid">
+
+      <!-- 1. FOLIO (Texto) -->
+      <mat-form-field appearance="outline" class="pill-input">
+        <mat-label>Folio de Captura</mat-label>
+        <input matInput formControlName="folio" placeholder="Ej. INV-2023-001">
+        <mat-icon matPrefix>tag</mat-icon>
+        <mat-error *ngIf="form.get('folio')?.hasError('required')">Requerido</mat-error>
+      </mat-form-field>
+
+      <!-- 2. ALMACÉN (Select) -->
+      <mat-form-field appearance="outline" class="pill-input">
+        <mat-label>Almacén</mat-label>
+        <mat-select formControlName="almacen" placeholder="Selecciona almacén">
+          <mat-option *ngFor="let alm of almacenes" [value]="alm.id">
+            {{ alm.nombre }}
+          </mat-option>
+          <mat-option *ngIf="almacenes.length === 0" disabled>No hay almacenes disponibles</mat-option>
+        </mat-select>
+        <mat-icon matPrefix>store</mat-icon>
+        <mat-error *ngIf="form.get('almacen')?.hasError('required')">Requerido</mat-error>
+      </mat-form-field>
+
+      <!-- 3. CAPTURADOR (Select) -->
+      <mat-form-field appearance="outline" class="pill-input">
+        <mat-label>Capturador Asignado</mat-label>
+        <mat-select formControlName="capturador" placeholder="Selecciona empleado">
+          <mat-option *ngFor="let user of usuarios" [value]="user.id">
+            {{ user.first_name }} {{ user.last_name }} ({{ user.username }})
+          </mat-option>
+          <mat-option *ngIf="usuarios.length === 0" disabled>No hay usuarios disponibles</mat-option>
+        </mat-select>
+        <mat-icon matPrefix>person</mat-icon>
+        <mat-error *ngIf="form.get('capturador')?.hasError('required')">Requerido</mat-error>
+      </mat-form-field>
+
+      <!-- Feedback de Error General -->
+      <div class="error-feedback" *ngIf="errorMessage">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <!-- ACCIONES -->
+      <div class="actions">
+        <button type="button" class="btn-cancelar" (click)="cancelar()" [disabled]="isLoading">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-crear" [disabled]="form.invalid || isLoading" routerLink="./form">
+          <mat-spinner *ngIf="isLoading" diameter="18"></mat-spinner>
+          <span *ngIf="!isLoading">INICIAR CAPTURA</span>
+          <mat-icon *ngIf="!isLoading">arrow_forward</mat-icon>
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>

@@ -3,7 +3,8 @@ import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FacadeService } from 'src/app/services/facade.service';
-import { AdministradoresService } from 'src/app/services/roles/administradores.service';
+// Importamos el servicio correcto
+import { EmpleadosService } from 'src/app/services/roles/empleados.service';
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,11 +13,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-// Importante para formatear la fecha
 import { DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-registro-admin',
+  selector: 'app-registro-empleados', // Selector ajustado
   standalone: true,
   imports: [
     CommonModule,
@@ -30,18 +30,19 @@ import { DatePipe } from '@angular/common';
     MatDatepickerModule,
     MatNativeDateModule
   ],
-  providers: [DatePipe], // Agregamos DatePipe a proveedores
-  templateUrl: './registro-administradores.component.html',
-  styleUrls: ['./registro-administradores.component.scss']
+  providers: [DatePipe],
+  templateUrl: './registro-empleados.component.html',
+  styleUrls: ['./registro-empleados.component.scss'] // Reutiliza estilos o crea uno nuevo si es necesario
 })
-export class RegistroAdminComponent implements OnInit {
+export class RegistroEmpleadosComponent implements OnInit {
 
   @Input() rol: string = "";
   @Input() datos_user: any = {};
 
-  public admin:any = {};
-  public errors:any = {};
-  public editar:boolean = false;
+  // Cambiamos 'admin' por 'empleado'
+  public empleado: any = {};
+  public errors: any = {};
+  public editar: boolean = false;
   public token: string = "";
   public idUser: Number = 0;
 
@@ -53,37 +54,40 @@ export class RegistroAdminComponent implements OnInit {
   constructor(
     private location: Location,
     public activatedRoute: ActivatedRoute,
-    private administradoresService: AdministradoresService,
+    private empleadosService: EmpleadosService, // Inyección del servicio de empleados
     private facadeService: FacadeService,
     private router: Router,
-    private datePipe: DatePipe // Inyección para formateo de fecha
+    private datePipe: DatePipe
   ) { }
 
   ngOnInit(): void {
     if(this.activatedRoute.snapshot.params['id'] != undefined){
       this.editar = true;
       this.idUser = this.activatedRoute.snapshot.params['id'];
+      console.log("ID Empleado a editar: ", this.idUser);
 
       if (this.datos_user) {
-        this.admin = {
+        // Mapeo de datos para edición (coherente con EmpleadosService y modelo Back)
+        this.empleado = {
           id: this.datos_user.id,
-          clave_admin: this.datos_user.clave_interna || this.datos_user.clave_admin,
+          clave_interna: this.datos_user.clave_interna, // Aquí usamos clave_interna directo
           rfc: this.datos_user.rfc,
           telefono: this.datos_user.telefono,
-          // La edad ya no se edita manual, pero se recibe para mostrar si fuera necesario (aunque ya no tenemos input)
-          // edad: this.datos_user.edad,
           fecha_nacimiento: this.datos_user.fecha_nacimiento,
           first_name: this.datos_user.user?.first_name || "",
           last_name: this.datos_user.user?.last_name || "",
           email: this.datos_user.user?.email || this.datos_user.user?.username || "",
-          rol: this.datos_user.puesto || 'ADMIN'
+          // Si quieres editar el rol, podrías asignarlo aquí, por defecto lo dejamos como viene o CAPTURADOR
+          puesto: this.datos_user.puesto || 'CAPTURADOR'
         };
       }
     } else {
-      this.admin = this.administradoresService.esquemaAdmin();
-      this.admin.rol = this.rol;
+      // Inicialización para nuevo registro
+      this.empleado = this.empleadosService.esquemaEmpleado();
+      this.empleado.puesto = this.rol || 'CAPTURADOR'; // Si viene rol por input lo usamos
       this.token = this.facadeService.getSessionToken();
     }
+    console.log("Empleado (Formulario): ", this.empleado);
   }
 
   public showPassword() {
@@ -106,10 +110,9 @@ export class RegistroAdminComponent implements OnInit {
     }
   }
 
-  // EVENTO DE FECHA: Convierte el objeto Date de Angular Material a string "YYYY-MM-DD"
   public changeFecha(event: any) {
     if (event.value) {
-      this.admin.fecha_nacimiento = this.datePipe.transform(event.value, 'yyyy-MM-dd');
+      this.empleado.fecha_nacimiento = this.datePipe.transform(event.value, 'yyyy-MM-dd');
     }
   }
 
@@ -119,24 +122,26 @@ export class RegistroAdminComponent implements OnInit {
 
   public registrar(): void {
     this.errors = {};
-    this.errors = this.administradoresService.validarAdmin(this.admin, this.editar);
+    // Usamos validarEmpleado del servicio nuevo
+    this.errors = this.empleadosService.validarEmpleado(this.empleado, this.editar);
     if(Object.keys(this.errors).length > 0){
       return;
     }
 
-    if(this.admin.password == this.admin.confirmar_password){
-      // El backend calculará la edad
-      this.administradoresService.registrarAdmin(this.admin).subscribe(
+    if(this.empleado.password == this.empleado.confirmar_password){
+      this.empleadosService.registrarEmpleado(this.empleado).subscribe(
         (response) => {
-          alert("Administrador registrado exitosamente");
+          alert("Empleado registrado exitosamente");
+          console.log("Respuesta: ", response);
           if(this.token && this.token !== ""){
-            this.router.navigate(["administrador"]);
+            this.router.navigate(["empleados"]); // Ajusta esta ruta a tu lista de empleados
           } else {
             this.router.navigate(["/"]);
           }
         },
         (error) => {
-          alert("Error al registrar administrador");
+          alert("Error al registrar empleado");
+          console.error(error);
           if(error.error && error.error.message){
              alert(error.error.message);
           }
@@ -144,29 +149,31 @@ export class RegistroAdminComponent implements OnInit {
       );
     } else {
       alert("Las contraseñas no coinciden");
-      this.admin.password="";
-      this.admin.confirmar_password="";
+      this.empleado.password="";
+      this.empleado.confirmar_password="";
     }
   }
 
   public actualizar(): void {
     this.errors = {};
-    this.errors = this.administradoresService.validarAdmin(this.admin, this.editar);
+    this.errors = this.empleadosService.validarEmpleado(this.empleado, this.editar);
     if(Object.keys(this.errors).length > 0){
       return;
     }
 
-    if (!this.admin.id) {
-        this.admin.id = this.idUser;
+    if (!this.empleado.id) {
+        this.empleado.id = this.idUser;
     }
 
-    this.administradoresService.actualizarAdmin(this.admin).subscribe(
+    this.empleadosService.actualizarEmpleado(this.empleado).subscribe(
       (response) => {
-        alert("Administrador actualizado exitosamente");
-        this.router.navigate(["administrador"]);
+        alert("Empleado actualizado exitosamente");
+        console.log("Respuesta: ", response);
+        this.router.navigate(["empleados"]); // Ajusta esta ruta a tu lista de empleados
       },
       (error) => {
-        alert("Error al actualizar administrador");
+        alert("Error al actualizar empleado");
+        console.error(error);
       }
     );
   }

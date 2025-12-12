@@ -57,7 +57,7 @@ export class CapturaCapturadoresScreenComponent implements OnInit {
 
     if (!captura || !captura.id) {
       this._errorsService.mostrarError("No se detectó una sesión de captura activa.");
-      this._router.navigate(['/dashboard']);
+      this._router.navigate(['/home/dashboard']);
     } else {
       // Si hay sesión, intentamos refrescar los datos del servidor para tener la última versión
       this.cargarDatosServidor(captura.id);

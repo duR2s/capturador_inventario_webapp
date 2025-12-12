@@ -1,0 +1,180 @@
+// Importar variables de color centralizadas
+@import '../../../styles/color-variables';
+
+.wrapper {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  // Cambio: Usamos el fondo de página cálido en lugar de blanco puro
+  background-color: $color-white;
+  border-radius: 16px;
+}
+
+.section-registro{
+  width: 90%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.body-registro {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding-top: 2.5rem;
+  gap: 2.2rem;
+  // Cambio: Fondo de contenedor blanco cálido
+  background: $color-white;
+}
+
+.title-user{
+  font-size: 28px;
+  text-align: left;
+  font-family: Nexa-Bold;
+  letter-spacing: 2px;
+  // Cambio: Color de título de marca (Verde oscuro)
+  color: $color-text-title;
+  text-transform: capitalize;
+  opacity: 1;
+}
+
+mat-form-field{
+  width: 90%!important;
+  margin-left: 5%;
+  height: 48px!important;
+  text-align: left!important;
+}
+
+//Para la sección de botones
+.section-buttons{
+  width: 90%;
+  margin-left: 5%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 3rem;
+}
+
+.btn-primary {
+  width: 208px;
+  height: 48px;
+  // Cambio: Usamos el color Secundario (Terracota) para match con Login
+  background-color: $color-primary!important;
+  border-color: $color-primary!important;
+  border-radius: 8px!important;
+  opacity: 1;
+  //Fuente
+  text-align: center;
+  font-family: Nexa-Bold;
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 0px;
+  color: $color-white;
+  opacity: 1;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  // Cambio: Hover consistente
+  background-color: $color-primary-light!important;
+  border-color: $color-primary-light!important;
+}
+
+.btn-danger{
+  width: 208px;
+  height: 48px;
+  // Agregado: Color de error/peligro (Faltaba background en tu código)
+  background-color: $color-danger!important;
+  border: 1px solid $color-danger!important;
+  border-radius: 8px!important;
+  opacity: 1;
+  //Fuente
+  text-align: center;
+  font-family: Nexa-Bold;
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 0px;
+  color: $color-white;
+  opacity: 1;
+  transition: background-color 0.2s;
+}
+
+.btn-danger:hover {
+  background-color: $color-danger-dark!important;
+  border-color: $color-danger-dark!important;
+}
+
+.mat-hint-margin {
+  margin-bottom: 1rem;
+}
+
+/* =========================
+   Ajustes para el formulario en dispositivos móviles
+   ========================= */
+
+/* Título del formulario (en móvil) */
+@media (max-width: 700px) {
+  .title-user {
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem); /* Asegura que el tamaño sea adecuado */
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+    text-align: center; /* Centrado en dispositivos móviles */
+    white-space: normal; /* Evita que el texto se divida o se sobreponga */
+  }
+
+  .title-materias {
+    font-size: 1.2rem; /* Asegura que el tamaño sea adecuado en dispositivos pequeños */
+    text-align: left;
+    margin-bottom: 1rem;
+    color: $color-text-dark;
+  }
+
+  .select-materias {
+    width: 100%;
+    gap: 0.5rem;
+    padding-left: 1.5rem;
+  }
+
+  mat-form-field {
+    width: 100% !important; /* Hace que el formulario ocupe todo el ancho */
+    margin-left: 0; /* Elimina el margen de la izquierda en móviles */
+  }
+
+  /* Ajuste para los botones */
+  .btn-primary, .btn-danger {
+    width: 100%; /* Ancho completo para los botones en móviles */
+    font-size: 14px; /* Reducción de tamaño en botones */
+    height: 48px;
+  }
+
+  .section-buttons {
+    flex-direction: column; /* Coloca los botones en columna en pantallas pequeñas */
+    gap: 1rem; /* Espaciado entre los botones */
+  }
+}
+
+/* =========================
+   Ajustes adicionales para la vista móvil (≤ 700px)
+   ========================= */
+@media (max-width: 700px) {
+
+  .mat-form-field {
+    width: 100% !important;
+    margin-left: 0; /* Elimina el margen */
+  }
+
+}
+
+.invalid-feedback, .feedback-error {
+  margin-left: 2.5rem;
+  color: $color-error; // Asegurar color de error correcto
+  font-size: 0.875rem;
+}

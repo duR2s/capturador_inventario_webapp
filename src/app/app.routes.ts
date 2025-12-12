@@ -5,6 +5,7 @@ import { LoginScreenComponent } from './screens/login-screen/login-screen.compon
 import { RegistroUsuariosScreenComponent } from './screens/registro-usuarios-screen/registro-usuarios-screen.component';
 import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-layout.component';
 import { CapturaCapturadoresScreenComponent } from './screens/captura/captura-capturadores-screen/captura-capturadores-screen.component';
+import { MenuCapturaComponent } from './screens/captura/menu-captura/menu-captura.component';
 
 // --- app.routes.ts ---
 // Este archivo define las rutas principales de la aplicación.
@@ -27,14 +28,17 @@ export const routes: Routes = [
   // Rutas del Dashboard (lo que ve el usuario después de iniciar sesión)
   // Usan el DashboardLayoutComponent como plantilla.
   {
-    path: 'dashboard',
+    path: 'home',
     component: DashboardLayoutComponent,
     // canActivate: [AuthGuard], // <-- Futuro: Aquí pondrías un guard para proteger la ruta
     children: [
       // Ejemplo de una ruta dentro del dashboard:
-      { path: 'inicio', component: DashboardInicioScreenComponent},
+      { path: 'dashboard', component: DashboardInicioScreenComponent},
       // Ruta PRovisional
-      { path: 'captura', component: CapturaCapturadoresScreenComponent},
+      { path: 'captura', component: MenuCapturaComponent},
+      //{ path: 'captura/form', component: CapturaCapturadoresScreenComponent},
+
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
 

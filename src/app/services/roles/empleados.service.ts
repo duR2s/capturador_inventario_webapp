@@ -13,7 +13,7 @@ const httpOptions = {
 @Injectable({
   providedIn: 'root'
 })
-export class AdministradoresService {
+export class EmpleadosService {
 
   constructor(
     private http: HttpClient,
@@ -22,10 +22,10 @@ export class AdministradoresService {
     private facadeService: FacadeService
   ) { }
 
-  public esquemaAdmin() {
+  public esquemaEmpleado() {
     return {
-      'rol': 'ADMIN',
-      'clave_admin': '',
+      'puesto': 'CAPTURADOR', // Rol por defecto, puede cambiar en el form
+      'clave_interna': '', // ID de trabajador
       'first_name': '',
       'last_name': '',
       'email': '',
@@ -33,18 +33,18 @@ export class AdministradoresService {
       'confirmar_password': '',
       'telefono': '',
       'rfc': '',
-      'fecha_nacimiento': '', // Obligatorio
-      'edad': '' // Se ignorará en validación y envío manual
+      'fecha_nacimiento': '', // Obligatorio para cálculo automático de edad
+      'edad': '' // Se ignorará en validación y envío (calculado por back)
     }
   }
 
-  //Validación para el formulario
-  public validarAdmin(data: any, editar: boolean) {
-    console.log("Validando admin... ", data);
+  // Validación para el formulario de Empleado
+  public validarEmpleado(data: any, editar: boolean) {
+    console.log("Validando empleado... ", data);
     let error: any = {};
 
-    if (!this.validatorService.required(data["clave_admin"])) {
-      error["clave_admin"] = this.errorService.required;
+    if (!this.validatorService.required(data["clave_interna"])) {
+      error["clave_interna"] = this.errorService.required;
     }
 
     if (!this.validatorService.required(data["first_name"])) {
@@ -81,13 +81,10 @@ export class AdministradoresService {
       error["rfc"] = this.errorService.max(13);
     }
 
-    // NUEVO: Validación requerida de fecha de nacimiento
+    // Validación obligatoria de fecha de nacimiento
     if (!this.validatorService.required(data["fecha_nacimiento"])) {
       error["fecha_nacimiento"] = this.errorService.required;
     }
-
-    // ELIMINADO: Validación de edad manual
-    // if (!this.validatorService.required(data["edad"])) { ... }
 
     if (!this.validatorService.required(data["telefono"])) {
       error["telefono"] = this.errorService.required;
@@ -109,23 +106,23 @@ export class AdministradoresService {
     return new HttpHeaders({ 'Content-Type': 'application/json' });
   }
 
-  public registrarAdmin(data: any): Observable<any> {
-    return this.http.post<any>(`${environment.url_api}/api/admin/`, data, { headers: this.getHeaders() });
+  public registrarEmpleado(data: any): Observable<any> {
+    return this.http.post<any>(`${environment.url_api}/api/empleado/`, data, { headers: this.getHeaders() });
   }
 
-  public obtenerListaAdmins(): Observable<any> {
-    return this.http.get<any>(`${environment.url_api}/api/lista-admins/`, { headers: this.getHeaders() });
+  public obtenerListaEmpleados(): Observable<any> {
+    return this.http.get<any>(`${environment.url_api}/api/lista-empleados/`, { headers: this.getHeaders() });
   }
 
-  public obtenerAdminPorID(idAdmin: number): Observable<any> {
-    return this.http.get<any>(`${environment.url_api}/api/admin/?id=${idAdmin}`, { headers: this.getHeaders() });
+  public obtenerEmpleadoPorID(idEmpleado: number): Observable<any> {
+    return this.http.get<any>(`${environment.url_api}/api/empleado/?id=${idEmpleado}`, { headers: this.getHeaders() });
   }
 
-  public eliminarAdmin(idAdmin: number): Observable<any>{
-    return this.http.delete<any>(`${environment.url_api}/api/admin/?id=${idAdmin}`, { headers: this.getHeaders() });
+  public eliminarEmpleado(idEmpleado: number): Observable<any>{
+    return this.http.delete<any>(`${environment.url_api}/api/empleado/?id=${idEmpleado}`, { headers: this.getHeaders() });
   }
 
-  public actualizarAdmin(data: any): Observable<any> {
-    return this.http.put<any>(`${environment.url_api}/api/admin/`, data, { headers: this.getHeaders() });
+  public actualizarEmpleado(data: any): Observable<any> {
+    return this.http.put<any>(`${environment.url_api}/api/empleado/`, data, { headers: this.getHeaders() });
   }
 }
