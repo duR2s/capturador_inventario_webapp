@@ -17,7 +17,7 @@ import { TicketCapturaPartialsComponent } from '../ticket-captura-partials/ticke
 
 // Servicios e Interfaces Nuevos
 import { CapturaService } from '../../../services/documents/captura.service';
-import { DetalleCaptura } from '../../../captura.interfaces';
+import { DetalleCaptura, Captura } from '../../../captura.interfaces';
 
 @Component({
   selector: 'app-tabla-captura-partial',
@@ -45,6 +45,10 @@ export class TablaCapturaPartialComponent implements AfterViewInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
+  // CAMBIO: Ahora guardamos todo el objeto Captura, no solo el string del folio.
+  // Esto hace disponible toda la info (almacen, fecha, capturador) en el HTML.
+  public capturaHeader: Captura | null = null;
+
   // Columnas a mostrar
   displayedColumns: string[] = ['codigo', 'nombre', 'existencia_previa', 'existencia_capturada', 'diferencia', 'editar', 'ticket', 'eliminar'];
 
@@ -52,15 +56,18 @@ export class TablaCapturaPartialComponent implements AfterViewInit {
   dataSource = new MatTableDataSource<DetalleCaptura>([]);
 
   constructor() {
-    // SUSCRIPCIÓN REACTIVA:
-    // Conectamos la tabla al BehaviorSubject del servicio.
-    // Cada vez que se escanea algo (online) o se sincroniza, la tabla se actualiza sola.
+    // 1. SUSCRIPCIÓN A DETALLES (Tabla)
     this.capturaService.detalles$.subscribe((detalles) => {
       this.dataSource.data = detalles;
-      // Si la tabla crece mucho, podríamos necesitar reasignar el paginador o llamar a _updateChangeSubscription
       if (this.paginator) {
         this.dataSource.paginator = this.paginator;
       }
+    });
+
+    // 2. SUSCRIPCIÓN A LA CABECERA (Info General Completa)
+    this.capturaService.capturaActual$.subscribe((captura: Captura | null) => {
+      this.capturaHeader = captura;
+      // Ahora tienes disponible this.capturaHeader.almacen, this.capturaHeader.fecha_captura, etc.
     });
   }
 
@@ -76,7 +83,6 @@ export class TablaCapturaPartialComponent implements AfterViewInit {
   // --- ACCIONES DE UI (Diálogos) ---
 
   ticketProducto(element: DetalleCaptura): void {
-    console.log(`Generando ticket para: ${element.producto_codigo}`);
     this.dialog.open(TicketCapturaPartialsComponent, {
       data: { filaSeleccionada: element, generarTicket: true },
       width: '400px',
@@ -84,8 +90,6 @@ export class TablaCapturaPartialComponent implements AfterViewInit {
   }
 
   editarFila(element: DetalleCaptura): void {
-    console.log(`Editando fila: ${element.producto_codigo}`);
-    // Nota: Aquí podrías abrir el mismo diálogo de Input para editar cantidad
     this.dialog.open(TicketCapturaPartialsComponent, {
       data: { filaSeleccionada: element, generarTicket: false },
       width: '400px',
@@ -95,8 +99,6 @@ export class TablaCapturaPartialComponent implements AfterViewInit {
   // --- LÓGICA HÍBRIDA DE ELIMINACIÓN ---
 
   eliminarFila(element: DetalleCaptura): void {
-    console.log(`Solicitando eliminar: ${element.producto_codigo}`);
-
     // CASO 1: Elemento pendiente de sincronización (Offline/Cola)
     if (this.esPendiente(element)) {
       alert("Este ítem está pendiente de sincronización. No se puede eliminar hasta que se suba al servidor.");
@@ -108,13 +110,8 @@ export class TablaCapturaPartialComponent implements AfterViewInit {
       const confirmacion = confirm(`¿Estás seguro de eliminar el producto ${element.producto_codigo}?`);
 
       if (confirmacion) {
-        // Llamamos al servicio para borrar del backend
         this.capturaService.eliminarDetalle(element.id).subscribe({
-          next: () => {
-            console.log('Elemento eliminado exitosamente del servidor.');
-            // No hace falta actualizar this.dataSource manualmente aquí,
-            // el servicio emitirá el nuevo array en 'detalles$' y el constructor lo capturará.
-          },
+          next: () => console.log('Elemento eliminado exitosamente del servidor.'),
           error: (err) => {
             console.error('Error al eliminar:', err);
             alert('No se pudo eliminar el registro. Intente nuevamente.');
@@ -124,9 +121,6 @@ export class TablaCapturaPartialComponent implements AfterViewInit {
     }
   }
 
-  /**
-   * Helper para identificar visualmente si un ítem es local (sin ID real)
-   */
   esPendiente(detalle: DetalleCaptura): boolean {
     return !detalle.id || !!detalle.pendiente_sync;
   }

@@ -61,7 +61,7 @@
         <button type="button" class="btn-cancelar" (click)="cancelar()" [disabled]="isLoading">
           Cancelar
         </button>
-        <button type="submit" class="btn-crear" [disabled]="form.invalid || isLoading" routerLink="./form">
+        <button type="submit" class="btn-crear" [disabled]="form.invalid || isLoading">
           <mat-spinner *ngIf="isLoading" diameter="18"></mat-spinner>
           <span *ngIf="!isLoading">INICIAR CAPTURA</span>
           <mat-icon *ngIf="!isLoading">arrow_forward</mat-icon>

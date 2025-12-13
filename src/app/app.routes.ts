@@ -9,41 +9,34 @@ import { MenuCapturaComponent } from './screens/captura/menu-captura/menu-captur
 
 // --- app.routes.ts ---
 // Este archivo define las rutas principales de la aplicación.
-// Es el mapa que le dice a Angular qué componente mostrar para cada URL.
 
 export const routes: Routes = [
-  // Rutas de Autenticación (login, registro)
-  // Usan el AuthLayoutComponent como "plantilla" o "contenedor".
+  // Rutas de Autenticación
   {
     path: '',
     component: AuthLayoutComponent,
     children: [
       { path: 'login', component: LoginScreenComponent },
       { path: 'registro', component: RegistroUsuariosScreenComponent },
-      // Si el usuario entra a la raíz del sitio (''), lo redirigimos a '/login'.
       { path: '', redirectTo: 'login', pathMatch: 'full' }
     ]
   },
 
-  // Rutas del Dashboard (lo que ve el usuario después de iniciar sesión)
-  // Usan el DashboardLayoutComponent como plantilla.
+  // Rutas del Dashboard
   {
     path: 'home',
     component: DashboardLayoutComponent,
-    // canActivate: [AuthGuard], // <-- Futuro: Aquí pondrías un guard para proteger la ruta
     children: [
-      // Ejemplo de una ruta dentro del dashboard:
       { path: 'dashboard', component: DashboardInicioScreenComponent},
-      // Ruta PRovisional
       { path: 'captura', component: MenuCapturaComponent},
-      //{ path: 'captura/form', component: CapturaCapturadoresScreenComponent},
+
+      // CAMBIO IMPORTANTE: Agregamos /:id para recibir el parámetro
+      // Esto permite entrar directamente a una captura específica (ej. /captura/form/15)
+      { path: 'captura/form/:id', component: CapturaCapturadoresScreenComponent},
 
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
 
-
-  // Redirección para cualquier otra ruta no encontrada.
-  // Es una buena práctica tener esto para manejar URLs incorrectas.
   { path: '**', redirectTo: 'login' }
 ];

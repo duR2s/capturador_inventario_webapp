@@ -1,13 +1,16 @@
 <div class="screen-container">
 
-  <!-- ZONA A: Tabla (Ocupa todo el espacio restante) -->
+  <!-- ZONA A: Tabla (Ocupa el espacio disponible) -->
   <div class="table-wrapper">
     <app-tabla-captura-partial></app-tabla-captura-partial>
   </div>
 
-  <!-- ZONA B: Inputs (Fijo abajo) -->
+  <!-- ZONA B: Inputs (Lo crítico para que funcione) -->
   <div class="bottom-actions">
-    <app-inputs-captura-partial></app-inputs-captura-partial>
+    <app-inputs-captura-partial
+      [isLoading]="isLoading"
+      (onEscanear)="onEscanear($event)">
+    </app-inputs-captura-partial>
   </div>
 
 </div>

@@ -4,7 +4,6 @@ import { BehaviorSubject, Observable, throwError, forkJoin } from 'rxjs';
 import { catchError, tap, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { Captura, DetalleCaptura, PayloadEscaner, PayloadDetalleBatch } from '../../captura.interfaces';
-// Importamos FacadeService para obtener el token
 import { FacadeService } from 'src/app/services/facade.service';
 
 @Injectable({
@@ -26,7 +25,7 @@ export class CapturaService {
 
   constructor(
     private http: HttpClient,
-    private facadeService: FacadeService // Inyectamos FacadeService
+    private facadeService: FacadeService
   ) {}
 
   public get capturaActualValue(): Captura | null {
@@ -90,6 +89,23 @@ export class CapturaService {
     );
   }
 
+  /**
+   * NUEVO MÉTODO: Carga la captura completa por ID (Cabecera + Detalles).
+   * Actualiza tanto la captura actual como la lista de detalles.
+   */
+  cargarCapturaPorId(id: number): Observable<Captura> {
+    const url = `${this.CAPTURA_ENDPOINT}${id}/`;
+    return this.http.get<Captura>(url, { headers: this.getHeaders() }).pipe(
+      tap((captura) => {
+        // Actualizamos el estado global de la captura actual
+        this._capturaActualSubject.next(captura);
+        // Actualizamos la lista de detalles
+        this._detallesSubject.next(captura.detalles || []);
+      }),
+      catchError(this.handleError)
+    );
+  }
+
   terminarCaptura(capturaId: number): Observable<any> {
     const url = `${this.CAPTURA_ENDPOINT}${capturaId}/`;
     return this.http.patch(url, { estado: 'CONFIRMADO' }, { headers: this.getHeaders() }).pipe(
@@ -101,12 +117,10 @@ export class CapturaService {
     );
   }
 
+  // Método legacy mantenido, pero idealmente usamos cargarCapturaPorId
   cargarDetalles(capturaId: number): Observable<DetalleCaptura[]> {
-    const url = `${this.CAPTURA_ENDPOINT}${capturaId}/`;
-    return this.http.get<Captura>(url, { headers: this.getHeaders() }).pipe(
-        map(captura => captura.detalles || []),
-        tap(detalles => this._detallesSubject.next(detalles)),
-        catchError(this.handleError)
+    return this.cargarCapturaPorId(capturaId).pipe(
+      map(captura => captura.detalles || [])
     );
   }
 

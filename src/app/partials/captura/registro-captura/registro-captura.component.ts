@@ -1,7 +1,8 @@
-import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 
 // Material Imports
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -28,7 +29,6 @@ import { AppRoutingModule } from "src/app/app-routing.module";
     MatIconModule,
     MatButtonModule,
     MatProgressSpinnerModule,
-    AppRoutingModule
 ],
   templateUrl: './registro-captura.component.html',
   styleUrls: ['./registro-captura.component.scss']
@@ -45,6 +45,8 @@ export class RegistroCapturaComponent implements OnInit {
   isLoading: boolean = false;
   isLoadingCatalogos: boolean = false; // Estado de carga para los selects
   errorMessage: string = '';
+
+  public router = inject(Router);
 
   constructor(
     private fb: FormBuilder,
@@ -99,6 +101,9 @@ export class RegistroCapturaComponent implements OnInit {
         this.isLoading = false;
         console.log("Sesión creada:", captura);
         this.onSesionCreada.emit(captura);
+
+        // CORRECCIÓN AQUÍ: Ruta absoluta incluyendo '/home'
+        this.router.navigate(['/home/captura/form', captura.id]);
       },
       error: (err) => {
         this.isLoading = false;

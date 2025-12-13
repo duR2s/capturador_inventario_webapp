@@ -119,7 +119,6 @@ export class InputsCapturaPartialComponent implements OnInit {
       codigo: codigo.trim(),
       cantidad: Number(cantidad)
     });
-
     // Acciones Post-Envío (UI)
     this.postGuardadoExitoso();
   }
