@@ -17,6 +17,9 @@ export class CapturaService {
   private readonly ALMACENES_ENDPOINT = `${this.API_URL}/inventario/almacenes/`;
   private readonly EMPLEADOS_ENDPOINT = `${this.API_URL}/lista-empleados/`;
 
+  // NUEVO ENDPOINT
+  private readonly BUSQUEDA_ENDPOINT = `${this.API_URL}/inventario/buscar-articulo/`;
+
   private _detallesSubject = new BehaviorSubject<DetalleCaptura[]>([]);
   public detalles$ = this._detallesSubject.asObservable();
 
@@ -32,7 +35,10 @@ export class CapturaService {
     return this._capturaActualSubject.value;
   }
 
-  // --- HELPER DE HEADERS ---
+  public get detallesActualesValue(): DetalleCaptura[] {
+    return this._detallesSubject.value;
+  }
+
   private getHeaders(): HttpHeaders {
     const token = this.facadeService.getSessionToken();
     if (token) {
@@ -44,62 +50,24 @@ export class CapturaService {
     return new HttpHeaders({ 'Content-Type': 'application/json' });
   }
 
-  // -------------------------------------------------------------------------
-  // CATÁLOGOS
-  // -------------------------------------------------------------------------
-
-  getAlmacenes(): Observable<any[]> {
-    return this.http.get<any[]>(this.ALMACENES_ENDPOINT, { headers: this.getHeaders() }).pipe(
-      catchError(this.handleError)
-    );
-  }
-
-  getCapturadores(): Observable<any[]> {
-    return this.http.get<any[]>(this.EMPLEADOS_ENDPOINT, { headers: this.getHeaders() }).pipe(
-      catchError(this.handleError)
-    );
-  }
-
-  cargarCatalogosIniciales(): Observable<{ almacenes: any[], capturadores: any[] }> {
-    return forkJoin({
-      almacenes: this.getAlmacenes(),
-      capturadores: this.getCapturadores()
-    });
-  }
-
-  // -------------------------------------------------------------------------
-  // MÉTODOS DE GESTIÓN DE CAPTURA
-  // -------------------------------------------------------------------------
+  // ... (Métodos de catálogos sin cambios) ...
+  getAlmacenes(): Observable<any[]> { return this.http.get<any[]>(this.ALMACENES_ENDPOINT, { headers: this.getHeaders() }).pipe(catchError(this.handleError)); }
+  getCapturadores(): Observable<any[]> { return this.http.get<any[]>(this.EMPLEADOS_ENDPOINT, { headers: this.getHeaders() }).pipe(catchError(this.handleError)); }
+  cargarCatalogosIniciales(): Observable<{ almacenes: any[], capturadores: any[] }> { return forkJoin({ almacenes: this.getAlmacenes(), capturadores: this.getCapturadores() }); }
 
   iniciarCaptura(folio: string, capturadorId: number, almacenId: number): Observable<Captura> {
-    const payload: any = {
-      folio: folio,
-      capturador: capturadorId,
-      almacen: almacenId,
-      estado: 'BORRADOR',
-      detalles: []
-    };
-
+    const payload: any = { folio: folio, capturador: capturadorId, almacen: almacenId, estado: 'BORRADOR', detalles: [] };
     return this.http.post<Captura>(this.CAPTURA_ENDPOINT, payload, { headers: this.getHeaders() }).pipe(
-      tap((captura) => {
-        this._capturaActualSubject.next(captura);
-        this._detallesSubject.next([]);
-      }),
+      tap((captura) => { this._capturaActualSubject.next(captura); this._detallesSubject.next([]); }),
       catchError(this.handleError)
     );
   }
 
-  /**
-   * NUEVO MÉTODO: Carga la captura completa por ID (Cabecera + Detalles).
-   * Actualiza tanto la captura actual como la lista de detalles.
-   */
   cargarCapturaPorId(id: number): Observable<Captura> {
     const url = `${this.CAPTURA_ENDPOINT}${id}/`;
     return this.http.get<Captura>(url, { headers: this.getHeaders() }).pipe(
       tap((captura) => {
-        // Actualizamos el estado global de la captura actual
         this._capturaActualSubject.next(captura);
-        // Actualizamos la lista de detalles
         this._detallesSubject.next(captura.detalles || []);
       }),
       catchError(this.handleError)
@@ -109,21 +77,28 @@ export class CapturaService {
   terminarCaptura(capturaId: number): Observable<any> {
     const url = `${this.CAPTURA_ENDPOINT}${capturaId}/`;
     return this.http.patch(url, { estado: 'CONFIRMADO' }, { headers: this.getHeaders() }).pipe(
-      tap(() => {
-        this._capturaActualSubject.next(null);
-        this._detallesSubject.next([]);
-      }),
+      tap(() => { this._capturaActualSubject.next(null); this._detallesSubject.next([]); }),
       catchError(this.handleError)
     );
   }
 
-  // Método legacy mantenido, pero idealmente usamos cargarCapturaPorId
   cargarDetalles(capturaId: number): Observable<DetalleCaptura[]> {
-    return this.cargarCapturaPorId(capturaId).pipe(
-      map(captura => captura.detalles || [])
+    return this.cargarCapturaPorId(capturaId).pipe(map(captura => captura.detalles || []));
+  }
+
+  // -------------------------------------------------------------------------
+  // NUEVO MÉTODO DE BÚSQUEDA (SOLO LECTURA)
+  // -------------------------------------------------------------------------
+  buscarArticulo(codigo: string): Observable<any> {
+    const url = `${this.BUSQUEDA_ENDPOINT}?codigo=${encodeURIComponent(codigo)}`;
+    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError)
     );
   }
 
+  // -------------------------------------------------------------------------
+  // MÉTODO PARA GUARDAR (PROCESAR ESCANEO)
+  // -------------------------------------------------------------------------
   escanearArticulo(codigo: string, cantidad: number): Observable<DetalleCaptura> {
     const capturaActual = this.capturaActualValue;
 
@@ -138,9 +113,19 @@ export class CapturaService {
     };
 
     return this.http.post<DetalleCaptura>(this.DETALLE_ENDPOINT, payload, { headers: this.getHeaders() }).pipe(
-      tap((nuevoDetalle) => {
+      tap((itemRespuesta) => {
         const listaActual = this._detallesSubject.value;
-        this._detallesSubject.next([nuevoDetalle, ...listaActual]);
+        const indiceExistente = listaActual.findIndex(d => d.id === itemRespuesta.id);
+
+        if (indiceExistente > -1) {
+          const listaActualizada = [...listaActual];
+          listaActualizada[indiceExistente] = itemRespuesta;
+          listaActualizada.splice(indiceExistente, 1);
+          listaActualizada.unshift(itemRespuesta);
+          this._detallesSubject.next(listaActualizada);
+        } else {
+          this._detallesSubject.next([itemRespuesta, ...listaActual]);
+        }
       }),
       catchError(this.handleError)
     );
@@ -148,20 +133,14 @@ export class CapturaService {
 
   sincronizarMasivo(detallesBatch: PayloadDetalleBatch[]): Observable<DetalleCaptura[]> {
     const capturaActual = this.capturaActualValue;
-
-    if (!capturaActual || !capturaActual.id) {
-      return throwError(() => new Error("No se puede sincronizar sin una captura activa (ID faltante)."));
-    }
-
-    if (!detallesBatch || detallesBatch.length === 0) {
-      return throwError(() => new Error("La lista de sincronización está vacía."));
-    }
+    if (!capturaActual || !capturaActual.id) return throwError(() => new Error("No se puede sincronizar sin una captura activa."));
+    if (!detallesBatch || detallesBatch.length === 0) return throwError(() => new Error("La lista de sincronización está vacía."));
 
     const url = `${this.CAPTURA_ENDPOINT}${capturaActual.id}/sincronizar/`;
 
     return this.http.post<DetalleCaptura[]>(url, detallesBatch, { headers: this.getHeaders() }).pipe(
       tap((listaActualizadaServer) => {
-        console.log('Sincronización exitosa. Actualizando estado local...');
+        console.log('Sincronización exitosa.');
         this._detallesSubject.next(listaActualizadaServer);
       }),
       catchError(this.handleError)
@@ -185,9 +164,7 @@ export class CapturaService {
       msg = `Error cliente: ${error.error.message}`;
     } else {
       msg = error.error?.detail || error.error?.error || `Error Servidor: ${error.status}`;
-      if (typeof error.error === 'object' && !error.error.detail && !error.error.error) {
-          msg = JSON.stringify(error.error);
-      }
+      if (typeof error.error === 'object' && !error.error.detail && !error.error.error) msg = JSON.stringify(error.error);
     }
     console.error(msg);
     return throwError(() => new Error(msg));

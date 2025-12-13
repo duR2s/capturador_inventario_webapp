@@ -2,9 +2,9 @@
 
 $input-bg: #e8e8e6;
 $input-border: #cfcfcf;
-$card-radius: 16px; // Regresamos a un radio un poco más cerrado para el tamaño 900px
+$card-radius: 16px;
 $pill-radius: 100px;
-$input-height: 34px; // REDUCIDO: De 42px a 34px
+$input-height: 34px;
 
 .wrapper-captura {
   display: flex;
@@ -21,7 +21,7 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
   flex-direction: row;
   width: 100%;
   min-width: 900px;
-  height: 190px; // Reduje un poco la altura total de la tarjeta (antes 210px) para que no se vea vacía
+  height: 210px;
   background: $color-white;
   border-radius: $card-radius;
   box-shadow: 0 10px 30px $color-shadow-dark;
@@ -31,7 +31,7 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
 
 // SECCIÓN IMAGEN
 .section-image {
-  width: 40%; // Ajusté ligeramente el porcentaje
+  width: 40%;
   height: 100%;
   background-color: $color-bg-light-3;
   position: relative;
@@ -47,7 +47,7 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
     align-items: center;
     color: $color-text-muted;
     mat-icon {
-      font-size: 56px; // Icono un poco más pequeño
+      font-size: 56px;
       width: 56px;
       height: 56px;
       margin-bottom: 0.75rem;
@@ -68,15 +68,18 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
 // SECCIÓN FORMULARIO
 .section-form {
   width: 60%;
-  padding: 1rem 2rem; // Padding un poco más compacto
+  padding: 1rem 2rem;
   display: flex;
   flex-direction: column;
   background: $color-white;
   position: relative;
   z-index: 10;
-  justify-content: center; // Centrar contenido verticalmente
+  justify-content: center;
 
   .mobile-toggle-btn { display: none; }
+
+  // Por defecto (Desktop) el botón móvil está oculto
+  .btn-mobile-floating { display: none; }
 
   .header {
     display: flex;
@@ -87,7 +90,7 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
     .title-captura {
       margin: 0;
       font-family: 'Nexa-Bold', sans-serif;
-      font-size: 13px; // Texto un poco más pequeño
+      font-size: 13px;
       color: $color-text-title;
       letter-spacing: 0.5px;
     }
@@ -96,10 +99,9 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
   .form-grid {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem; // Espacio entre inputs reducido
+    gap: 0.75rem;
   }
 
-  // Feedback de error inline
   .error-feedback {
     color: $color-error;
     font-size: 0.8rem;
@@ -108,7 +110,6 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
     margin-top: -4px;
   }
 
-  // ACCIONES
   .actions {
     margin-top: 0.25rem;
     display: flex;
@@ -119,11 +120,11 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
     background-color: $color-primary;
     color: $color-white;
     border: none;
-    height: 34px; // Igualar altura del input
+    height: 34px;
     padding: 0 1.25rem;
     border-radius: 100px;
     font-family: 'Nexa-Bold', sans-serif;
-    font-size: 12px; // Fuente más pequeña
+    font-size: 12px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -173,9 +174,9 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
     .mat-mdc-text-field-wrapper {
       background-color: $input-bg !important;
       border-radius: $pill-radius !important;
-      border: 1px solid $input-border; // Borde más fino (1px)
-      padding: 0 12px; // Menos padding lateral
-      height: $input-height; // 34px
+      border: 1px solid $input-border;
+      padding: 0 12px;
+      height: $input-height;
       transition: border-color 0.2s, background-color 0.2s;
       display: flex;
       align-items: center;
@@ -204,20 +205,20 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
       font-weight: 600;
       height: 100% !important;
       margin-top: -2px;
-      font-size: 13px !important; // Texto input ajustado
+      font-size: 13px !important;
     }
 
     .mdc-floating-label {
       color: $color-text-light !important;
       font-weight: 500;
-      font-size: 13px !important; // Label ajustado
+      font-size: 13px !important;
       top: 50% !important;
       transform: translateY(-50%);
     }
 
     &.mat-focused .mdc-floating-label,
     &.mat-form-field-should-float .mdc-floating-label {
-      transform: translateY(-150%) scale(0.8) !important; // Ajuste de posición flotante
+      transform: translateY(-150%) scale(0.8) !important;
       color: $color-primary-dark !important;
       background: $color-white;
       padding: 0 4px;
@@ -229,7 +230,7 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
 
     .mat-icon-button, .mat-icon {
         color: $color-text-muted;
-        transform: scale(0.8); // Iconos más pequeños
+        transform: scale(0.8);
     }
 
     .unit-suffix {
@@ -267,7 +268,6 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
     box-shadow: inset 0 -20px 20px -10px rgba(0,0,0,0.3);
 
     &.expanded {
-      //z-index: 15;
       height: auto;
       width: auto;
       top: 0;
@@ -280,13 +280,12 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
   .section-form {
     position: fixed;
     bottom: 0;
-    left: 0;            // Anclado a la izquierda
-    right: 0;           // Anclado a la derecha
-    margin-left: auto;  // Margen automático izquierda
-    margin-right: auto; // Margen automático derecha
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
     width: 95%;
     height: auto;
-    //min-height: 45%;
     background: $color-white;
     z-index: 10;
     border-radius: 24px 24px 0 0;
@@ -294,6 +293,49 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
     box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
     transition: transform 0.3s ease;
     justify-content: flex-start;
+
+    // --- NUEVO: ESTILOS BOTÓN MÓVIL ---
+    .btn-mobile-floating {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        background-color: $color-primary;
+        color: white;
+        border: none;
+        padding: 14px; // Un poco más alto para tocar fácil
+        border-radius: 12px;
+        font-family: 'Nexa-Bold', sans-serif;
+        font-size: 14px;
+        margin-bottom: 1.5rem; // Espacio antes de los inputs
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba($color-primary, 0.4);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+
+        mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+        }
+
+        &:active {
+            transform: scale(0.98);
+        }
+
+        &:disabled {
+            background-color: $color-text-muted;
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+    }
+
+    // --- NUEVO: OCULTAR TÍTULO EN MÓVIL ---
+    .header .title-captura {
+        display: none;
+    }
 
     .mobile-toggle-btn {
       display: flex;
@@ -308,7 +350,6 @@ $input-height: 34px; // REDUCIDO: De 42px a 34px
       mat-icon { font-size: 32px; height: 32px; width: 32px; }
     }
 
-    .title-captura { font-size: 18px; }
     .form-grid { gap: 1rem; }
   }
 

@@ -41,8 +41,8 @@
       <mat-form-field appearance="outline" class="pill-input">
         <mat-label>Capturador Asignado</mat-label>
         <mat-select formControlName="capturador" placeholder="Selecciona empleado">
-          <mat-option *ngFor="let user of usuarios" [value]="user.id">
-            {{ user.first_name }} {{ user.last_name }} ({{ user.username }})
+          <mat-option *ngFor="let user of usuarios" [value]="user.user.id">
+            {{ user.user.first_name }} {{ user.user.last_name }} ({{ user.user.username }})
           </mat-option>
           <mat-option *ngIf="usuarios.length === 0" disabled>No hay usuarios disponibles</mat-option>
         </mat-select>

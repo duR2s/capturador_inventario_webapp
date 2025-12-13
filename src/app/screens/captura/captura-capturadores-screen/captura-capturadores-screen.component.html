@@ -8,9 +8,21 @@
   <!-- ZONA B: Inputs (Lo crítico para que funcione) -->
   <div class="bottom-actions">
     <app-inputs-captura-partial
-      [isLoading]="isLoading"
-      (onEscanear)="onEscanear($event)">
+        #inputsComponent
+        [isLoading]="isLoading"
+        [articuloEncontrado]="productoTemporal"
+        (onBuscarCodigo)="procesarBusqueda($event)"
+        (onConfirmarCaptura)="procesarGuardado($event)">
     </app-inputs-captura-partial>
+  </div>
+
+  <div class="d-flex justify-content-end mt-3 gap-2">
+      <button class="btn btn-warning" *ngIf="colaPendientes.length > 0" (click)="sincronizarPendientes()">
+          Sincronizar Pendientes ({{colaPendientes.length}})
+      </button>
+      <button class="btn btn-success" (click)="finalizarCaptura()">
+          Terminar Captura
+      </button>
   </div>
 
 </div>

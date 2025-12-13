@@ -1,4 +1,4 @@
-import { Component, ElementRef, Inject, OnInit, Optional, ViewChild, Output, EventEmitter, Input } from '@angular/core';
+import { Component, ElementRef, Inject, OnInit, Optional, ViewChild, Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -26,17 +26,17 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   templateUrl: './inputs-captura-partial.component.html',
   styleUrls: ['./inputs-captura-partial.component.scss']
 })
-export class InputsCapturaPartialComponent implements OnInit {
+export class InputsCapturaPartialComponent implements OnInit, OnChanges {
 
-  // --- INPUTS & OUTPUTS (Comunicación con Padre) ---
   @Input() isLoading: boolean = false;
-  @Output() onEscanear = new EventEmitter<{ codigo: string, cantidad: number }>();
+  @Input() articuloEncontrado: any | null = null;
 
-  // --- VIEW CHILDS ---
+  @Output() onBuscarCodigo = new EventEmitter<string>();
+  @Output() onConfirmarCaptura = new EventEmitter<{ codigo: string, cantidad: number }>();
+
   @ViewChild('cantidadInput') cantidadInput!: ElementRef<HTMLInputElement>;
   @ViewChild('codigoInput') codigoInput!: ElementRef<HTMLInputElement>;
 
-  // --- ESTADO INTERNO ---
   form: FormGroup;
   isMobileImageExpanded = false;
   currentImageUrl: string | null = null;
@@ -50,104 +50,94 @@ export class InputsCapturaPartialComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       codigo: ['', [Validators.required]],
-      nombre: [{ value: '', disabled: true }], // Campo solo lectura para feedback visual
+      nombre: [{ value: '', disabled: true }],
       cantidad: [1, [Validators.required, Validators.pattern(/^[0-9]+$/), Validators.min(1)]]
     });
   }
 
   ngOnInit(): void {
-    // Detectar si es modo edición basándonos en si llega data
     if (this.data && (this.data.id || this.data.codigo)) {
       this.isEditMode = true;
       this.form.patchValue(this.data);
       if (this.data.imagen) this.currentImageUrl = this.data.imagen;
     }
 
-    // Listener para limpiar UI si borran código manualmente
+    // Listener para limpiar si borran código manualmente
     this.form.get('codigo')?.valueChanges.subscribe((val) => {
+      // Si el usuario borra todo el texto manualmente y NO estamos cargando
       if (!this.isLoading && (!val || val.length === 0)) {
-        this.resetUIFields();
+         // Opcional: Si quieres reiniciar UI al borrar manual
+         // this.resetUIFields();
       }
     });
 
-    // Foco inicial
     setTimeout(() => this.focarInputCodigo(), 500);
   }
 
-  // --- LÓGICA DE FLUJO ---
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['articuloEncontrado'] && this.articuloEncontrado) {
+      this.form.patchValue({ nombre: this.articuloEncontrado.nombre });
 
-  /**
-   * Se dispara al dar ENTER en el input de Código.
-   * En flujo masivo, esto podría pasar el foco a cantidad o enviar directo.
-   * Aquí mantenemos tu flujo de "Pasar a Cantidad".
-   */
-  onCodigoEnter(): void {
-    const codigoVal = this.form.get('codigo')?.value;
-    if (!codigoVal) return;
-
-    this.errorMessage = '';
-
-    // Optimistic UI: Asumimos éxito y pasamos foco a cantidad
-    setTimeout(() => {
-      if (this.cantidadInput) {
-        this.cantidadInput.nativeElement.focus();
-        this.cantidadInput.nativeElement.select();
-      }
-    }, 50);
-
-    // NOTA: Si necesitas buscar la info del producto (nombre/foto) ANTES de confirmar cantidad,
-    // el padre debería proveer esa info o un método de búsqueda.
-    // Por simplicidad y rendimiento en PWA, asumimos flujo rápido.
-  }
-
-  /**
-   * Se dispara al dar ENTER en Cantidad o clic en Guardar.
-   */
-  onCantidadEnter(): void {
-    if (this.form.valid && !this.isLoading) {
-      this.guardar();
-    } else {
-      this.form.markAllAsTouched();
+      setTimeout(() => {
+        if (this.cantidadInput) {
+          this.cantidadInput.nativeElement.focus();
+          this.cantidadInput.nativeElement.select();
+        }
+      }, 100);
     }
   }
+
+  onCodigoEnter(): void {
+    const codigoVal = this.form.get('codigo')?.value;
+    if (!codigoVal) {
+      return;
+    }
+    this.errorMessage = '';
+    this.onBuscarCodigo.emit(codigoVal.trim());
+    this.codigoInput.nativeElement.select();
+  }
+
+  onCantidadEnter(): void {
+    if (!this.form.invalid || !this.isLoading) {
+      //this.guardar();
+    }
+  }
+
 
   guardar() {
     const { codigo, cantidad } = this.form.getRawValue();
 
-    // EMITIR EVENTO AL PADRE (Quien tiene la lógica Online/Offline)
-    this.onEscanear.emit({
+    // 1. SOLO EMITIMOS. No limpiamos aquí. Esperamos al padre.
+    this.onConfirmarCaptura.emit({
       codigo: codigo.trim(),
       cantidad: Number(cantidad)
     });
-    // Acciones Post-Envío (UI)
-    this.postGuardadoExitoso();
   }
 
-  // --- UI HELPERS & VISUALS (Tu código original preservado) ---
+  // El padre llamará a esto cuando el servidor responda "OK"
+  public limpiarFormulario() {
+    // 2. Usamos reset() en lugar de patchValue().
+    // reset() limpia los valores Y quita los errores de validación (untouched/pristine).
+    this.form.reset({
+        codigo: '',
+        nombre: '',
+        cantidad: 1 // Valor por defecto para cantidad
+    });
 
-  private resetUIFields() {
-    this.form.patchValue({ nombre: '', cantidad: 1 }, { emitEvent: false });
+    // Restauramos el estado visual
     this.currentImageUrl = null;
     this.errorMessage = '';
-  }
-
-  private postGuardadoExitoso() {
-    if (this.isEditMode && this.dialogRef) {
-      this.dialogRef.close(true);
-    } else {
-      // Flujo continuo
-      this.resetUIFields();
-      this.form.get('codigo')?.setValue('');
-      this.focarInputCodigo();
-    }
+    // 3. Forzamos el foco al código para el siguiente producto
+    this.focarInputCodigo();
   }
 
   private focarInputCodigo() {
+    // Pequeño delay para asegurar que el DOM se actualizó tras el reset
     setTimeout(() => {
       if (this.codigoInput) {
         this.codigoInput.nativeElement.focus();
       }
-    }, 50);
+    }, 100);
   }
 
   toggleMobileImage() {
@@ -155,7 +145,6 @@ export class InputsCapturaPartialComponent implements OnInit {
   }
 
   abrirBusqueda() {
-    // Aquí podrías emitir otro evento al padre si quieres manejar la búsqueda global
     console.log("Abrir modal de búsqueda...");
   }
 

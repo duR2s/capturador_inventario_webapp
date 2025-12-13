@@ -3,14 +3,19 @@
   <!-- CARD PRINCIPAL -->
   <div class="card-flotante">
 
-
-
-    <!-- SECCIÓN B: FORMULARIO -->
     <div class="section-form">
 
+      <!-- Botón Toggle Imagen (Móvil) -->
       <button class="mobile-toggle-btn" (click)="toggleMobileImage()">
         <mat-icon>{{ isMobileImageExpanded ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}</mat-icon>
       </button>
+
+      <!--
+         BOTÓN MÓVIL PRINCIPAL (SUBMIT):
+         Visible solo en móvil (vía CSS), ubicado arriba del header/título.
+      -->
+
+
 
       <div class="header">
         <h2 class="title-captura">
@@ -21,12 +26,20 @@
         </button>
       </div>
 
-      <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid">
+      <form [formGroup]="form" (submit)="guardar()" class="form-grid">
+
+        <button type="button" class="btn-mobile-floating"
+                [disabled]="form.invalid || isLoading"
+                type ="submit">
+            <mat-icon>check_circle</mat-icon>
+            <span>REGISTRAR CAPTURA</span>
+        </button>
 
         <!-- 1. CÓDIGO -->
         <mat-form-field appearance="outline" class="pill-input">
           <mat-label>Código / Barras</mat-label>
           <input matInput formControlName="codigo"
+                 #codigoInput
                  (keydown.enter)="onCodigoEnter()"
                  autocomplete="off"
                  placeholder="Escanea...">
@@ -43,23 +56,26 @@
           </button>
         </mat-form-field>
 
-        <!-- 3. CANTIDAD (Dispara guardar al dar Enter) -->
+        <!-- 3. CANTIDAD -->
         <mat-form-field appearance="outline" class="pill-input cantidad-field">
           <mat-label>Cantidad</mat-label>
           <input matInput #cantidadInput
                  type="number"
                  formControlName="cantidad"
                  placeholder="0"
-                 (keydown.enter)="onCantidadEnter()"> <!-- Cambio Clave aquí -->
+                 >
           <span matSuffix class="unit-suffix">pzas</span>
         </mat-form-field>
 
-        <!-- ERROR MESSAGE (Feedback visual rápido) -->
+        <!-- ERROR MESSAGE -->
         <div class="error-feedback" *ngIf="errorMessage">
             {{ errorMessage }}
         </div>
 
-        <!-- ACCIONES (Solo visibles en modo EDICIÓN) -->
+        <!-- Botón submit invisible para que el Enter funcione en Desktop -->
+        <button type="submit" class="hidden-submit" style="display: none;"></button>
+
+        <!-- ACCIONES DESKTOP -->
         <div class="actions" *ngIf="isEditMode">
           <button type="submit" class="btn-guardar" [disabled]="form.invalid || isLoading">
             <mat-icon>check</mat-icon>
@@ -70,25 +86,13 @@
       </form>
     </div>
 
-<!--
-=========================
-Invertir validaciones, estan puestas para demo, no es
-version Final.
-
-Url hardcodeada de imagen temporal.
-=========================
-
--->
-
-
     <!-- SECCIÓN A: IMAGEN -->
     <div class="section-image" [class.expanded]="isMobileImageExpanded">
-      <div class="image-placeholder" *ngIf="currentImageUrl">
+      <div class="image-placeholder" *ngIf="!currentImageUrl">
         <mat-icon>image_not_supported</mat-icon>
         <span>Sin Imagen</span>
       </div>
-      <!-- <img *ngIf="currentImageUrl" [src]="currentImageUrl" alt="Producto" class="product-image"> -->
-      <img *ngIf="!currentImageUrl" src="../../../../assets/images/product-template.jpeg" alt="Producto" class="product-image">
+      <img *ngIf="currentImageUrl" [src]="currentImageUrl" alt="Producto" class="product-image">
       <div class="mobile-overlay"></div>
     </div>
 
