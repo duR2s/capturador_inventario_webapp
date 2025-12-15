@@ -1,0 +1,46 @@
+<div class="modal-wrapper" [ngClass]="data.type">
+
+  <!-- BOTÓN DE CIERRE (X) SUPERIOR DERECHA -->
+  <button class="close-icon-btn" (click)="close()">
+    <mat-icon>close</mat-icon>
+  </button>
+
+  <!-- CONTENIDO CENTRAL -->
+  <div class="modal-content">
+
+    <!-- 1. ICONO CENTRAL -->
+    <div class="icon-badge">
+      <mat-icon>{{ iconName }}</mat-icon>
+    </div>
+
+    <!-- 2. TEXTOS -->
+    <h2 class="modal-title">
+      {{ data.title || defaultTitle }}
+    </h2>
+
+    <p class="modal-message">
+      {{ data.message }}
+    </p>
+
+    <!-- 3. ACCIONES (BOTONES) -->
+    <div class="modal-actions">
+
+      <!-- Botón Cancelar (Solo visible si NO es Info) -->
+      <button
+        *ngIf="data.type !== 'info'"
+        class="btn-cancel"
+        (click)="close()">
+        {{ data.cancelText || 'Cancelar' }}
+      </button>
+
+      <!-- Botón Confirmar / Aceptar -->
+      <button
+        class="btn-confirm"
+        (click)="confirm()">
+        {{ data.confirmText || (data.type === 'info' ? 'Entendido' : 'Confirmar') }}
+      </button>
+
+    </div>
+
+  </div>
+</div>

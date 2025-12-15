@@ -1,0 +1,72 @@
+<div class="modal-wrapper" [ngClass]="data.mode">
+
+  <!-- BOTÓN DE CIERRE (X) SUPERIOR DERECHA -->
+  <button class="close-icon-btn" (click)="close()">
+    <mat-icon>close</mat-icon>
+  </button>
+
+  <!-- CABECERA FLOTANTE (IMAGEN) -->
+  <div class="floating-image-header">
+    <div class="image-container">
+      <div class="placeholder" *ngIf="!data.item.imagen || !imageLoaded">
+        <mat-icon>image</mat-icon> <!-- Icono genérico si no carga -->
+      </div>
+      <img *ngIf="data.item.imagen"
+           [src]="data.item.imagen"
+           (load)="onImageLoad()"
+           [class.hidden]="!imageLoaded"
+           alt="Producto">
+    </div>
+  </div>
+
+  <!-- CONTENIDO DEL DIALOGO -->
+  <div class="modal-content">
+
+    <h2 class="modal-title">{{ defaultTitle }}</h2>
+
+    <form [formGroup]="form" class="form-grid">
+
+      <!-- 1. CÓDIGO (Editable solo en 'edit', Readonly en 'ticket') -->
+      <!-- Usamos la misma clase 'pill-input' de tu diseño global -->
+      <mat-form-field appearance="outline" class="pill-input">
+        <mat-label>Código</mat-label>
+        <input matInput formControlName="codigo" autocomplete="off">
+        <mat-icon matPrefix>qr_code</mat-icon>
+      </mat-form-field>
+
+      <!-- 2. NOMBRE (Siempre Readonly/Disabled visualmente) -->
+      <mat-form-field appearance="outline" class="pill-input">
+        <mat-label>Descripción</mat-label>
+        <input matInput formControlName="nombre" readonly tabindex="-1">
+        <mat-icon matSuffix>lock</mat-icon>
+      </mat-form-field>
+
+      <!-- 3. CANTIDAD -->
+      <mat-form-field appearance="outline" class="pill-input">
+        <mat-label>Cantidad</mat-label>
+        <input matInput type="number" formControlName="cantidad">
+        <span matSuffix class="unit-suffix">pzas</span>
+      </mat-form-field>
+
+      <!-- 4. RESPONSABLE (Solo visible en modo 'ticket') -->
+      <mat-form-field *ngIf="data.mode === 'ticket'" appearance="outline" class="pill-input">
+        <mat-label>Responsable</mat-label>
+        <input matInput formControlName="responsable" placeholder="Nombre de quien solicita">
+        <mat-icon matPrefix>person</mat-icon>
+      </mat-form-field>
+
+    </form>
+
+    <!-- ACCIONES -->
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="close()">
+        Cancelar
+      </button>
+
+      <button class="btn-confirm" (click)="confirm()" [disabled]="form.invalid">
+        {{ data.mode === 'edit' ? 'Guardar Cambios' : 'Imprimir Ticket' }}
+      </button>
+    </div>
+
+  </div>
+</div>

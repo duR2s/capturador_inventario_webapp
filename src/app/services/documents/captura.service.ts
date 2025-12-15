@@ -74,7 +74,7 @@ export class CapturaService {
     );
   }
 
-  terminarCaptura(capturaId: number): Observable<any> {
+  terminarCaptura(capturaId: any): Observable<any> {
     const url = `${this.CAPTURA_ENDPOINT}${capturaId}/`;
     return this.http.patch(url, { estado: 'CONFIRMADO' }, { headers: this.getHeaders() }).pipe(
       tap(() => { this._capturaActualSubject.next(null); this._detallesSubject.next([]); }),
@@ -82,7 +82,7 @@ export class CapturaService {
     );
   }
 
-  cargarDetalles(capturaId: number): Observable<DetalleCaptura[]> {
+  cargarDetalles(capturaId: any): Observable<DetalleCaptura[]> {
     return this.cargarCapturaPorId(capturaId).pipe(map(captura => captura.detalles || []));
   }
 
@@ -131,6 +131,44 @@ export class CapturaService {
     );
   }
 
+  // -------------------------------------------------------------------------
+  // NUEVOS MÉTODOS DE EDICIÓN Y TICKET (REQUERIDOS PARA LA UI)
+  // -------------------------------------------------------------------------
+
+  actualizarDetalle(detalleId: any, nuevaCantidad: number): Observable<DetalleCaptura> {
+    const url = `${this.DETALLE_ENDPOINT}${detalleId}/`;
+    // Usamos PATCH para actualización parcial
+    const payload = { cantidad_contada: nuevaCantidad };
+
+    return this.http.patch<DetalleCaptura>(url, payload, { headers: this.getHeaders() }).pipe(
+      tap((itemActualizado) => {
+        // Actualizamos el estado local inmediatamente
+        const listaActual = this._detallesSubject.value;
+        const index = listaActual.findIndex(d => d.id === detalleId);
+
+        if (index > -1) {
+          const nuevaLista = [...listaActual];
+          // Fusionamos por si el servidor devuelve campos extra actualizados (ej. diferencia)
+          nuevaLista[index] = { ...nuevaLista[index], ...itemActualizado };
+          this._detallesSubject.next(nuevaLista);
+        }
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  imprimirTicket(detalleId: any, cantidad: number, responsable: string): Observable<any> {
+    // Asumimos un endpoint tipo /inventario/detalle/{id}/imprimir-ticket/
+    const url = `${this.DETALLE_ENDPOINT}${detalleId}/imprimir_ticket/`;
+    const payload = { copias: cantidad, responsable: responsable };
+
+    return this.http.post(url, payload, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // -------------------------------------------------------------------------
+
   sincronizarMasivo(detallesBatch: PayloadDetalleBatch[]): Observable<DetalleCaptura[]> {
     const capturaActual = this.capturaActualValue;
     if (!capturaActual || !capturaActual.id) return throwError(() => new Error("No se puede sincronizar sin una captura activa."));
@@ -147,7 +185,7 @@ export class CapturaService {
     );
   }
 
-  eliminarDetalle(detalleId: number): Observable<void> {
+  eliminarDetalle(detalleId: any): Observable<void> {
     const url = `${this.DETALLE_ENDPOINT}${detalleId}/`;
     return this.http.delete<void>(url, { headers: this.getHeaders() }).pipe(
       tap(() => {

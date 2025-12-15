@@ -1,0 +1,213 @@
+@import '../../../styles/color-variables';
+
+// ==========================================
+// CONFIGURACIÓN LOCAL
+// ==========================================
+$image-header-size: 100px; // Tamaño del círculo/cuadro de imagen
+$pill-radius: 100px;
+$input-bg: #e8e8e6;
+$input-border: #cfcfcf;
+
+// Reset del contenedor de dialog (Igual que en confirmation-dialog)
+::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important; // IMPORTANTE para que la imagen flote fuera
+}
+
+.modal-wrapper {
+  background-color: $color-white;
+  width: 100%;
+  min-width: 380px;
+  max-width: 450px;
+  padding: 60px 24px 32px 24px; // Padding top extra para compensar la imagen flotante
+  border-radius: 24px;
+  position: relative;
+  text-align: center;
+  box-shadow: 0 10px 30px $color-shadow-dark;
+  font-family: 'Nexa', sans-serif;
+  margin-top: 40px; // Margen para que no se corte la imagen arriba
+}
+
+// ==========================================
+// CABECERA FLOTANTE DE IMAGEN
+// ==========================================
+.floating-image-header {
+  position: absolute;
+  top: -($image-header-size / 2); // Sube la mitad de su tamaño
+  left: 50%;
+  transform: translateX(-50%);
+  width: $image-header-size;
+  height: $image-header-size;
+  border-radius: 20px; // Cuadrado redondeado suave
+  background-color: $color-white;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  padding: 6px;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .image-container {
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+    background-color: $color-bg-light-3; // Fondo hueso si es transparente
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      &.hidden { opacity: 0; }
+    }
+
+    .placeholder {
+      color: $color-primary; // Icono verde marca
+      opacity: 0.5;
+      mat-icon { font-size: 40px; width: 40px; height: 40px; }
+    }
+  }
+}
+
+// ==========================================
+// BOTÓN CERRAR
+// ==========================================
+.close-icon-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: $color-text-muted;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  &:hover {
+    background-color: rgba(0,0,0,0.05);
+    color: $color-error; // Rojo al hover para cerrar
+  }
+}
+
+// ==========================================
+// CONTENIDO
+// ==========================================
+.modal-title {
+  font-family: 'Nexa-Bold', sans-serif;
+  font-size: 20px;
+  color: $color-text-title;
+  margin: 0 0 24px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+  text-align: left; // Inputs alineados a la izquierda
+}
+
+// ==========================================
+// ESTILOS INPUTS (PILL SHAPE - COPIADO DE TUS PARTIALS)
+// ==========================================
+::ng-deep .pill-input {
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none; // Ocultamos espacio extra si no hay error
+    }
+
+    // Si hay error, Angular agrega clases para mostrarlo, pero aquí simplificamos
+    // para el modal. Si quieres mostrar errores, quita el display: none de arriba.
+
+    .mat-mdc-text-field-wrapper {
+      background-color: $input-bg !important;
+      border-radius: $pill-radius !important;
+      border: 1px solid $input-border;
+      padding: 0 16px;
+      height: 42px; // Altura cómoda
+      display: flex;
+      align-items: center;
+    }
+
+    &.mat-focused .mat-mdc-text-field-wrapper {
+      background-color: $color-white !important;
+      border-color: $color-primary !important;
+      box-shadow: 0 0 0 2px rgba($color-primary, 0.2);
+    }
+
+    input.mat-mdc-input-element {
+      font-family: 'Nexa-Bold', sans-serif;
+      color: $color-text-dark;
+      margin-top: -4px; // Ajuste fino vertical
+    }
+
+    .mdc-floating-label {
+        font-family: 'Nexa', sans-serif;
+        color: $color-text-light;
+    }
+
+    .mat-icon { color: $color-text-muted; margin-right: 8px; }
+
+    // Ajuste específico para unit-suffix
+    .unit-suffix { font-size: 12px; color: $color-text-muted; font-weight: bold; }
+}
+
+// ==========================================
+// BOTONES
+// ==========================================
+.modal-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+
+  button {
+    height: 44px;
+    padding: 0 24px;
+    border-radius: 100px;
+    font-family: 'Nexa-Bold', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.1s, box-shadow 0.2s;
+    min-width: 120px;
+
+    &:active { transform: scale(0.98); }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+
+  .btn-cancel {
+    background-color: $color-bg-light-2;
+    color: $color-text-light;
+    &:hover { background-color: darken($color-bg-light-2, 5%); }
+  }
+
+  .btn-confirm {
+    background-color: $color-primary;
+    color: white;
+    box-shadow: 0 4px 12px rgba($color-primary, 0.3);
+    &:hover:not(:disabled) { background-color: $color-primary-dark; }
+  }
+}
+
+// ==========================================
+// TEMA ESPECÍFICO POR MODO
+// ==========================================
+.modal-wrapper.ticket {
+  // En modo ticket, quizás el botón confirmar sea de otro color (ej. azul o secundario)
+  .btn-confirm {
+    background-color: $color-secondary; // Rojo Terracota para ticket
+    &:hover:not(:disabled) { background-color: $color-secondary-dark; }
+  }
+}

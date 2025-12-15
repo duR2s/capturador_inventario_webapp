@@ -26,11 +26,11 @@
         </button>
       </div>
 
-      <form [formGroup]="form" (submit)="guardar()" class="form-grid">
+      <div [formGroup]="form" class="form-grid" (keydown.enter)="$event.stopPropagation()">
 
         <button type="button" class="btn-mobile-floating"
                 [disabled]="form.invalid || isLoading"
-                type ="submit">
+                (click)="guardar()">
             <mat-icon>check_circle</mat-icon>
             <span>REGISTRAR CAPTURA</span>
         </button>
@@ -63,6 +63,7 @@
                  type="number"
                  formControlName="cantidad"
                  placeholder="0"
+                (keydown.enter)="onCantidadEnter()"
                  >
           <span matSuffix class="unit-suffix">pzas</span>
         </mat-form-field>
@@ -83,7 +84,7 @@
           </button>
         </div>
 
-      </form>
+      </div>
     </div>
 
     <!-- SECCIÓN A: IMAGEN -->

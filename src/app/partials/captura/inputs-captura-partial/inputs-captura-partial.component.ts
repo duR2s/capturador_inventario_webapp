@@ -98,8 +98,12 @@ export class InputsCapturaPartialComponent implements OnInit, OnChanges {
   }
 
   onCantidadEnter(): void {
-    if (!this.form.invalid || !this.isLoading) {
-      //this.guardar();
+    // Verificamos que sea válido y no esté cargando
+    if (this.form.valid && !this.isLoading) {
+      this.guardar(); // <--- DESCOMENTAR ESTO
+    } else {
+        // Opcional: Si dan enter y es inválido, podrías marcar los campos como 'touched'
+        this.form.markAllAsTouched();
     }
   }
 

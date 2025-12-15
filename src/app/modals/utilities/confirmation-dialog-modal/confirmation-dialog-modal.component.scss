@@ -1,0 +1,215 @@
+@import '../../../styles/color-variables'; // Ajusta la ruta a tu archivo global
+
+// ==========================================
+// VARIABLES LOCALES DE COLOR (Para este modal)
+// ==========================================
+// Amarillo cálido para "Advertisement" (Warning)
+$color-warning: #F4A261;
+$color-warning-bg: #fff8e1;
+
+// Azul suave para "Info" (Acorde a tu paleta pastel/cálida)
+$color-info: #457B9D;
+$color-info-bg: #e3f2fd;
+
+// Rojo (Danger) - Usamos tu variable global
+$color-danger-bg: #ffebee;
+
+// ==========================================
+// ESTILOS BASE
+// ==========================================
+
+// Quitamos paddings por defecto de Material Dialog
+::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 24px !important; // Radius de tarjeta
+}
+
+.modal-wrapper {
+  background-color: $color-white;
+  width: 100%;
+  min-width: 380px;
+  max-width: 450px;
+  padding: 32px 24px;
+  border-radius: 24px;
+  position: relative;
+  text-align: center;
+  box-shadow: 0 10px 30px $color-shadow-dark;
+  font-family: 'Nexa', sans-serif;
+  overflow: hidden;
+
+  // Borde superior decorativo (opcional, da un toque elegante)
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    width: 100%;
+  }
+}
+
+// ==========================================
+// ELEMENTOS INTERNOS
+// ==========================================
+
+.close-icon-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: $color-text-muted;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background-color: rgba(0,0,0,0.05);
+    color: $color-text-dark;
+  }
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+// 1. Icono Central
+.icon-badge {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+
+  mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+  }
+}
+
+// 2. Textos
+.modal-title {
+  font-family: 'Nexa-Bold', sans-serif;
+  font-size: 22px;
+  color: $color-text-title;
+  margin: 0 0 12px 0;
+}
+
+.modal-message {
+  font-family: 'Nexa', sans-serif; // O tu fuente regular
+  font-size: 16px;
+  color: $color-text-light;
+  margin: 0 0 32px 0;
+  line-height: 1.5;
+  max-width: 90%;
+}
+
+// 3. Botones (Pill Shape)
+.modal-actions {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  justify-content: center;
+
+  button {
+    height: 44px;
+    padding: 0 28px;
+    border-radius: 100px; // Pill shape
+    font-family: 'Nexa-Bold', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.1s, box-shadow 0.2s;
+    min-width: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  .btn-cancel {
+    background-color: $color-bg-light-2; // Un crema suave
+    color: $color-text-light;
+
+    &:hover {
+      background-color: darken($color-bg-light-2, 5%);
+    }
+  }
+
+  .btn-confirm {
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+}
+
+// ==========================================
+// TEMAS (THEMING)
+// ==========================================
+
+// --- TIPO: DANGER (Rojo) ---
+.modal-wrapper.danger {
+  &::before { background-color: $color-danger; }
+
+  .icon-badge {
+    background-color: $color-danger-bg;
+    color: $color-danger;
+  }
+
+  .btn-confirm {
+    background-color: $color-danger;
+    &:hover { background-color: darken($color-danger, 5%); }
+  }
+}
+
+// --- TIPO: ADVERTISEMENT (Amarillo / Warning) ---
+.modal-wrapper.advertisement {
+  &::before { background-color: $color-warning; }
+
+  .icon-badge {
+    background-color: $color-warning-bg;
+    color: $color-warning;
+  }
+
+  .btn-confirm {
+    background-color: $color-warning;
+    &:hover { background-color: darken($color-warning, 5%); }
+  }
+}
+
+// --- TIPO: INFO (Azul) ---
+.modal-wrapper.info {
+  &::before { background-color: $color-info; }
+
+  .icon-badge {
+    background-color: $color-info-bg;
+    color: $color-info;
+  }
+
+  .btn-confirm {
+    background-color: $color-info;
+    width: 100%; // Botón ancho si es el único
+    max-width: 200px;
+    &:hover { background-color: darken($color-info, 5%); }
+  }
+}
