@@ -4,7 +4,7 @@ import { FacadeService } from '../facade.service';
 import { ErrorsService } from '../tools/errors.service';
 import { ValidatorService } from '../tools/validator.service';
 import { Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { environment } from 'src/environments/environment.development';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -110,22 +110,22 @@ export class AdministradoresService {
   }
 
   public registrarAdmin(data: any): Observable<any> {
-    return this.http.post<any>(`${environment.url_api}/api/admin/`, data, { headers: this.getHeaders() });
+    return this.http.post<any>(`${environment.url_api}/admin/`, data, { headers: this.getHeaders() });
   }
 
   public obtenerListaAdmins(): Observable<any> {
-    return this.http.get<any>(`${environment.url_api}/api/lista-admins/`, { headers: this.getHeaders() });
+    return this.http.get<any>(`${environment.url_api}/lista-admins/`, { headers: this.getHeaders() });
   }
 
   public obtenerAdminPorID(idAdmin: number): Observable<any> {
-    return this.http.get<any>(`${environment.url_api}/api/admin/?id=${idAdmin}`, { headers: this.getHeaders() });
+    return this.http.get<any>(`${environment.url_api}/admin/?id=${idAdmin}`, { headers: this.getHeaders() });
   }
 
   public eliminarAdmin(idAdmin: number): Observable<any>{
-    return this.http.delete<any>(`${environment.url_api}/api/admin/?id=${idAdmin}`, { headers: this.getHeaders() });
+    return this.http.delete<any>(`${environment.url_api}/admin/?id=${idAdmin}`, { headers: this.getHeaders() });
   }
 
   public actualizarAdmin(data: any): Observable<any> {
-    return this.http.put<any>(`${environment.url_api}/api/admin/`, data, { headers: this.getHeaders() });
+    return this.http.put<any>(`${environment.url_api}/admin/`, data, { headers: this.getHeaders() });
   }
 }

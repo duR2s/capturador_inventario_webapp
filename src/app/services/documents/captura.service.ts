@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError, forkJoin } from 'rxjs';
 import { catchError, tap, map } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment.development';
 import { Captura, DetalleCaptura, PayloadEscaner, PayloadDetalleBatch } from '../../captura.interfaces';
 import { FacadeService } from 'src/app/services/facade.service';
 
@@ -10,7 +10,7 @@ import { FacadeService } from 'src/app/services/facade.service';
   providedIn: 'root'
 })
 export class CapturaService {
-  private readonly API_URL = `${environment.url_api || 'http://localhost:8000'}/api`;
+  private readonly API_URL = `${environment.url_api || 'http://localhost:8000'}`;
 
   private readonly CAPTURA_ENDPOINT = `${this.API_URL}/inventario/captura/`;
   private readonly DETALLE_ENDPOINT = `${this.API_URL}/inventario/detalle/`;

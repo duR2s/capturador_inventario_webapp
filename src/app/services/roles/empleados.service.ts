@@ -4,7 +4,7 @@ import { FacadeService } from '../facade.service';
 import { ErrorsService } from '../tools/errors.service';
 import { ValidatorService } from '../tools/validator.service';
 import { Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { environment } from 'src/environments/environment.development';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -107,22 +107,22 @@ export class EmpleadosService {
   }
 
   public registrarEmpleado(data: any): Observable<any> {
-    return this.http.post<any>(`${environment.url_api}/api/empleado/`, data, { headers: this.getHeaders() });
+    return this.http.post<any>(`${environment.url_api}/empleado/`, data, { headers: this.getHeaders() });
   }
 
   public obtenerListaEmpleados(): Observable<any> {
-    return this.http.get<any>(`${environment.url_api}/api/lista-empleados/`, { headers: this.getHeaders() });
+    return this.http.get<any>(`${environment.url_api}/lista-empleados/`, { headers: this.getHeaders() });
   }
 
   public obtenerEmpleadoPorID(idEmpleado: number): Observable<any> {
-    return this.http.get<any>(`${environment.url_api}/api/empleado/?id=${idEmpleado}`, { headers: this.getHeaders() });
+    return this.http.get<any>(`${environment.url_api}/empleado/?id=${idEmpleado}`, { headers: this.getHeaders() });
   }
 
   public eliminarEmpleado(idEmpleado: number): Observable<any>{
-    return this.http.delete<any>(`${environment.url_api}/api/empleado/?id=${idEmpleado}`, { headers: this.getHeaders() });
+    return this.http.delete<any>(`${environment.url_api}/empleado/?id=${idEmpleado}`, { headers: this.getHeaders() });
   }
 
   public actualizarEmpleado(data: any): Observable<any> {
-    return this.http.put<any>(`${environment.url_api}/api/empleado/`, data, { headers: this.getHeaders() });
+    return this.http.put<any>(`${environment.url_api}/empleado/`, data, { headers: this.getHeaders() });
   }
 }
