@@ -1,0 +1,97 @@
+<!--
+  CONTENEDOR PRINCIPAL
+  Clase 'open' condicionada para animaciones CSS futuras.
+-->
+<div class="sidebar-container" [class.sidebar-open]="isOpen">
+
+  <!--
+    BOTÓN FLOTANTE (TOGGLE)
+    Siempre visible. Si está cerrado, la flecha apunta izquierda (chevron_left).
+    Si está abierto, apunta derecha (chevron_right) para indicar "cerrar".
+  -->
+  <button class="toggle-btn" (click)="toggleMenu()">
+    <mat-icon>{{ isOpen ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+  </button>
+
+  <!--
+    PANEL DE CONTENIDO
+    Aquí va toda la info.
+  -->
+  <div class="info-panel" *ngIf="isOpen">
+
+    <!-- CABECERA DEL PANEL -->
+    <div class="panel-header">
+      <h3 class="panel-title">Detalles de Sesión</h3>
+      <span class="status-badge" [class.offline]="pendientesSincronizar > 0">
+        {{ pendientesSincronizar > 0 ? 'Offline / Pendiente' : 'Sincronizado' }}
+      </span>
+    </div>
+
+    <!-- DATOS GENERALES -->
+    <div class="panel-body" *ngIf="captura">
+
+      <div class="info-row">
+        <label>Folio:</label>
+        <span>{{ captura.folio }}</span>
+      </div>
+
+      <div class="info-row">
+        <label>Almacén:</label>
+        <!-- Usamos el nombre que viene del serializer o un fallback -->
+        <span>{{ captura.almacen_nombre || 'Desconocido' }}</span>
+      </div>
+
+      <div class="info-row">
+        <label>Capturador:</label>
+        <span>{{ captura.capturador_nombre || 'Desconocido' }}</span>
+      </div>
+
+      <div class="info-row">
+        <label>Fecha:</label>
+        <span>{{ captura.fecha_captura | date:'short' }}</span>
+      </div>
+
+      <div class="metrics-row">
+        <div class="metric-item">
+          <span class="metric-value">{{ totalArticulos }}</span>
+          <span class="metric-label">Escaneados</span>
+        </div>
+        <div class="metric-item warning" *ngIf="pendientesSincronizar > 0">
+          <span class="metric-value">{{ pendientesSincronizar }}</span>
+          <span class="metric-label">Pendientes</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="panel-body empty-state" *ngIf="!captura">
+      <p>No hay información de captura activa.</p>
+    </div>
+
+    <!-- ACCIONES -->
+    <div class="panel-actions">
+
+      <!-- Sincronizar (Solo visible si hay pendientes) -->
+      <button class="action-btn btn-sync"
+              *ngIf="pendientesSincronizar > 0"
+              (click)="ejecutarSincronizar()">
+        <mat-icon>sync</mat-icon>
+        Sincronizar
+      </button>
+
+      <!-- Terminar Captura -->
+      <button class="action-btn btn-finish" (click)="ejecutarFinalizar()">
+        <mat-icon>check_circle</mat-icon>
+        Terminar
+      </button>
+
+      <!-- Eliminar Captura (Peligroso) -->
+      <button class="action-btn btn-delete" (click)="ejecutarEliminar()">
+        <mat-icon>delete_forever</mat-icon>
+        Eliminar Sesión
+      </button>
+
+    </div>
+
+  </div>
+</div>

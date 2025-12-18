@@ -1,7 +1,105 @@
-<div class="screen-container">
+<div class="dashboard-container">
 
-  <!-- ZONA B: Inputs (Fijo abajo) -->
-  <div class="bottom-actions">
+  <!-- VISTA DASHBOARD (FILAS) -->
+  <div class="rows-wrapper" *ngIf="!showNuevoForm">
+
+    <!-- === FILA 1: NUEVO + CONFIRMADOS + PROCESADOS === -->
+    <section class="dashboard-section">
+      <h3 class="section-label">Acciones & Recientes</h3>
+
+      <div class="row-carousel">
+        <button class="nav-arrow left"
+                (mousedown)="startScroll('row1', -1)"
+                (mouseup)="stopScroll()"
+                (mouseleave)="stopScroll()"
+                (click)="stepScroll('row1', -1)">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <div class="scroll-track" #scrollRow1>
+          <app-captura-info-card
+            *ngFor="let item of row1Items"
+            [captura]="item"
+            (onClick)="item ? seleccionarCaptura(item) : crearNueva()">
+          </app-captura-info-card>
+
+          <div class="empty-msg" *ngIf="row1Items.length === 1">
+            <small>No hay recientes.</small>
+          </div>
+        </div>
+
+        <button class="nav-arrow right"
+                (mousedown)="startScroll('row1', 1)"
+                (mouseup)="stopScroll()"
+                (mouseleave)="stopScroll()"
+                (click)="stepScroll('row1', 1)">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </section>
+
+    <!-- === FILA 2: BORRADORES === -->
+    <section class="dashboard-section">
+      <h3 class="section-label">Borradores Pendientes ({{ row2Items.length }})</h3>
+
+      <div class="row-carousel">
+        <button class="nav-arrow left"
+                (mousedown)="startScroll('row2', -1)"
+                (mouseup)="stopScroll()"
+                (mouseleave)="stopScroll()"
+                (click)="stepScroll('row2', -1)">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <div class="scroll-track" #scrollRow2>
+          <app-captura-info-card
+            *ngFor="let cap of row2Items"
+            [captura]="cap"
+            (onClick)="seleccionarCaptura(cap)">
+          </app-captura-info-card>
+
+          <div class="empty-placeholder" *ngIf="row2Items.length === 0 && !isLoading">
+            <mat-icon>assignment_turned_in</mat-icon>
+            <p>¡Todo al día!</p>
+          </div>
+          <div class="loading-placeholder" *ngIf="isLoading">
+            Cargando...
+          </div>
+        </div>
+
+        <button class="nav-arrow right"
+                (mousedown)="startScroll('row2', 1)"
+                (mouseup)="stopScroll()"
+                (mouseleave)="stopScroll()"
+                (click)="stepScroll('row2', 1)">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </section>
+
+    <!-- === ZONA TABLA COMPLETA === -->
+    <section class="table-section">
+      <!--
+        Inyección del componente de tabla.
+        Pasamos 'todasLasCapturas' y conectamos los eventos.
+      -->
+      <app-tabla-lista-capturas
+        [capturas]="todasLasCapturas"
+        (onView)="seleccionarCaptura($event)"
+        (onEdit)="seleccionarCaptura($event)"
+        (onDelete)="eliminarCaptura($event)">
+      </app-tabla-lista-capturas>
+    </section>
+
+  </div>
+
+  <!-- VISTA FORMULARIO -->
+  <div class="form-container" *ngIf="showNuevoForm">
+    <div class="back-btn-row">
+      <button class="btn-back" (click)="cancelarNuevo()">
+        <mat-icon>arrow_back</mat-icon> Volver al Dashboard
+      </button>
+    </div>
     <app-registro-captura></app-registro-captura>
   </div>
 

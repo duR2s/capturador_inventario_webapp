@@ -29,19 +29,20 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 export class InputsCapturaPartialComponent implements OnInit, OnChanges {
 
   @Input() isLoading: boolean = false;
+  // Recibimos el objeto completo, que ahora trae 'existencia_teorica' del back
   @Input() articuloEncontrado: any | null = null;
 
   @Output() onBuscarCodigo = new EventEmitter<string>();
   @Output() onConfirmarCaptura = new EventEmitter<{ codigo: string, cantidad: number }>();
 
-  @ViewChild('cantidadInput') cantidadInput!: ElementRef<HTMLInputElement>;
   @ViewChild('codigoInput') codigoInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('cantidadInput') cantidadInput!: ElementRef<HTMLInputElement>;
 
   form: FormGroup;
-  isMobileImageExpanded = false;
+  isEditMode: boolean = false;
   currentImageUrl: string | null = null;
   errorMessage: string = '';
-  isEditMode: boolean = false;
+  isMobileImageExpanded: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -49,35 +50,54 @@ export class InputsCapturaPartialComponent implements OnInit, OnChanges {
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.form = this.fb.group({
-      codigo: ['', [Validators.required]],
-      nombre: [{ value: '', disabled: true }],
-      cantidad: [1, [Validators.required, Validators.pattern(/^[0-9]+$/), Validators.min(1)]]
+      codigo: ['', Validators.required],
+      nombre: [{ value: '', disabled: true }], // Campo solo visual
+      cantidad: [1, [Validators.required, Validators.min(0.001)]]
     });
+
+    // Si se abre como Modal (Edición)
+    if (this.data && this.data.mode === 'edit') {
+      this.isEditMode = true;
+      this.currentImageUrl = this.data.item.imagen;
+      this.form.patchValue({
+        codigo: this.data.item.codigo,
+        nombre: this.data.item.nombre,
+        cantidad: this.data.item.cantidad
+      });
+      this.form.get('codigo')?.disable(); // En edición no cambiamos código
+    }
   }
 
   ngOnInit(): void {
-    if (this.data && (this.data.id || this.data.codigo)) {
-      this.isEditMode = true;
-      this.form.patchValue(this.data);
-      if (this.data.imagen) this.currentImageUrl = this.data.imagen;
+    // Foco inicial si no es edición
+    if (!this.isEditMode) {
+      this.focarInputCodigo();
     }
-
-    // Listener para limpiar si borran código manualmente
-    this.form.get('codigo')?.valueChanges.subscribe((val) => {
-      // Si el usuario borra todo el texto manualmente y NO estamos cargando
-      if (!this.isLoading && (!val || val.length === 0)) {
-         // Opcional: Si quieres reiniciar UI al borrar manual
-         // this.resetUIFields();
-      }
-    });
-
-    setTimeout(() => this.focarInputCodigo(), 500);
   }
 
+  // --- NUEVA LÓGICA: DETECTAR ARTÍCULO ENCONTRADO ---
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['articuloEncontrado'] && this.articuloEncontrado) {
-      this.form.patchValue({ nombre: this.articuloEncontrado.nombre });
 
+      // 1. Mostrar nombre para feedback visual
+      this.form.patchValue({
+        nombre: this.articuloEncontrado.nombre
+      });
+
+      // 2. Lógica de Existencia Previa
+      // Si el backend envió existencia teórica, la usamos. Si no, por defecto 1.
+      const existencia = this.articuloEncontrado.existencia_teorica;
+
+      if (existencia !== undefined && existencia !== null) {
+        // Pre-llenamos con la existencia actual para validarla/ajustarla
+        this.form.patchValue({ cantidad: existencia });
+      } else {
+        this.form.patchValue({ cantidad: 1 });
+      }
+
+      this.errorMessage = ''; // Limpiar errores previos
+
+      // 3. Mover foco a cantidad y seleccionar todo para facilitar sobreescritura
       setTimeout(() => {
         if (this.cantidadInput) {
           this.cantidadInput.nativeElement.focus();
@@ -87,72 +107,65 @@ export class InputsCapturaPartialComponent implements OnInit, OnChanges {
     }
   }
 
-  onCodigoEnter(): void {
-    const codigoVal = this.form.get('codigo')?.value;
-    if (!codigoVal) {
-      return;
-    }
-    this.errorMessage = '';
-    this.onBuscarCodigo.emit(codigoVal.trim());
-    this.codigoInput.nativeElement.select();
-  }
-
-  onCantidadEnter(): void {
-    // Verificamos que sea válido y no esté cargando
-    if (this.form.valid && !this.isLoading) {
-      this.guardar(); // <--- DESCOMENTAR ESTO
-    } else {
-        // Opcional: Si dan enter y es inválido, podrías marcar los campos como 'touched'
-        this.form.markAllAsTouched();
-    }
-  }
-
-
-  guardar() {
-    const { codigo, cantidad } = this.form.getRawValue();
-
-    // 1. SOLO EMITIMOS. No limpiamos aquí. Esperamos al padre.
-    this.onConfirmarCaptura.emit({
-      codigo: codigo.trim(),
-      cantidad: Number(cantidad)
-    });
-  }
-
-  // El padre llamará a esto cuando el servidor responda "OK"
-  public limpiarFormulario() {
-    // 2. Usamos reset() en lugar de patchValue().
-    // reset() limpia los valores Y quita los errores de validación (untouched/pristine).
-    this.form.reset({
-        codigo: '',
-        nombre: '',
-        cantidad: 1 // Valor por defecto para cantidad
-    });
-
-    // Restauramos el estado visual
-    this.currentImageUrl = null;
-    this.errorMessage = '';
-    // 3. Forzamos el foco al código para el siguiente producto
-    this.focarInputCodigo();
-  }
-
-  private focarInputCodigo() {
-    // Pequeño delay para asegurar que el DOM se actualizó tras el reset
-    setTimeout(() => {
-      if (this.codigoInput) {
-        this.codigoInput.nativeElement.focus();
-      }
-    }, 100);
-  }
-
   toggleMobileImage() {
     this.isMobileImageExpanded = !this.isMobileImageExpanded;
   }
 
-  abrirBusqueda() {
-    console.log("Abrir modal de búsqueda...");
+  cerrar() {
+    this.dialogRef?.close();
   }
 
-  cerrar() {
-    if (this.dialogRef) this.dialogRef.close();
+  onCodigoEnter() {
+    const codigoVal = this.form.get('codigo')?.value;
+    if (codigoVal) {
+      this.errorMessage = '';
+      this.onBuscarCodigo.emit(codigoVal);
+    }
+  }
+
+  onCantidadEnter() {
+    if (this.form.valid) {
+      this.guardar();
+    } else {
+      this.form.markAllAsTouched();
+    }
+  }
+
+  guardar() {
+    // Obtenemos valores raw para incluir campos deshabilitados si fuera necesario
+    const rawValues = this.form.getRawValue();
+
+    // Si estamos en flujo normal (no modal), usamos el código buscado o el del input
+    const codigoFinal = this.articuloEncontrado?.clave || rawValues.codigo;
+
+    this.onConfirmarCaptura.emit({
+      codigo: codigoFinal.trim(),
+      cantidad: Number(rawValues.cantidad)
+    });
+  }
+
+  abrirBusqueda() {
+    this.errorMessage = '';
+  }
+
+  public limpiarFormulario() {
+    this.form.reset({
+        codigo: '',
+        nombre: '',
+        cantidad: 1
+    });
+    this.currentImageUrl = null;
+    this.errorMessage = '';
+
+    // Forzamos foco al código para el siguiente
+    this.focarInputCodigo();
+  }
+
+  private focarInputCodigo() {
+    setTimeout(() => {
+      if (this.codigoInput && !this.codigoInput.nativeElement.disabled) {
+        this.codigoInput.nativeElement.focus();
+      }
+    }, 200);
   }
 }

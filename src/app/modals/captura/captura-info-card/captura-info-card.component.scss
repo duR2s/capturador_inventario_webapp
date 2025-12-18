@@ -1,0 +1,145 @@
+@import '../../../styles/color-variables';
+
+// Configuración local de dimensiones (esto está bien aquí)
+$card-height: 160px;
+$card-radius: 20px;
+
+.card-container {
+  width: 100%;
+  height: $card-height;
+  border-radius: $card-radius;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  background-color: $color-white;
+  box-shadow: 0 8px 20px $color-shadow-light; // Variable global
+  border: 1px solid $color-border-light;      // Variable global
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px $color-shadow-medium; // Variable global
+  }
+}
+
+// === TARJETA DE DATOS ===
+.data-card {
+  justify-content: space-between;
+
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .status-circle {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+
+      // Usando las nuevas variables globales
+      &.status-orange {
+        background-color: $status-borrador;
+        box-shadow: 0 0 6px rgba($status-borrador, 0.4);
+      }
+      &.status-green {
+        background-color: $status-confirmado;
+        box-shadow: 0 0 6px rgba($status-confirmado, 0.4);
+      }
+      &.status-blue {
+        background-color: $status-procesado;
+        box-shadow: 0 0 6px rgba($status-procesado, 0.4);
+      }
+      &.status-gray {
+        background-color: $status-desconocido;
+      }
+    }
+
+    .status-text {
+      font-family: 'Nexa-Bold', sans-serif;
+      font-size: 11px;
+      color: $color-text-light;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .info-content {
+    margin-top: 10px;
+
+    .folio-text {
+      margin: 0;
+      font-family: 'Nexa-Bold', sans-serif;
+      font-size: 20px;
+      color: $color-text-title;
+    }
+
+    .almacen-text {
+      margin: 4px 0 0 0;
+      font-family: 'Nexa', sans-serif;
+      font-size: 14px;
+      color: $color-text-light;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .footer-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: auto;
+
+    .date-text {
+      font-family: 'Nexa-Bold', sans-serif;
+      font-size: 11px;
+      color: $color-text-muted;
+    }
+  }
+}
+
+// === TARJETA VACÍA (NUEVA) ===
+.empty-card {
+  background-color: $card-empty-bg; // Variable global
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed rgba($card-empty-icon, 0.3);
+  box-shadow: none;
+
+  .icon-wrapper {
+    width: 50px;
+    height: 50px;
+    background-color: rgba($color-white, 0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    transition: transform 0.2s;
+
+    mat-icon {
+      color: $card-empty-icon; // Variable global
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  .new-label {
+    font-family: 'Nexa-Bold', sans-serif;
+    color: $card-empty-icon; // Variable global
+    font-size: 14px;
+  }
+
+  &:hover {
+    background-color: darken($card-empty-bg, 3%);
+
+    .icon-wrapper {
+      transform: rotate(90deg);
+    }
+  }
+}

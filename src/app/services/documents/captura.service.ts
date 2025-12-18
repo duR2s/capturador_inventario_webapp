@@ -12,13 +12,13 @@ import { FacadeService } from 'src/app/services/facade.service';
 export class CapturaService {
   private readonly API_URL = `${environment.url_api || 'http://localhost:8000'}`;
 
+  // Endpoints
   private readonly CAPTURA_ENDPOINT = `${this.API_URL}/inventario/captura/`;
   private readonly DETALLE_ENDPOINT = `${this.API_URL}/inventario/detalle/`;
   private readonly ALMACENES_ENDPOINT = `${this.API_URL}/inventario/almacenes/`;
   private readonly EMPLEADOS_ENDPOINT = `${this.API_URL}/lista-empleados/`;
-
-  // NUEVO ENDPOINT
   private readonly BUSQUEDA_ENDPOINT = `${this.API_URL}/inventario/buscar-articulo/`;
+  private readonly TICKET_ENDPOINT = `${this.API_URL}/inventario/ticket/`;
 
   private _detallesSubject = new BehaviorSubject<DetalleCaptura[]>([]);
   public detalles$ = this._detallesSubject.asObservable();
@@ -50,10 +50,25 @@ export class CapturaService {
     return new HttpHeaders({ 'Content-Type': 'application/json' });
   }
 
-  // ... (Métodos de catálogos sin cambios) ...
+  // --- Listar mis capturas ---
+  listarMisCapturas(): Observable<Captura[]> {
+    return this.http.get<Captura[]>(this.CAPTURA_ENDPOINT, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   getAlmacenes(): Observable<any[]> { return this.http.get<any[]>(this.ALMACENES_ENDPOINT, { headers: this.getHeaders() }).pipe(catchError(this.handleError)); }
   getCapturadores(): Observable<any[]> { return this.http.get<any[]>(this.EMPLEADOS_ENDPOINT, { headers: this.getHeaders() }).pipe(catchError(this.handleError)); }
   cargarCatalogosIniciales(): Observable<{ almacenes: any[], capturadores: any[] }> { return forkJoin({ almacenes: this.getAlmacenes(), capturadores: this.getCapturadores() }); }
+
+  // CORRECCIÓN: Aceptar parámetro opcional almacenId
+  buscarArticulo(codigo: string, almacenId?: number): Observable<any> {
+    let url = `${this.BUSQUEDA_ENDPOINT}?codigo=${encodeURIComponent(codigo)}`;
+    if (almacenId) {
+      url += `&almacen=${almacenId}`;
+    }
+    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(catchError(this.handleError));
+  }
 
   iniciarCaptura(folio: string, capturadorId: number, almacenId: number): Observable<Captura> {
     const payload: any = { folio: folio, capturador: capturadorId, almacen: almacenId, estado: 'BORRADOR', detalles: [] };
@@ -82,26 +97,23 @@ export class CapturaService {
     );
   }
 
-  cargarDetalles(capturaId: any): Observable<DetalleCaptura[]> {
-    return this.cargarCapturaPorId(capturaId).pipe(map(captura => captura.detalles || []));
-  }
-
-  // -------------------------------------------------------------------------
-  // NUEVO MÉTODO DE BÚSQUEDA (SOLO LECTURA)
-  // -------------------------------------------------------------------------
-  buscarArticulo(codigo: string): Observable<any> {
-    const url = `${this.BUSQUEDA_ENDPOINT}?codigo=${encodeURIComponent(codigo)}`;
-    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
+  eliminarCaptura(capturaId: any): Observable<void> {
+    const url = `${this.CAPTURA_ENDPOINT}${capturaId}/`;
+    return this.http.delete<void>(url, { headers: this.getHeaders() }).pipe(
+      tap(() => {
+        this._capturaActualSubject.next(null);
+        this._detallesSubject.next([]);
+      }),
       catchError(this.handleError)
     );
   }
 
-  // -------------------------------------------------------------------------
-  // MÉTODO PARA GUARDAR (PROCESAR ESCANEO)
-  // -------------------------------------------------------------------------
+  cargarDetalles(capturaId: any): Observable<DetalleCaptura[]> {
+    return this.cargarCapturaPorId(capturaId).pipe(map(captura => captura.detalles || []));
+  }
+
   escanearArticulo(codigo: string, cantidad: number): Observable<DetalleCaptura> {
     const capturaActual = this.capturaActualValue;
-
     if (!capturaActual || !capturaActual.id) {
       return throwError(() => new Error("No hay una captura activa."));
     }
@@ -131,55 +143,22 @@ export class CapturaService {
     );
   }
 
-  // -------------------------------------------------------------------------
-  // NUEVOS MÉTODOS DE EDICIÓN Y TICKET (REQUERIDOS PARA LA UI)
-  // -------------------------------------------------------------------------
-
   actualizarDetalle(detalleId: any, nuevaCantidad: number): Observable<DetalleCaptura> {
     const url = `${this.DETALLE_ENDPOINT}${detalleId}/`;
-    // Usamos PATCH para actualización parcial
     const payload = { cantidad_contada: nuevaCantidad };
-
     return this.http.patch<DetalleCaptura>(url, payload, { headers: this.getHeaders() }).pipe(
       tap((itemActualizado) => {
-        // Actualizamos el estado local inmediatamente
         const listaActual = this._detallesSubject.value;
         const index = listaActual.findIndex(d => d.id === detalleId);
-
         if (index > -1) {
           const nuevaLista = [...listaActual];
-          // Fusionamos por si el servidor devuelve campos extra actualizados (ej. diferencia)
+          const ticketsPrevios = nuevaLista[index].tickets;
           nuevaLista[index] = { ...nuevaLista[index], ...itemActualizado };
+          if (ticketsPrevios && !nuevaLista[index].tickets) {
+             nuevaLista[index].tickets = ticketsPrevios;
+          }
           this._detallesSubject.next(nuevaLista);
         }
-      }),
-      catchError(this.handleError)
-    );
-  }
-
-  imprimirTicket(detalleId: any, cantidad: number, responsable: string): Observable<any> {
-    // Asumimos un endpoint tipo /inventario/detalle/{id}/imprimir-ticket/
-    const url = `${this.DETALLE_ENDPOINT}${detalleId}/imprimir_ticket/`;
-    const payload = { copias: cantidad, responsable: responsable };
-
-    return this.http.post(url, payload, { headers: this.getHeaders() }).pipe(
-      catchError(this.handleError)
-    );
-  }
-
-  // -------------------------------------------------------------------------
-
-  sincronizarMasivo(detallesBatch: PayloadDetalleBatch[]): Observable<DetalleCaptura[]> {
-    const capturaActual = this.capturaActualValue;
-    if (!capturaActual || !capturaActual.id) return throwError(() => new Error("No se puede sincronizar sin una captura activa."));
-    if (!detallesBatch || detallesBatch.length === 0) return throwError(() => new Error("La lista de sincronización está vacía."));
-
-    const url = `${this.CAPTURA_ENDPOINT}${capturaActual.id}/sincronizar/`;
-
-    return this.http.post<DetalleCaptura[]>(url, detallesBatch, { headers: this.getHeaders() }).pipe(
-      tap((listaActualizadaServer) => {
-        console.log('Sincronización exitosa.');
-        this._detallesSubject.next(listaActualizadaServer);
       }),
       catchError(this.handleError)
     );
@@ -191,6 +170,48 @@ export class CapturaService {
       tap(() => {
         const listaActual = this._detallesSubject.value;
         this._detallesSubject.next(listaActual.filter(d => d.id !== detalleId));
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  sincronizarMasivo(detallesBatch: PayloadDetalleBatch[]): Observable<DetalleCaptura[]> {
+    const capturaActual = this.capturaActualValue;
+    if (!capturaActual || !capturaActual.id) return throwError(() => new Error("No se puede sincronizar sin una captura activa."));
+    if (!detallesBatch || detallesBatch.length === 0) return throwError(() => new Error("La lista de sincronización está vacía."));
+
+    const url = `${this.CAPTURA_ENDPOINT}${capturaActual.id}/sincronizar/`;
+    return this.http.post<DetalleCaptura[]>(url, detallesBatch, { headers: this.getHeaders() }).pipe(
+      tap((listaActualizadaServer) => {
+        this._detallesSubject.next(listaActualizadaServer);
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  generarTicket(detalleId: any, cantidad: number, responsable: string): Observable<any> {
+    const url = this.TICKET_ENDPOINT;
+    const payload = {
+      detalle: detalleId,
+      cantidad: cantidad,
+      responsable: responsable
+    };
+
+    return this.http.post(url, payload, { headers: this.getHeaders() }).pipe(
+      tap((response: any) => {
+        if (response.nueva_cantidad_detalle !== undefined) {
+           const listaActual = this._detallesSubject.value;
+           const index = listaActual.findIndex(d => d.id === detalleId);
+           if (index > -1) {
+             const nuevaLista = [...listaActual];
+             const itemViejo = nuevaLista[index];
+             nuevaLista[index] = {
+                ...itemViejo,
+                cantidad_contada: response.nueva_cantidad_detalle
+             };
+             this._detallesSubject.next(nuevaLista);
+           }
+        }
       }),
       catchError(this.handleError)
     );

@@ -1,4 +1,4 @@
-import { Component, inject, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, inject, ViewChild, AfterViewInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -13,7 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
-// Componentes
+// Rutas corregidas
 import { ConfirmationDialogModalComponent } from '../../../modals/utilities/confirmation-dialog-modal/confirmation-dialog-modal.component';
 import { EditarDetalleModalComponent, EditModalData } from '../../../modals/captura/editar-detalle-modal/editar-detalle-modal.component';
 
@@ -42,6 +42,8 @@ import { DetalleCaptura, Captura } from '../../../captura.interfaces';
 })
 export class TablaCapturaPartialComponent implements AfterViewInit {
 
+  @Input() isReadOnly: boolean = false;
+
   private capturaService = inject(CapturaService);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
@@ -50,14 +52,24 @@ export class TablaCapturaPartialComponent implements AfterViewInit {
 
   public capturaHeader: Captura | null = null;
 
-  // Columnas
-  displayedColumns: string[] = ['codigo', 'nombre', 'existencia_previa', 'existencia_capturada', 'diferencia', 'editar', 'ticket', 'eliminar'];
+  // COLUMNAS RESTAURADAS
+  displayedColumns: string[] = [
+    'codigo',
+    'nombre',
+    'existencia_previa',
+    'existencia_capturada',
+    'diferencia',
+    'editar',
+    'ticket',
+    'eliminar'
+  ];
 
   dataSource = new MatTableDataSource<DetalleCaptura>([]);
 
   constructor() {
     this.capturaService.detalles$.subscribe((detalles) => {
       this.dataSource.data = detalles;
+      // Reasignar paginator si la data cambia
       if (this.paginator) {
         this.dataSource.paginator = this.paginator;
       }
@@ -77,19 +89,19 @@ export class TablaCapturaPartialComponent implements AfterViewInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
-  // ==========================================================================
-  // LÓGICA DE EDICIÓN Y TICKET
-  // ==========================================================================
+  // --- ACCIONES (Con bloqueo ReadOnly) ---
 
   editarFila(element: DetalleCaptura): void {
+    if (this.isReadOnly) return;
+
     const dialogRef = this.dialog.open(EditarDetalleModalComponent, {
       data: {
         mode: 'edit',
         item: {
-            codigo: element.producto_codigo,
-            nombre: element.articulo_nombre,
-            cantidad: element.cantidad_contada,
-            //imagen: element.imagen_url
+          codigo: element.producto_codigo,
+          nombre: element.articulo_nombre || element.nombre_articulo,
+          cantidad: element.cantidad_contada,
+          // imagen: element.imagen_url
         }
       } as EditModalData,
       width: '450px',
@@ -97,22 +109,22 @@ export class TablaCapturaPartialComponent implements AfterViewInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        // result trae { codigo, cantidad }
-        // Se llama al servicio real para actualizar
-        this.actualizarCantidad(element.id, result.cantidad, element.articulo_nombre);
+        this.actualizarCantidad(element.id, result.cantidad, element.articulo_nombre || 'Artículo');
       }
     });
   }
 
   ticketProducto(element: DetalleCaptura): void {
+    if (this.isReadOnly) return;
+
     const dialogRef = this.dialog.open(EditarDetalleModalComponent, {
       data: {
         mode: 'ticket',
         item: {
-            codigo: element.producto_codigo,
-            nombre: element.articulo_nombre,
-            cantidad: 1, // Por defecto 1 ticket o etiqueta
-            //imagen: element.imagen_url
+          codigo: element.producto_codigo,
+          nombre: element.articulo_nombre || element.nombre_articulo,
+          cantidad: 1,
+          // imagen: element.imagen_url
         }
       } as EditModalData,
       width: '450px'
@@ -120,55 +132,14 @@ export class TablaCapturaPartialComponent implements AfterViewInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        // result trae { cantidad, responsable, ... }
         this.generarTicket(element, result.cantidad, result.responsable);
       }
     });
   }
 
-  // ==========================================================================
-  // MÉTODOS DE SERVICIO (CONECTADOS AL BACKEND)
-  // ==========================================================================
-
-  private actualizarCantidad(id: any, cantidad: number, nombreArticulo: any) {
-    this.capturaService.actualizarDetalle(id, cantidad).subscribe({
-      next: (itemActualizado) => {
-        this.mostrarSnack(`Actualizado: ${nombreArticulo}`, 'success');
-        // No es necesario actualizar dataSource manualmente, el servicio actualiza el Subject
-      },
-      error: (err) => {
-        console.error(err);
-        this.mostrarSnack('Error al actualizar la cantidad.', 'error');
-      }
-    });
-  }
-
-  private generarTicket(element: DetalleCaptura, cantidad: number, responsable: string) {
-      this.capturaService.imprimirTicket(element.id, cantidad, responsable).subscribe({
-        next: () => {
-          this.mostrarSnack(`Ticket enviado (${cantidad} copias)`, 'success');
-        },
-        error: (err) => {
-          console.error(err);
-          // Si es un error 404 de endpoint, avisamos que quizás no está configurada la impresora
-          const msg = err.message?.includes('404') ? 'Servicio de impresión no disponible' : 'Error al imprimir ticket';
-          this.mostrarSnack(msg, 'error');
-        }
-      });
-  }
-
-  private mostrarSnack(mensaje: string, tipo: 'success' | 'error' = 'success') {
-      this.snackBar.open(mensaje, 'Cerrar', {
-          duration: 3000,
-          panelClass: tipo === 'error' ? 'snackbar-error' : 'snackbar-success'
-      });
-  }
-
-  // ==========================================================================
-  // LÓGICA DE ELIMINACIÓN
-  // ==========================================================================
-
   eliminarFila(element: DetalleCaptura): void {
+    if (this.isReadOnly) return;
+
     if (this.esPendiente(element)) {
       this.dialog.open(ConfirmationDialogModalComponent, {
           data: {
@@ -205,7 +176,38 @@ export class TablaCapturaPartialComponent implements AfterViewInit {
     }
   }
 
+  // --- HELPERS SERVICIO ---
+
+  private actualizarCantidad(id: any, cantidad: number, nombreArticulo: any) {
+    this.capturaService.actualizarDetalle(id, cantidad).subscribe({
+      next: () => this.mostrarSnack(`Actualizado: ${nombreArticulo}`, 'success'),
+      error: (err) => {
+        console.error(err);
+        this.mostrarSnack('Error al actualizar la cantidad.', 'error');
+      }
+    });
+  }
+
+  private generarTicket(element: DetalleCaptura, cantidad: number, responsable: string) {
+      this.capturaService.generarTicket(element.id, cantidad, responsable).subscribe({
+        next: () => this.mostrarSnack(`Ticket enviado (${cantidad} copias)`, 'success'),
+        error: (err) => {
+          console.error(err);
+          const msg = err.message?.includes('404') ? 'Servicio de impresión no disponible' : 'Error al imprimir ticket';
+          this.mostrarSnack(msg, 'error');
+        }
+      });
+  }
+
+  private mostrarSnack(mensaje: string, tipo: 'success' | 'error' | 'warning' = 'success') {
+      this.snackBar.open(mensaje, 'Cerrar', {
+          duration: 3000,
+          panelClass: `snackbar-${tipo}`
+      });
+  }
+
   esPendiente(detalle: DetalleCaptura): boolean {
-    return !detalle.id || !!detalle.pendiente_sync;
+    // Es pendiente si no tiene ID (creado localmente) o si el ID es negativo (convención offline)
+    return !detalle.id || (!!detalle.id && detalle.id < 0);
   }
 }

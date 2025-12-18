@@ -1,0 +1,273 @@
+@import '../../../styles/color-variables';
+
+// ==========================================
+// CONFIGURACIÓN LOCAL (Basada en tu modal)
+// ==========================================
+$sidebar-width: 320px;
+$panel-radius: 24px;
+$transition-speed: 0.4s;
+$shadow-depth: -10px 0 30px $color-shadow-medium;
+
+.sidebar-container {
+  position: fixed;
+  top: 90px; // Ajuste para no chocar con header
+  right: 0;
+  z-index: 1100; // Superior a modales normales
+  display: flex;
+  align-items: flex-start;
+  transition: transform $transition-speed cubic-bezier(0.25, 0.8, 0.25, 1);
+  // Se oculta hacia la derecha, dejando solo el botón visible si estuviera 'absolute',
+  // pero aquí usamos flex para que el botón "sobresalga"
+  transform: translateX(calc(100% - 50px));
+  pointer-events: none; // Permite clicks "a través" del área vacía si fuera necesario
+
+  &.sidebar-open {
+    transform: translateX(0);
+
+    // Al abrir, el botón cambia de aspecto si se desea
+    .toggle-btn {
+      background-color: $color-primary-dark;
+      box-shadow: none; // Se integra visualmente
+    }
+  }
+}
+
+// ==========================================
+// BOTÓN FLOTANTE (TOGGLE)
+// ==========================================
+.toggle-btn {
+  pointer-events: auto; // Reactiva clicks
+  width: 50px;
+  height: 60px;
+  background-color: $color-primary; // Verde principal
+  color: $color-white;
+  border: none;
+  // Bordes redondeados solo a la izquierda para efecto "pestaña"
+  border-radius: 16px 0 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: -4px 4px 15px rgba(0,0,0,0.15); // Sombra suave
+  transition: all 0.3s ease;
+  margin-top: 30px; // Un poco abajo del borde superior del panel
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    // Animación sutil de la flecha
+    transition: transform 0.3s;
+  }
+
+  &:hover {
+    background-color: $color-primary-light;
+    width: 55px; // Efecto sutil de "salir"
+  }
+}
+
+// ==========================================
+// PANEL DE CONTENIDO
+// ==========================================
+.info-panel {
+  pointer-events: auto; // Reactiva clicks
+  background-color: $color-white;
+  width: $sidebar-width;
+  min-height: 450px;
+  padding: 24px;
+
+  // Estilo "Card Flotante" igual al modal
+  border-radius: 0 0 0 $panel-radius; // Esquina inferior izquierda redondeada
+  box-shadow: $shadow-depth;
+  border-left: 1px solid $color-border-light;
+
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: 'Nexa', sans-serif;
+}
+
+// ==========================================
+// CABECERA
+// ==========================================
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid $color-bg-light-3; // Separador color hueso
+  padding-bottom: 12px;
+
+  .panel-title {
+    margin: 0;
+    font-family: 'Nexa-Bold', sans-serif;
+    font-size: 18px;
+    color: $color-text-title; // Verde oscuro marca
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .status-badge {
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 100px; // Pill shape
+    font-family: 'Nexa-Bold', sans-serif;
+    background-color: $color-green-light;
+    color: $color-success;
+    border: 1px solid $color-green-light-accent;
+
+    &.offline {
+      background-color: #fff3e0; // Naranja claro
+      color: #ef6c00;
+      border-color: #ffe0b2;
+    }
+  }
+}
+
+// ==========================================
+// CUERPO & DATOS
+// ==========================================
+.panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 14px;
+
+    label {
+      color: $color-text-light;
+      font-weight: normal;
+    }
+
+    span {
+      font-family: 'Nexa-Bold', sans-serif;
+      color: $color-text-dark;
+      text-align: right;
+      max-width: 60%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  &.empty-state {
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    color: $color-text-muted;
+    font-style: italic;
+    opacity: 0.7;
+  }
+}
+
+// ==========================================
+// MÉTRICAS (TARJETAS INTERNAS)
+// ==========================================
+.metrics-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+
+  .metric-item {
+    flex: 1;
+    background: $color-bg-light-2; // Fondo crema suave
+    border-radius: 16px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid $color-border-light;
+    transition: transform 0.2s;
+
+    &:hover {
+      transform: translateY(-2px);
+      background: $color-white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .metric-value {
+      font-family: 'Nexa-Bold', sans-serif;
+      font-size: 24px;
+      color: $color-primary;
+    }
+
+    .metric-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: $color-text-light;
+      margin-top: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    &.warning {
+      background-color: #fff8e1;
+      border-color: #ffe0b2;
+      .metric-value { color: #fbc02d; }
+    }
+  }
+}
+
+// ==========================================
+// ACCIONES (BOTONES)
+// ==========================================
+.panel-actions {
+  margin-top: auto; // Empuja al fondo
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px dashed $color-border-medium;
+
+  .action-btn {
+    height: 48px;
+    border-radius: 100px; // Pill shape completo
+    border: none;
+    font-family: 'Nexa-Bold', sans-serif;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    &:active { transform: scale(0.98); }
+
+    // Botón Sincronizar (Naranja/Aviso)
+    &.btn-sync {
+      background-color: #ff9800;
+      color: white;
+      &:hover { background-color: darken(#ff9800, 5%); }
+    }
+
+    // Botón Terminar (Principal / Éxito)
+    &.btn-finish {
+      background-color: $color-primary; // Verde Marca
+      color: white;
+      &:hover { background-color: $color-primary-dark; }
+    }
+
+    // Botón Eliminar (Peligro / Secundario)
+    &.btn-delete {
+      background-color: transparent;
+      color: $color-secondary; // Terracota
+      border: 1px solid rgba($color-secondary, 0.3);
+      box-shadow: none;
+
+      &:hover {
+        background-color: rgba($color-secondary, 0.05);
+        border-color: $color-secondary;
+      }
+    }
+  }
+}

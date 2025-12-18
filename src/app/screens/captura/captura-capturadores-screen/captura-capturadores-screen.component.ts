@@ -5,6 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 // Componentes Hijos
 import { InputsCapturaPartialComponent } from '../../../partials/captura/inputs-captura-partial/inputs-captura-partial.component';
 import { TablaCapturaPartialComponent } from '../../../partials/captura/tabla-captura-partial/tabla-captura-partial.component';
+import { InfoCapturaSidebarComponent } from '../../../modals/captura/info-captura-sidebar/info-captura-sidebar.component';
 
 // Servicios e Interfaces
 import { CapturaService } from '../../../services/documents/captura.service';
@@ -17,7 +18,8 @@ import { PayloadDetalleBatch } from '../../../captura.interfaces';
   imports: [
     CommonModule,
     InputsCapturaPartialComponent,
-    TablaCapturaPartialComponent
+    TablaCapturaPartialComponent,
+    InfoCapturaSidebarComponent
   ],
   templateUrl: './captura-capturadores-screen.component.html',
   styleUrls: ['./captura-capturadores-screen.component.scss']
@@ -29,17 +31,23 @@ export class CapturaCapturadoresScreenComponent implements OnInit {
   private _router = inject(Router);
   private _route = inject(ActivatedRoute);
 
-  // Referencia al hijo para poder llamar a limpiarFormulario()
   @ViewChild('inputsComponent') inputsComponent!: InputsCapturaPartialComponent;
 
   public isLoading: boolean = false;
   public colaPendientes: PayloadDetalleBatch[] = [];
-
-  // Estado temporal del producto buscado (Paso 1 del flujo)
   public productoTemporal: any | null = null;
 
   public get capturaActual() {
     return this.capturaService.capturaActualValue;
+  }
+
+  public get totalDetallesCount(): number {
+    return this.capturaService.detallesActualesValue?.length || 0;
+  }
+
+  public get isReadOnly(): boolean {
+    const estado = this.capturaActual?.estado;
+    return estado === 'CONFIRMADO' || estado === 'PROCESADO';
   }
 
   ngOnInit(): void {
@@ -81,76 +89,64 @@ export class CapturaCapturadoresScreenComponent implements OnInit {
   private cargarDatosServidor(id: number): void {
     this.isLoading = true;
     this.capturaService.cargarDetalles(id).subscribe({
-      next: () => this.isLoading = false,
-      error: () => this.isLoading = false
+      next: () => {
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error("Error actualizando datos:", err);
+      }
     });
   }
 
-  // -------------------------------------------------------------------------
-  // PASO 1: BÚSQUEDA DEL PRODUCTO (Al dar Enter en Código)
-  // -------------------------------------------------------------------------
+  // --- LÓGICA DE CAPTURA ACTUALIZADA ---
+
   public procesarBusqueda(codigo: string): void {
     if (!codigo) return;
     this.isLoading = true;
-    this.productoTemporal = null; // Reset previo
+    this.productoTemporal = null;
 
-    this.capturaService.buscarArticulo(codigo).subscribe({
+    // Obtenemos el almacén de la captura activa
+    const almacenId = this.capturaActual?.almacen;
+
+    // Llamamos al servicio pasando el almacén para que traiga la existencia
+    this.capturaService.buscarArticulo(codigo, almacenId).subscribe({
       next: (dataArticulo) => {
         this.isLoading = false;
-        // Al asignar esto, el componente hijo detectará el cambio (ngOnChanges),
-        // mostrará el nombre y pasará el foco a cantidad.
         this.productoTemporal = dataArticulo;
+        // La lógica de asignación al input de cantidad se manejará en el componente hijo
+        // al recibir el cambio de [articuloEncontrado]
       },
       error: (err) => {
         this.isLoading = false;
         console.error(err);
         this._errorsService.mostrarError("Producto no encontrado o error de conexión.");
-        // Opcional: Manejo offline si no encuentra
       }
     });
   }
 
-  // -------------------------------------------------------------------------
-  // PASO 2: GUARDADO FINAL (Al confirmar Cantidad)
-  // -------------------------------------------------------------------------
   public procesarGuardado(datos: { codigo: string, cantidad: number }): void {
     if (this.isLoading) return;
 
-    // 1. VALIDACIÓN DE DUPLICADOS (Usando ID si está disponible)
-    // Usamos el ID del productoTemporal que obtuvimos en el paso 1
     if (this.productoTemporal) {
         const esDuplicado = this.verificarDuplicadoPorID(this.productoTemporal.id);
-
         if (esDuplicado) {
-            // Aquí puedes usar un MatDialog bonito
-            const confirmar = confirm(`El producto "${this.productoTemporal.nombre}" YA está capturado en esta sesión. ¿Deseas sumar la cantidad?`);
+            const confirmar = confirm(`El producto "${this.productoTemporal.nombre}" YA está capturado. ¿Sumar cantidad?`);
             if (!confirmar) return;
         }
-    } else {
-        // Fallback por si acaso se perdió el estado temporal (raro)
-        console.warn("No hay producto temporal, validando solo texto...");
     }
 
-    // 2. ENVIAR AL SERVICIO
     this.capturaService.escanearArticulo(datos.codigo, datos.cantidad).subscribe({
       next: (detalle) => {
-        // ÉXITO
         this._errorsService.mostrarExito(`Guardado: ${detalle.articulo_nombre}`);
-
-        // Limpiamos el formulario del hijo y el estado temporal
         this.productoTemporal = null;
-        if (this.inputsComponent) {
-            this.inputsComponent.limpiarFormulario();
-        }
+        if (this.inputsComponent) this.inputsComponent.limpiarFormulario();
       },
       error: (err) => {
-        // ERROR / OFFLINE
         const mensajeError = err.message || '';
         const esOffline = mensajeError.includes('0') || mensajeError.toLowerCase().includes('unknown error');
-
         if (esOffline) {
           this.agregarAColaOffline(datos.codigo, datos.cantidad);
-          // También limpiamos en offline
           this.productoTemporal = null;
           this.inputsComponent.limpiarFormulario();
         } else {
@@ -163,14 +159,8 @@ export class CapturaCapturadoresScreenComponent implements OnInit {
   private verificarDuplicadoPorID(idArticuloNuevo: number): boolean {
     const detallesActuales = this.capturaService.detallesActualesValue;
     if (!detallesActuales) return false;
-
-    // Buscamos si algún detalle tiene ese mismo ID de artículo
     return detallesActuales.some(d => d.id === idArticuloNuevo);
   }
-
-  // -------------------------------------------------------------------------
-  // LOGICA OFFLINE & CIERRE
-  // -------------------------------------------------------------------------
 
   private agregarAColaOffline(codigo: string, cantidad: number): void {
     const nuevoItem: PayloadDetalleBatch = {
@@ -180,6 +170,8 @@ export class CapturaCapturadoresScreenComponent implements OnInit {
     this.colaPendientes.push(nuevoItem);
     this._errorsService.mostrarAlerta(`Guardado localmente (${this.colaPendientes.length} pendientes).`);
   }
+
+  // --- ACCIONES DEL SIDEBAR Y CIERRE ---
 
   public sincronizarPendientes(): void {
     if (this.colaPendientes.length === 0) return;
@@ -199,7 +191,7 @@ export class CapturaCapturadoresScreenComponent implements OnInit {
 
   public finalizarCaptura(): void {
     if (this.colaPendientes.length > 0) {
-      this._errorsService.mostrarError("Tiene datos pendientes.");
+      this._errorsService.mostrarError("Tiene datos pendientes por sincronizar.");
       return;
     }
     const id = this.capturaActual?.id;
@@ -209,5 +201,23 @@ export class CapturaCapturadoresScreenComponent implements OnInit {
             error: (err) => this._errorsService.mostrarError(err.message)
         });
     }
+  }
+
+  public eliminarCapturaActual(): void {
+    const id = this.capturaActual?.id;
+    if (!id) return;
+
+    this.isLoading = true;
+    this.capturaService.eliminarCaptura(id).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this._errorsService.mostrarExito("Captura eliminada correctamente.");
+        this._router.navigate(['/home/dashboard']);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this._errorsService.mostrarError("No se pudo eliminar la captura: " + err.message);
+      }
+    });
   }
 }

@@ -1,12 +1,19 @@
 <div class="screen-container">
 
-  <!-- ZONA A: Tabla (Ocupa el espacio disponible) -->
+  <!--
+    ZONA A: Tabla
+    [isReadOnly]: Pasamos la bandera al hijo.
+    Si ZONA B desaparece, Flexbox hará que este div ocupe el 100% de la altura.
+  -->
   <div class="table-wrapper">
-    <app-tabla-captura-partial></app-tabla-captura-partial>
+    <app-tabla-captura-partial [isReadOnly]="isReadOnly"></app-tabla-captura-partial>
   </div>
 
-  <!-- ZONA B: Inputs (Lo crítico para que funcione) -->
-  <div class="bottom-actions">
+  <!--
+    ZONA B: Inputs
+    *ngIf="!isReadOnly": Solo se renderiza si la captura es editable (BORRADOR).
+  -->
+  <div class="bottom-actions" *ngIf="!isReadOnly">
     <app-inputs-captura-partial
         #inputsComponent
         [isLoading]="isLoading"
@@ -16,13 +23,14 @@
     </app-inputs-captura-partial>
   </div>
 
-  <div class="d-flex justify-content-end mt-3 gap-2">
-      <button class="btn btn-warning" *ngIf="colaPendientes.length > 0" (click)="sincronizarPendientes()">
-          Sincronizar Pendientes ({{colaPendientes.length}})
-      </button>
-      <button class="btn btn-success" (click)="finalizarCaptura()">
-          Terminar Captura
-      </button>
-  </div>
+  <!-- Sidebar (Siempre visible para ver info, acciones internas controladas por su propia lógica) -->
+  <app-info-captura-sidebar
+    [captura]="capturaActual"
+    [totalArticulos]="totalDetallesCount"
+    [pendientesSincronizar]="colaPendientes.length"
+    (onFinalizar)="finalizarCaptura()"
+    (onSincronizar)="sincronizarPendientes()"
+    (onEliminar)="eliminarCapturaActual()">
+  </app-info-captura-sidebar>
 
 </div>

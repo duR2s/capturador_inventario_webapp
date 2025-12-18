@@ -1,0 +1,32 @@
+<!-- CASO A: Tarjeta con Datos -->
+<div class="card-container data-card"
+     *ngIf="captura"
+     (click)="handleClick()">
+
+  <!-- Indicador de Estado -->
+  <div class="status-row">
+    <div class="status-circle" [ngClass]="statusColorClass"></div>
+    <span class="status-text">{{ statusText }}</span>
+  </div>
+
+  <!-- Información Principal -->
+  <div class="info-content">
+    <h3 class="folio-text">{{ captura.folio }}</h3>
+    <p class="almacen-text">{{ captura.almacen_nombre || 'Sin Almacén' }}</p>
+  </div>
+
+  <!-- Pie: Fecha -->
+  <div class="footer-row">
+    <span class="date-text">{{ captura.fecha_captura | date:'mediumDate' }}</span>
+  </div>
+</div>
+
+<!-- CASO B: Tarjeta Vacía / Nueva (Botón +) -->
+<div class="card-container empty-card"
+     *ngIf="!captura"
+     (click)="handleClick()">
+  <div class="icon-wrapper">
+    <mat-icon>add</mat-icon>
+  </div>
+  <span class="new-label">Nueva Captura</span>
+</div>

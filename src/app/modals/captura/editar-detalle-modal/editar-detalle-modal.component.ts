@@ -79,13 +79,13 @@ export class EditarDetalleModalComponent implements OnInit {
     // Listener para actualizar nombre si cambia el código (Simulación visual)
     // Nota: La lógica real de búsqueda la hace el padre, aquí solo permitimos la edición.
     // Si quisieras limpiar el nombre al cambiar código:
-    /*
+
     this.form.get('codigo')?.valueChanges.subscribe(val => {
        if(this.data.mode === 'edit' && val !== item.codigo) {
           this.form.get('nombre')?.setValue('Calculando...');
        }
     });
-    */
+
   }
 
   close() {

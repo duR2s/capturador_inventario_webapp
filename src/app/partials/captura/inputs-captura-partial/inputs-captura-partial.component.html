@@ -10,13 +10,6 @@
         <mat-icon>{{ isMobileImageExpanded ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}</mat-icon>
       </button>
 
-      <!--
-         BOTÓN MÓVIL PRINCIPAL (SUBMIT):
-         Visible solo en móvil (vía CSS), ubicado arriba del header/título.
-      -->
-
-
-
       <div class="header">
         <h2 class="title-captura">
           {{ isEditMode ? 'Editar Captura' : 'Captura Rápida' }}
@@ -26,8 +19,15 @@
         </button>
       </div>
 
+      <!--
+          CAMBIO CRÍTICO:
+          1. Cambiado <form> por <div>.
+          2. Eliminado (submit).
+          3. Eliminado botón hidden.
+      -->
       <div [formGroup]="form" class="form-grid" (keydown.enter)="$event.stopPropagation()">
 
+        <!-- Botón Móvil: Type button y (click) manual -->
         <button type="button" class="btn-mobile-floating"
                 [disabled]="form.invalid || isLoading"
                 (click)="guardar()">
@@ -56,15 +56,14 @@
           </button>
         </mat-form-field>
 
-        <!-- 3. CANTIDAD -->
+         <!-- 3. CAMPO CANTIDAD -->
         <mat-form-field appearance="outline" class="pill-input cantidad-field">
           <mat-label>Cantidad</mat-label>
           <input matInput #cantidadInput
                  type="number"
                  formControlName="cantidad"
                  placeholder="0"
-                (keydown.enter)="onCantidadEnter()"
-                 >
+                 (keydown.enter)="onCantidadEnter()">
           <span matSuffix class="unit-suffix">pzas</span>
         </mat-form-field>
 
@@ -73,12 +72,11 @@
             {{ errorMessage }}
         </div>
 
-        <!-- Botón submit invisible para que el Enter funcione en Desktop -->
-        <button type="submit" class="hidden-submit" style="display: none;"></button>
-
-        <!-- ACCIONES DESKTOP -->
+        <!-- ACCIONES DESKTOP: Type button y (click) manual -->
         <div class="actions" *ngIf="isEditMode">
-          <button type="submit" class="btn-guardar" [disabled]="form.invalid || isLoading">
+          <button type="button" class="btn-guardar"
+                  [disabled]="form.invalid || isLoading"
+                  (click)="guardar()">
             <mat-icon>check</mat-icon>
             CONFIRMAR CAMBIOS
           </button>

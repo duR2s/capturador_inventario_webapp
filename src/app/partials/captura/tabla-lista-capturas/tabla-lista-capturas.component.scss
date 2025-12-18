@@ -1,0 +1,236 @@
+@import '../../../styles/color-variables';
+
+// ==========================================
+// CONFIGURACIÓN LOCAL
+// ==========================================
+$table-row-height: 48px;
+
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.table-container-card {
+  background: $color-white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  border: 1px solid $color-border-light;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+// ==========================================
+// CABECERA (Título y Buscador)
+// ==========================================
+.table-header {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid $color-border-light;
+  background-color: $color-bg-light; // Fondo sutil cabecera
+
+  .table-title {
+    margin: 0;
+    font-family: 'Nexa-Bold', sans-serif;
+    font-size: 18px;
+    color: $color-text-title;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  // Buscador denso (estilo píldora)
+  .dense-search {
+    width: 300px;
+
+    ::ng-deep .mat-mdc-text-field-wrapper {
+      background-color: $color-white !important;
+      border: 1px solid $color-border-medium;
+      border-radius: 100px !important;
+      height: 36px;
+      padding: 0 16px;
+    }
+
+    ::ng-deep .mat-mdc-form-field-flex {
+      height: 36px;
+      align-items: center;
+    }
+
+    ::ng-deep .mat-mdc-form-field-infix {
+      padding: 0 !important;
+      min-height: 36px !important;
+    }
+
+    ::ng-deep input {
+      font-size: 13px;
+      color: $color-text-dark;
+    }
+
+    ::ng-deep .mat-icon {
+      font-size: 18px;
+      color: $color-text-muted;
+      margin-right: 8px;
+    }
+
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; } // Sin espacio de error
+  }
+}
+
+// ==========================================
+// TABLA MATERIAL
+// ==========================================
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table.mat-mdc-table {
+  width: 100%;
+
+  .mat-mdc-header-row {
+    height: 40px;
+    background-color: $color-white;
+  }
+
+  .mat-mdc-header-cell {
+    font-family: 'Nexa-Bold', sans-serif;
+    font-size: 12px;
+    color: $color-text-light;
+    border-bottom: 2px solid $color-bg-light-2;
+    padding: 0 16px;
+
+    &.w-icon { width: 40px; padding-right: 0; }
+    &.text-right { text-align: right; }
+  }
+
+  .mat-mdc-row {
+    height: $table-row-height;
+    transition: background 0.2s;
+    &:hover { background-color: $color-bg-light-3; } // Hover color hueso suave
+  }
+
+  .mat-mdc-cell {
+    font-size: 13px;
+    color: $color-text-dark;
+    border-bottom: 1px solid $color-border-light;
+    padding: 0 16px;
+    font-family: 'Nexa', sans-serif;
+
+    &.cell-folio {
+      font-family: 'Nexa-Bold', sans-serif;
+      color: $color-text-title;
+    }
+
+    &.cell-muted {
+      color: $color-text-light;
+    }
+  }
+}
+
+// ==========================================
+// INDICADORES DE ESTADO
+// ==========================================
+
+// 1. Círculo al inicio
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin: 0 auto;
+
+  &.status-orange { background-color: $status-borrador; box-shadow: 0 0 6px rgba($status-borrador, 0.4); }
+  &.status-green { background-color: $status-confirmado; box-shadow: 0 0 6px rgba($status-confirmado, 0.4); }
+  &.status-blue { background-color: $status-procesado; box-shadow: 0 0 6px rgba($status-procesado, 0.4); }
+  &.status-gray { background-color: $status-desconocido; }
+}
+
+// 2. Texto Subrayado
+.status-text-underlined {
+  font-family: 'Nexa-Bold', sans-serif;
+  font-size: 12px;
+  position: relative;
+  padding-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    opacity: 0.5;
+  }
+
+  &.status-orange { &::after { background-color: $status-borrador; } }
+  &.status-green { &::after { background-color: $status-confirmado; } }
+  &.status-blue { &::after { background-color: $status-procesado; } }
+  &.status-gray { &::after { background-color: $status-desconocido; } }
+}
+
+// ==========================================
+// ACCIONES
+// ==========================================
+.actions-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+
+  button.mat-mdc-icon-button {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+    }
+
+    // Colores sutiles por defecto
+    color: $color-text-muted;
+
+    &:hover {
+      background-color: rgba(0,0,0,0.05);
+
+      // Colores específicos al hover
+      &[color="primary"] { color: $color-primary; }
+      &[color="warn"] { color: $color-error; }
+    }
+  }
+}
+
+.empty-cell {
+  text-align: center;
+  padding: 32px !important;
+  color: $color-text-muted;
+  font-style: italic;
+}
+
+@media (max-width: 480px) {
+  .table-header{
+
+      .table-title {
+        font-size: 13px;
+      }
+
+      .dense-search {
+        width: 180px;
+
+        ::ng-deep input {
+          font-size: 11px;
+        }
+
+        ::ng-deep .mat-icon {
+          font-size: 13px;
+          color: $color-text-muted;
+          margin-right: 5px;
+        }
+      }
+  }
+}

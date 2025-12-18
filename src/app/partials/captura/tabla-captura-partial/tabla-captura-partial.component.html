@@ -1,19 +1,17 @@
 <div class="captura-widget">
 
-  <!-- 1. ENCABEZADO UNIFICADO (Folio + Buscador) -->
+  <!-- 1. ENCABEZADO UNIFICADO -->
   <div class="header-row">
-
-    <!-- Bloque Folio DINÁMICO -->
-    <!-- Ahora accedemos a capturaHeader?.propiedad -->
     <div class="folio-section">
       <span class="folio-label">Folio:</span>
       <span class="folio-value">{{ capturaHeader?.folio || 'Cargando...' }}</span>
 
-      <!-- Ejemplo: Si quisieras mostrar el almacén (descomentar para usar) -->
-      <!-- <small class="text-muted ml-2">{{ capturaHeader?.almacen_nombre }}</small> -->
+      <!-- Badge de Solo Lectura -->
+      <span class="badge-readonly" *ngIf="isReadOnly">
+        <mat-icon>lock</mat-icon> SOLO LECTURA
+      </span>
     </div>
 
-    <!-- Bloque Buscador (Flexible) -->
     <div class="search-section">
       <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dense-search">
         <mat-icon matPrefix>search</mat-icon>
@@ -23,10 +21,9 @@
                autocomplete="off">
       </mat-form-field>
     </div>
-
   </div>
 
-  <!-- 2. TABLA (Maximizado espacio vertical) -->
+  <!-- 2. TABLA -->
   <div class="table-scroll-container">
     <table mat-table [dataSource]="dataSource" class="mat-elevation-z0">
 
@@ -39,34 +36,42 @@
       <!-- Nombre -->
       <ng-container matColumnDef="nombre">
         <th mat-header-cell *matHeaderCellDef> Descripción </th>
-        <td mat-cell *matCellDef="let element"> {{element.articulo_nombre || 'Cargando...'}} </td>
+        <td mat-cell *matCellDef="let element"> {{element.articulo_nombre || element.nombre_articulo || 'Cargando...'}} </td>
       </ng-container>
 
-      <!-- Prev -->
+      <!-- Existencia Previa -->
       <ng-container matColumnDef="existencia_previa">
         <th mat-header-cell *matHeaderCellDef class="text-center"> Ex. Previa </th>
-        <td mat-cell *matCellDef="let element" class="text-center"> {{element.existencia_sistema_al_momento | number:'1.0-2'}} </td>
-      </ng-container>
-
-      <!-- Capt -->
-      <ng-container matColumnDef="existencia_capturada">
-        <th mat-header-cell *matHeaderCellDef class="text-center"> Capt. </th>
-        <td mat-cell *matCellDef="let element" class="text-center font-bold text-primary"> {{element.cantidad_contada | number:'1.0-2'}} </td>
-      </ng-container>
-
-      <!-- Dif -->
-      <ng-container matColumnDef="diferencia">
-        <th mat-header-cell *matHeaderCellDef class="text-center"> Dif. </th>
         <td mat-cell *matCellDef="let element" class="text-center">
-            {{ (element.cantidad_contada - element.existencia_sistema_al_momento) | number:'1.0-2' }}
+          {{element.existencia_sistema_al_momento | number:'1.0-2'}}
         </td>
       </ng-container>
 
-      <!-- ACCIONES -->
+      <!-- Existencia Capturada -->
+      <ng-container matColumnDef="existencia_capturada">
+        <th mat-header-cell *matHeaderCellDef class="text-center"> Capt. </th>
+        <td mat-cell *matCellDef="let element" class="text-center font-bold text-primary">
+          {{element.cantidad_contada | number:'1.0-2'}}
+        </td>
+      </ng-container>
+
+      <!-- Diferencia -->
+      <ng-container matColumnDef="diferencia">
+        <th mat-header-cell *matHeaderCellDef class="text-center"> Dif. </th>
+        <td mat-cell *matCellDef="let element" class="text-center">
+            {{ (element.cantidad_contada - (element.existencia_sistema_al_momento || 0)) | number:'1.0-2' }}
+        </td>
+      </ng-container>
+
+      <!-- ACCIONES (Con bloqueo visual si ReadOnly) -->
+
       <ng-container matColumnDef="editar">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let element" class="text-center">
-          <button mat-icon-button class="btn-edit" (click)="editarFila(element)">
+          <button mat-icon-button class="btn-edit"
+                  [class.disabled-icon]="isReadOnly"
+                  [disabled]="isReadOnly"
+                  (click)="editarFila(element)">
             <mat-icon>edit</mat-icon>
           </button>
         </td>
@@ -75,7 +80,10 @@
       <ng-container matColumnDef="ticket">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let element" class="text-center">
-          <button mat-icon-button class="btn-ticket" (click)="ticketProducto(element)">
+          <button mat-icon-button class="btn-ticket"
+                  [class.disabled-icon]="isReadOnly"
+                  [disabled]="isReadOnly"
+                  (click)="ticketProducto(element)">
             <mat-icon>receipt</mat-icon>
           </button>
         </td>
@@ -84,13 +92,16 @@
       <ng-container matColumnDef="eliminar">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let element" class="text-center">
-          <button mat-icon-button class="btn-delete" (click)="eliminarFila(element)">
+          <button mat-icon-button class="btn-delete"
+                  [class.disabled-icon]="isReadOnly"
+                  [disabled]="isReadOnly"
+                  (click)="eliminarFila(element)">
             <mat-icon>close</mat-icon>
           </button>
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true" ></tr>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.last-added-row]="false"></tr>
 
       <tr class="mat-row" *matNoDataRow>
@@ -100,4 +111,8 @@
       </tr>
     </table>
   </div>
+
+  <!-- PAGINATOR
+  <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons aria-label="Páginas"></mat-paginator>
+  -->
 </div>

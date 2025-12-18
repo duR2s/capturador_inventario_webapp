@@ -1,0 +1,112 @@
+<div class="table-container-card">
+
+  <!-- CABECERA DE LA TABLA (BUSCADOR) -->
+  <div class="table-header">
+    <h3 class="table-title">Historial de Capturas</h3>
+
+    <mat-form-field appearance="outline" class="dense-search">
+      <mat-icon matPrefix>search</mat-icon>
+      <!-- CORRECCIÓN: Agregado #input para que {{input.value}} funcione abajo -->
+      <input matInput
+             #input
+             (keyup)="applyFilter($event)"
+             placeholder="Buscar folio, almacén..."
+             autocomplete="off">
+    </mat-form-field>
+  </div>
+
+  <!-- TABLA -->
+  <div class="table-responsive">
+    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z0">
+
+      <!-- 1. Indicador de Estado (Círculo) -->
+      <ng-container matColumnDef="estado_indicator">
+        <th mat-header-cell *matHeaderCellDef class="w-icon"></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="status-dot" [ngClass]="getStatusClass(row.estado)" [matTooltip]="getStatusLabel(row.estado)"></div>
+        </td>
+      </ng-container>
+
+      <!-- 2. Folio -->
+      <ng-container matColumnDef="folio">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Folio </th>
+        <td mat-cell *matCellDef="let row" class="cell-folio">
+          {{row.folio}}
+        </td>
+      </ng-container>
+
+      <!-- 3. Almacén -->
+      <ng-container matColumnDef="almacen">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Almacén </th>
+        <td mat-cell *matCellDef="let row" class="cell-muted">
+          {{row.almacen_nombre || '---'}}
+        </td>
+      </ng-container>
+
+      <!-- 4. Capturador -->
+      <ng-container matColumnDef="capturador">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Capturador </th>
+        <td mat-cell *matCellDef="let row" class="cell-muted">
+          {{row.capturador_nombre || '---'}}
+        </td>
+      </ng-container>
+
+      <!-- 5. Fecha -->
+      <ng-container matColumnDef="fecha">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha Creación </th>
+        <td mat-cell *matCellDef="let row" class="cell-muted">
+          {{row.fecha_captura | date:'mediumDate'}} <small>{{row.fecha_captura | date:'shortTime'}}</small>
+        </td>
+      </ng-container>
+
+      <!-- 6. Estado Texto (Subrayado) -->
+      <ng-container matColumnDef="estado_text">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+        <td mat-cell *matCellDef="let row">
+          <span class="status-text-underlined" [ngClass]="getStatusClass(row.estado)">
+            {{ getStatusLabel(row.estado) }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- 7. Acciones -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef class="text-right"> Acciones </th>
+        <td mat-cell *matCellDef="let row">
+          <div class="actions-group">
+            <!-- Ver -->
+            <button mat-icon-button (click)="onView.emit(row)" matTooltip="Ver detalle">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <!-- Editar (Solo si es borrador o para continuar) -->
+            <button mat-icon-button color="primary" (click)="onEdit.emit(row)" matTooltip="Continuar captura">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <!-- Borrar -->
+            <button mat-icon-button color="warn" (click)="onDelete.emit(row)" matTooltip="Eliminar">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <!-- Row vacía -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-cell" colspan="7">
+          No se encontraron capturas con el filtro "{{input.value}}"
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- PAGINADOR -->
+  <mat-paginator [pageSize]="20"
+                 [pageSizeOptions]="[10, 20, 50]"
+                 showFirstLastButtons
+                 aria-label="Seleccionar página">
+  </mat-paginator>
+
+</div>
