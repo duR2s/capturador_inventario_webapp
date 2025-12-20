@@ -6,12 +6,14 @@ import { RegistroUsuariosScreenComponent } from './screens/registro-usuarios-scr
 import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-layout.component';
 import { CapturaCapturadoresScreenComponent } from './screens/captura/captura-capturadores-screen/captura-capturadores-screen.component';
 import { MenuCapturaComponent } from './screens/captura/menu-captura/menu-captura.component';
+// 1. Importamos el Guard que acabamos de crear
+import { AuthGuard } from './auth.guard';
 
 // --- app.routes.ts ---
 // Este archivo define las rutas principales de la aplicación.
 
 export const routes: Routes = [
-  // Rutas de Autenticación
+  // Rutas de Autenticación (Públicas)
   {
     path: '',
     component: AuthLayoutComponent,
@@ -22,10 +24,13 @@ export const routes: Routes = [
     ]
   },
 
-  // Rutas del Dashboard
+  // Rutas del Dashboard (Privadas)
   {
     path: 'home',
     component: DashboardLayoutComponent,
+    // 2. APLICAMOS EL GUARD AQUÍ
+    // Al ponerlo en la ruta padre, protege automáticamente a todos sus hijos (dashboard, captura, form/:id)
+    canActivate: [AuthGuard],
     children: [
       { path: 'dashboard', component: DashboardInicioScreenComponent},
       { path: 'captura', component: MenuCapturaComponent},
