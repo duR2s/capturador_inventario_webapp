@@ -3,7 +3,6 @@ import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FacadeService } from 'src/app/services/facade.service';
-// Importamos el servicio correcto
 import { EmpleadosService } from 'src/app/services/roles/empleados.service';
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from '@angular/material/input';
@@ -16,7 +15,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-registro-empleados', // Selector ajustado
+  selector: 'app-registro-empleados',
   standalone: true,
   imports: [
     CommonModule,
@@ -32,14 +31,13 @@ import { DatePipe } from '@angular/common';
   ],
   providers: [DatePipe],
   templateUrl: './registro-empleados.component.html',
-  styleUrls: ['./registro-empleados.component.scss'] // Reutiliza estilos o crea uno nuevo si es necesario
+  styleUrls: ['./registro-empleados.component.scss']
 })
 export class RegistroEmpleadosComponent implements OnInit {
 
   @Input() rol: string = "";
   @Input() datos_user: any = {};
 
-  // Cambiamos 'admin' por 'empleado'
   public empleado: any = {};
   public errors: any = {};
   public editar: boolean = false;
@@ -54,7 +52,7 @@ export class RegistroEmpleadosComponent implements OnInit {
   constructor(
     private location: Location,
     public activatedRoute: ActivatedRoute,
-    private empleadosService: EmpleadosService, // Inyección del servicio de empleados
+    private empleadosService: EmpleadosService,
     private facadeService: FacadeService,
     private router: Router,
     private datePipe: DatePipe
@@ -67,27 +65,41 @@ export class RegistroEmpleadosComponent implements OnInit {
       console.log("ID Empleado a editar: ", this.idUser);
 
       if (this.datos_user) {
-        // Mapeo de datos para edición (coherente con EmpleadosService y modelo Back)
         this.empleado = {
           id: this.datos_user.id,
-          clave_interna: this.datos_user.clave_interna, // Aquí usamos clave_interna directo
+          clave_interna: this.datos_user.clave_interna,
           rfc: this.datos_user.rfc,
           telefono: this.datos_user.telefono,
           fecha_nacimiento: this.datos_user.fecha_nacimiento,
           first_name: this.datos_user.user?.first_name || "",
           last_name: this.datos_user.user?.last_name || "",
           email: this.datos_user.user?.email || this.datos_user.user?.username || "",
-          // Si quieres editar el rol, podrías asignarlo aquí, por defecto lo dejamos como viene o CAPTURADOR
-          puesto: this.datos_user.puesto || 'CAPTURADOR'
+          // Mantenemos el puesto original si existe, si no, calculamos
+          puesto: this.datos_user.puesto || this.determinarPuesto(this.rol)
         };
       }
     } else {
-      // Inicialización para nuevo registro
       this.empleado = this.empleadosService.esquemaEmpleado();
-      this.empleado.puesto = this.rol || 'CAPTURADOR'; // Si viene rol por input lo usamos
+      // CORRECCIÓN: Normalizamos el puesto desde el inicio
+      this.empleado.puesto = this.determinarPuesto(this.rol);
       this.token = this.facadeService.getSessionToken();
     }
     console.log("Empleado (Formulario): ", this.empleado);
+  }
+
+  // NUEVO: Función auxiliar para limpiar el rol de entrada
+  private determinarPuesto(rolInput: string): string {
+    if (!rolInput) return 'CAPTURADOR';
+
+    const rolNormalizado = rolInput.toUpperCase().trim();
+
+    // Mapeo seguro: si dice "otro" o "otros", es OTRO. Todo lo demás es CAPTURADOR.
+    if (rolNormalizado.includes('OTRO')) {
+      return 'OTRO';
+    }
+
+    // Por defecto (incluye "capturador", "capturadores", "empleado", etc.)
+    return 'CAPTURADOR';
   }
 
   public showPassword() {
@@ -122,10 +134,15 @@ export class RegistroEmpleadosComponent implements OnInit {
 
   public registrar(): void {
     this.errors = {};
-    // Usamos validarEmpleado del servicio nuevo
     this.errors = this.empleadosService.validarEmpleado(this.empleado, this.editar);
     if(Object.keys(this.errors).length > 0){
       return;
+    }
+
+    // CORRECCIÓN: Forzamos el puesto correcto justo antes de enviar
+    // Esto asegura que si el usuario manipuló el input o el binding falló, se envíe limpio.
+    if (!this.empleado.puesto) {
+       this.empleado.puesto = this.determinarPuesto(this.rol);
     }
 
     if(this.empleado.password == this.empleado.confirmar_password){
@@ -134,7 +151,7 @@ export class RegistroEmpleadosComponent implements OnInit {
           alert("Empleado registrado exitosamente");
           console.log("Respuesta: ", response);
           if(this.token && this.token !== ""){
-            this.router.navigate(["empleados"]); // Ajusta esta ruta a tu lista de empleados
+            this.router.navigate(["empleados"]);
           } else {
             this.router.navigate(["/"]);
           }
@@ -165,11 +182,16 @@ export class RegistroEmpleadosComponent implements OnInit {
         this.empleado.id = this.idUser;
     }
 
+    // Aseguramos puesto en actualización también (opcional, pero buena práctica)
+    if (!this.empleado.puesto) {
+      this.empleado.puesto = this.determinarPuesto(this.rol);
+    }
+
     this.empleadosService.actualizarEmpleado(this.empleado).subscribe(
       (response) => {
         alert("Empleado actualizado exitosamente");
         console.log("Respuesta: ", response);
-        this.router.navigate(["empleados"]); // Ajusta esta ruta a tu lista de empleados
+        this.router.navigate(["empleados"]);
       },
       (error) => {
         alert("Error al actualizar empleado");

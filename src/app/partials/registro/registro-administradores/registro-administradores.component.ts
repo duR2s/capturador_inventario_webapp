@@ -36,7 +36,7 @@ import { DatePipe } from '@angular/common';
 })
 export class RegistroAdminComponent implements OnInit {
 
-  @Input() rol: string = "";
+  @Input() rol: string = ""; // Puede venir sucio como "administradores"
   @Input() datos_user: any = {};
 
   public admin:any = {};
@@ -56,7 +56,7 @@ export class RegistroAdminComponent implements OnInit {
     private administradoresService: AdministradoresService,
     private facadeService: FacadeService,
     private router: Router,
-    private datePipe: DatePipe // Inyección para formateo de fecha
+    private datePipe: DatePipe
   ) { }
 
   ngOnInit(): void {
@@ -70,18 +70,17 @@ export class RegistroAdminComponent implements OnInit {
           clave_admin: this.datos_user.clave_interna || this.datos_user.clave_admin,
           rfc: this.datos_user.rfc,
           telefono: this.datos_user.telefono,
-          // La edad ya no se edita manual, pero se recibe para mostrar si fuera necesario (aunque ya no tenemos input)
-          // edad: this.datos_user.edad,
           fecha_nacimiento: this.datos_user.fecha_nacimiento,
           first_name: this.datos_user.user?.first_name || "",
           last_name: this.datos_user.user?.last_name || "",
           email: this.datos_user.user?.email || this.datos_user.user?.username || "",
-          rol: this.datos_user.puesto || 'ADMIN'
+          rol: 'ADMIN' // Forzamos ADMIN en edición también
         };
       }
     } else {
       this.admin = this.administradoresService.esquemaAdmin();
-      this.admin.rol = this.rol;
+      // CORRECCIÓN: Ignoramos el @Input rol si viene incorrecto y forzamos la constante
+      this.admin.rol = 'ADMIN';
       this.token = this.facadeService.getSessionToken();
     }
   }
@@ -124,8 +123,10 @@ export class RegistroAdminComponent implements OnInit {
       return;
     }
 
+    // CORRECCIÓN FINAL: Aseguramos que se envíe 'ADMIN' justo antes del submit
+    this.admin.rol = 'ADMIN';
+
     if(this.admin.password == this.admin.confirmar_password){
-      // El backend calculará la edad
       this.administradoresService.registrarAdmin(this.admin).subscribe(
         (response) => {
           alert("Administrador registrado exitosamente");
@@ -159,6 +160,9 @@ export class RegistroAdminComponent implements OnInit {
     if (!this.admin.id) {
         this.admin.id = this.idUser;
     }
+
+    // Aseguramos rol en actualización
+    this.admin.rol = 'ADMIN';
 
     this.administradoresService.actualizarAdmin(this.admin).subscribe(
       (response) => {

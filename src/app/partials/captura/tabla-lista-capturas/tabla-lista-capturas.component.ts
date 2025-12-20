@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ViewChild, OnChanges, SimpleChanges, AfterViewInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, OnChanges, SimpleChanges, AfterViewInit, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -11,6 +11,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 // Importa tu interfaz de Captura
 import { Captura } from '../../../captura.interfaces';
+
+//Importar Servicios
+import { FacadeService } from 'src/app/services/facade.service';
 
 @Component({
   selector: 'app-tabla-lista-capturas',
@@ -55,7 +58,17 @@ export class TablaListaCapturasComponent implements OnChanges, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
+  public isAdmin: boolean = false;
+
+  private facadeService = inject(FacadeService);
+
   constructor() {}
+
+  ngOnInit(): void {
+    // 1. Verificar si es ADMIN
+    const rol = this.facadeService.getUserGroup();
+    this.isAdmin = (rol === 'ADMIN');
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['capturas'] && this.capturas) {
