@@ -11,7 +11,6 @@ import { MatButtonModule } from '@angular/material/button';
   styleUrls: ['./info-captura-sidebar.component.scss']
 })
 export class InfoCapturaSidebarComponent {
-  // Usamos 'any' para evitar errores de importación de interfaces complejas
   @Input() captura: any = null;
   @Input() totalArticulos: number = 0;
   @Input() pendientesSincronizar: number = 0;
@@ -19,6 +18,7 @@ export class InfoCapturaSidebarComponent {
   @Output() onFinalizar = new EventEmitter<void>();
   @Output() onSincronizar = new EventEmitter<void>();
   @Output() onEliminar = new EventEmitter<void>();
+  @Output() onDescargarExcel = new EventEmitter<void>(); // NUEVO EVENTO
 
   public isOpen: boolean = false;
 
@@ -36,8 +36,11 @@ export class InfoCapturaSidebarComponent {
     this.onSincronizar.emit();
   }
 
+  ejecutarDescargarExcel() {
+    this.onDescargarExcel.emit();
+  }
+
   ejecutarEliminar() {
-    // Usamos window.confirm para evitar conflictos con servicios de dialogo no importados
     if (confirm('¿Estás seguro de que deseas ELIMINAR toda la sesión?')) {
       this.onEliminar.emit();
     }

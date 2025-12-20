@@ -1,4 +1,3 @@
-// Definición de interfaces alineadas con el backend en Django (snake_case)
 // Ubicación: src/app/models/captura.interfaces.ts
 
 export interface Articulo {
@@ -11,32 +10,32 @@ export interface Articulo {
   ultima_sincronizacion?: string;
 }
 
-// NUEVA INTERFAZ PARA TICKETS
 export interface TicketSalida {
   id?: number;
-  detalle?: number; // ID del detalle padre
+  detalle?: number;
   responsable: string;
   cantidad: number;
   fecha_hora?: string;
 }
 
 export interface DetalleCaptura {
-  id?: number; // Opcional porque al crearlo localmente offline no tiene ID de DB aun
-  captura?: number; // ID de la captura padre
-  producto_codigo: string; // Coincide con models.py del backend
+  id?: number;
+  captura?: number;
+
+  // CORRECCIÓN: Ahora recibimos 'articulo' como el ID numérico desde el backend
+  articulo?: number;
+
+  producto_codigo: string;
   cantidad_contada: number;
   existencia_sistema_al_momento?: number;
 
-  // Propiedades opcionales de respuesta backend
   nombre_articulo?: string;
   folio_captura?: string;
-  articulo_nombre?: string; // Mapeo del serializer nuevo
+  articulo_nombre?: string;
 
-  // NUEVOS CAMPOS (Sincronizados con el Serializer actualizado)
-  tickets?: TicketSalida[]; // Lista de tickets generados
-  conteo_tickets?: number;  // Suma total de piezas retiradas
+  tickets?: TicketSalida[];
+  conteo_tickets?: number;
 
-  // Flags Frontend (No se envían al backend, útiles para UI Offline)
   pendiente_sync?: boolean;
   error_sync?: string;
 }
@@ -44,10 +43,10 @@ export interface DetalleCaptura {
 export interface Captura {
   id?: number;
   folio: string;
-  capturador?: number; // ID del usuario
+  capturador?: number;
   capturador_nombre?: string;
   fecha_captura?: string;
-  estado: 'BORRADOR' | 'CONFIRMADO' | 'PROCESADO'; // Actualizado con los estados reales
+  estado: 'BORRADOR' | 'CONFIRMADO' | 'PROCESADO';
   modo_offline?: boolean;
   fecha_reportada?: string;
   detalles?: DetalleCaptura[];
@@ -55,15 +54,16 @@ export interface Captura {
   almacen?: number;
 }
 
-// Payload para endpoint individual (Online)
+// Payload actualizado para incluir ID
 export interface PayloadEscaner {
   captura_id: number;
   producto_codigo: string;
   cantidad_contada: number;
+  articulo_id?: number; // NUEVO
 }
 
-// Payload para endpoint masivo (El backend espera solo array de detalles, el ID va en URL)
 export interface PayloadDetalleBatch {
   producto_codigo: string;
   cantidad_contada: number;
+  articulo_id?: number; // NUEVO
 }

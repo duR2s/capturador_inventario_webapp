@@ -2,12 +2,11 @@ import { Component, OnInit, inject, ViewChild, ElementRef, OnDestroy } from '@an
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialog } from '@angular/material/dialog'; // Importar Dialog
+import { MatDialog } from '@angular/material/dialog';
 
 // Componentes Hijos
 import { CapturaInfoCardComponent } from '../../../modals/captura/captura-info-card/captura-info-card.component';
 import { RegistroCapturaComponent } from '../../../partials/captura/registro-captura/registro-captura.component';
-// NUEVO: Importar la tabla
 import { TablaListaCapturasComponent } from '../../../partials/captura/tabla-lista-capturas/tabla-lista-capturas.component';
 import { ConfirmationDialogModalComponent } from '../../../modals/utilities/confirmation-dialog-modal/confirmation-dialog-modal.component';
 
@@ -23,7 +22,7 @@ import { Captura } from '../../../captura.interfaces';
     MatIconModule,
     CapturaInfoCardComponent,
     RegistroCapturaComponent,
-    TablaListaCapturasComponent // Agregar a imports
+    TablaListaCapturasComponent
   ],
   templateUrl: './menu-captura.component.html',
   styleUrls: ['./menu-captura.component.scss']
@@ -32,21 +31,18 @@ export class MenuCapturaComponent implements OnInit, OnDestroy {
 
   private capturaService = inject(CapturaService);
   private router = inject(Router);
-  private dialog = inject(MatDialog); // Inyectar Dialog
+  private dialog = inject(MatDialog);
 
-  // Data completa para la tabla
   public todasLasCapturas: Captura[] = [];
-
-  // Fila 1: [NULL (Nueva), ...3 Confirmados, ...3 Procesados]
   public row1Items: (Captura | null)[] = [];
-
-  // Fila 2: [...7 Borradores]
   public row2Items: Captura[] = [];
 
   public isLoading: boolean = true;
-  public showNuevoForm: boolean = false;
 
-  // Refs para Scroll
+  // Variables para controlar el formulario (Create vs Edit)
+  public showNuevoForm: boolean = false;
+  public capturaParaEditar: Captura | null = null; // NUEVO
+
   @ViewChild('scrollRow1') scrollRow1!: ElementRef<HTMLElement>;
   @ViewChild('scrollRow2') scrollRow2!: ElementRef<HTMLElement>;
 
@@ -66,7 +62,7 @@ export class MenuCapturaComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.capturaService.listarMisCapturas().subscribe({
       next: (data) => {
-        this.todasLasCapturas = data; // Guardamos todo para la tabla
+        this.todasLasCapturas = data;
         this.procesarListas(data);
         this.isLoading = false;
       },
@@ -78,7 +74,6 @@ export class MenuCapturaComponent implements OnInit, OnDestroy {
   }
 
   private procesarListas(data: Captura[]) {
-    // Ordenar por fecha descendente
     const sorted = [...data].sort((a, b) => {
       const dateA = a.fecha_captura ? new Date(a.fecha_captura).getTime() : 0;
       const dateB = b.fecha_captura ? new Date(b.fecha_captura).getTime() : 0;
@@ -89,22 +84,27 @@ export class MenuCapturaComponent implements OnInit, OnDestroy {
     const confirmados = sorted.filter(c => c.estado === 'CONFIRMADO');
     const procesados = sorted.filter(c => c.estado === 'PROCESADO');
 
-    // Fila 1: Nueva + Top 3 Confirmados + Top 3 Procesados
     this.row1Items = [
       null,
       ...confirmados.slice(0, 3),
       ...procesados.slice(0, 3)
     ];
 
-    // Fila 2: Top 7 Borradores
     this.row2Items = borradores.slice(0, 7);
   }
 
   // --- Acciones ---
 
+  // Navegar a la pantalla de captura (Detalle)
   seleccionarCaptura(captura: Captura | null) {
     if (!captura) return;
     this.router.navigate(['/home/captura/form', captura.id]);
+  }
+
+  // NUEVO: Abrir formulario en modo edición (Sin navegar)
+  editarCaptura(captura: Captura) {
+    this.capturaParaEditar = captura;
+    this.showNuevoForm = true;
   }
 
   eliminarCaptura(captura: Captura) {
@@ -122,7 +122,7 @@ export class MenuCapturaComponent implements OnInit, OnDestroy {
         this.isLoading = true;
         this.capturaService.eliminarCaptura(captura.id).subscribe({
           next: () => {
-            this.cargarCapturas(); // Recargar listas
+            this.cargarCapturas();
           },
           error: (err) => {
             console.error(err);
@@ -135,11 +135,13 @@ export class MenuCapturaComponent implements OnInit, OnDestroy {
   }
 
   crearNueva() {
+    this.capturaParaEditar = null; // Modo Create
     this.showNuevoForm = true;
   }
 
   cancelarNuevo() {
     this.showNuevoForm = false;
+    this.capturaParaEditar = null;
     this.cargarCapturas();
   }
 

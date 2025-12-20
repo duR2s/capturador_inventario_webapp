@@ -16,18 +16,15 @@ $shadow-depth: -10px 0 30px $color-shadow-medium;
   display: flex;
   align-items: flex-start;
   transition: transform $transition-speed cubic-bezier(0.25, 0.8, 0.25, 1);
-  // Se oculta hacia la derecha, dejando solo el botón visible si estuviera 'absolute',
-  // pero aquí usamos flex para que el botón "sobresalga"
   transform: translateX(calc(100% - 50px));
-  pointer-events: none; // Permite clicks "a través" del área vacía si fuera necesario
+  pointer-events: none;
 
   &.sidebar-open {
     transform: translateX(0);
 
-    // Al abrir, el botón cambia de aspecto si se desea
     .toggle-btn {
       background-color: $color-primary-dark;
-      box-shadow: none; // Se integra visualmente
+      box-shadow: none;
     }
   }
 }
@@ -36,33 +33,31 @@ $shadow-depth: -10px 0 30px $color-shadow-medium;
 // BOTÓN FLOTANTE (TOGGLE)
 // ==========================================
 .toggle-btn {
-  pointer-events: auto; // Reactiva clicks
+  pointer-events: auto;
   width: 50px;
   height: 60px;
-  background-color: $color-primary; // Verde principal
+  background-color: $color-primary;
   color: $color-white;
   border: none;
-  // Bordes redondeados solo a la izquierda para efecto "pestaña"
   border-radius: 16px 0 0 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: -4px 4px 15px rgba(0,0,0,0.15); // Sombra suave
+  box-shadow: -4px 4px 15px rgba(0,0,0,0.15);
   transition: all 0.3s ease;
-  margin-top: 30px; // Un poco abajo del borde superior del panel
+  margin-top: 30px;
 
   mat-icon {
     font-size: 28px;
     width: 28px;
     height: 28px;
-    // Animación sutil de la flecha
     transition: transform 0.3s;
   }
 
   &:hover {
     background-color: $color-primary-light;
-    width: 55px; // Efecto sutil de "salir"
+    width: 55px;
   }
 }
 
@@ -70,14 +65,13 @@ $shadow-depth: -10px 0 30px $color-shadow-medium;
 // PANEL DE CONTENIDO
 // ==========================================
 .info-panel {
-  pointer-events: auto; // Reactiva clicks
+  pointer-events: auto;
   background-color: $color-white;
   width: $sidebar-width;
   min-height: 450px;
   padding: 24px;
 
-  // Estilo "Card Flotante" igual al modal
-  border-radius: 0 0 0 $panel-radius; // Esquina inferior izquierda redondeada
+  border-radius: 0 0 0 $panel-radius;
   box-shadow: $shadow-depth;
   border-left: 1px solid $color-border-light;
 
@@ -94,14 +88,14 @@ $shadow-depth: -10px 0 30px $color-shadow-medium;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid $color-bg-light-3; // Separador color hueso
+  border-bottom: 2px solid $color-bg-light-3;
   padding-bottom: 12px;
 
   .panel-title {
     margin: 0;
     font-family: 'Nexa-Bold', sans-serif;
     font-size: 18px;
-    color: $color-text-title; // Verde oscuro marca
+    color: $color-text-title;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
@@ -109,14 +103,14 @@ $shadow-depth: -10px 0 30px $color-shadow-medium;
   .status-badge {
     font-size: 11px;
     padding: 6px 12px;
-    border-radius: 100px; // Pill shape
+    border-radius: 100px;
     font-family: 'Nexa-Bold', sans-serif;
     background-color: $color-green-light;
     color: $color-success;
     border: 1px solid $color-green-light-accent;
 
     &.offline {
-      background-color: #fff3e0; // Naranja claro
+      background-color: #fff3e0;
       color: #ef6c00;
       border-color: #ffe0b2;
     }
@@ -173,7 +167,7 @@ $shadow-depth: -10px 0 30px $color-shadow-medium;
 
   .metric-item {
     flex: 1;
-    background: $color-bg-light-2; // Fondo crema suave
+    background: $color-bg-light-2;
     border-radius: 16px;
     padding: 12px;
     display: flex;
@@ -242,6 +236,13 @@ $shadow-depth: -10px 0 30px $color-shadow-medium;
     }
 
     &:active { transform: scale(0.98); }
+
+    // Botón Excel (NUEVO - Azul suave)
+    &.btn-excel {
+      background-color: #457b9d;
+      color: white;
+      &:hover { background-color: darken(#457b9d, 5%); }
+    }
 
     // Botón Sincronizar (Naranja/Aviso)
     &.btn-sync {

@@ -11,6 +11,10 @@ import { InfoCapturaSidebarComponent } from '../../../modals/captura/info-captur
 import { CapturaService } from '../../../services/documents/captura.service';
 import { ErrorsService } from '../../../services/tools/errors.service';
 import { PayloadDetalleBatch } from '../../../captura.interfaces';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ConfirmationDialogModalComponent } from '../../../modals/utilities/confirmation-dialog-modal/confirmation-dialog-modal.component';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+
 
 @Component({
   selector: 'app-captura-capturadores-screen',
@@ -19,7 +23,9 @@ import { PayloadDetalleBatch } from '../../../captura.interfaces';
     CommonModule,
     InputsCapturaPartialComponent,
     TablaCapturaPartialComponent,
-    InfoCapturaSidebarComponent
+    InfoCapturaSidebarComponent,
+    MatDialogModule,
+    MatSnackBarModule
   ],
   templateUrl: './captura-capturadores-screen.component.html',
   styleUrls: ['./captura-capturadores-screen.component.scss']
@@ -30,6 +36,8 @@ export class CapturaCapturadoresScreenComponent implements OnInit {
   private _errorsService = inject(ErrorsService);
   private _router = inject(Router);
   private _route = inject(ActivatedRoute);
+  private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
 
   @ViewChild('inputsComponent') inputsComponent!: InputsCapturaPartialComponent;
 
@@ -106,16 +114,12 @@ export class CapturaCapturadoresScreenComponent implements OnInit {
     this.isLoading = true;
     this.productoTemporal = null;
 
-    // Obtenemos el almacén de la captura activa
     const almacenId = this.capturaActual?.almacen;
 
-    // Llamamos al servicio pasando el almacén para que traiga la existencia
     this.capturaService.buscarArticulo(codigo, almacenId).subscribe({
       next: (dataArticulo) => {
         this.isLoading = false;
         this.productoTemporal = dataArticulo;
-        // La lógica de asignación al input de cantidad se manejará en el componente hijo
-        // al recibir el cambio de [articuloEncontrado]
       },
       error: (err) => {
         this.isLoading = false;
@@ -125,18 +129,51 @@ export class CapturaCapturadoresScreenComponent implements OnInit {
     });
   }
 
+  /**
+   * CORREGIDO: Uso de ID de artículo para evitar errores por diferencias de string
+   */
   public procesarGuardado(datos: { codigo: string, cantidad: number }): void {
     if (this.isLoading) return;
 
+    // 1. Verificamos si tenemos info temporal para checar duplicados
     if (this.productoTemporal) {
         const esDuplicado = this.verificarDuplicadoPorID(this.productoTemporal.id);
-        if (esDuplicado) {
-            const confirmar = confirm(`El producto "${this.productoTemporal.nombre}" YA está capturado. ¿Sumar cantidad?`);
-            if (!confirmar) return;
-        }
-    }
 
-    this.capturaService.escanearArticulo(datos.codigo, datos.cantidad).subscribe({
+        if (esDuplicado) {
+            const dialogRef = this.dialog.open(ConfirmationDialogModalComponent, {
+                data: {
+                    type: 'advertisement',
+                    title: 'Producto ya capturado',
+                    message: `El producto "${this.productoTemporal.nombre}" ya existe en la lista. ¿Deseas sumar la cantidad?`,
+                    confirmText: 'Sí, Sumar',
+                    cancelText: 'Cancelar'
+                }
+            });
+
+            dialogRef.afterClosed().subscribe(result => {
+                if (result) {
+                    // Pasamos el ID del productoTemporal para asegurar match en backend
+                    this.ejecutarGuardadoReal(datos.codigo, datos.cantidad, this.productoTemporal.id);
+                } else {
+                    this.productoTemporal = null;
+                    if (this.inputsComponent) this.inputsComponent.limpiarFormulario();
+                }
+            });
+            return;
+        }
+
+        // Si no es duplicado pero tenemos el ID (captura normal por búsqueda), lo enviamos
+        this.ejecutarGuardadoReal(datos.codigo, datos.cantidad, this.productoTemporal.id);
+    } else {
+        // Caso: Captura manual sin búsqueda previa (Enter rápido) o offline sin cache
+        // Solo enviamos código
+        this.ejecutarGuardadoReal(datos.codigo, datos.cantidad);
+    }
+  }
+
+  private ejecutarGuardadoReal(codigo: string, cantidad: number, articuloId?: number): void {
+    // Enviamos articuloId si lo tenemos
+    this.capturaService.escanearArticulo(codigo, cantidad, articuloId).subscribe({
       next: (detalle) => {
         this._errorsService.mostrarExito(`Guardado: ${detalle.articulo_nombre}`);
         this.productoTemporal = null;
@@ -145,8 +182,9 @@ export class CapturaCapturadoresScreenComponent implements OnInit {
       error: (err) => {
         const mensajeError = err.message || '';
         const esOffline = mensajeError.includes('0') || mensajeError.toLowerCase().includes('unknown error');
+
         if (esOffline) {
-          this.agregarAColaOffline(datos.codigo, datos.cantidad);
+          this.agregarAColaOffline(codigo, cantidad, articuloId);
           this.productoTemporal = null;
           this.inputsComponent.limpiarFormulario();
         } else {
@@ -159,13 +197,23 @@ export class CapturaCapturadoresScreenComponent implements OnInit {
   private verificarDuplicadoPorID(idArticuloNuevo: number): boolean {
     const detallesActuales = this.capturaService.detallesActualesValue;
     if (!detallesActuales) return false;
-    return detallesActuales.some(d => d.id === idArticuloNuevo);
+
+    // Comparación robusta usando el campo 'articulo' que ahora es el ID numérico
+    return detallesActuales.some(d => {
+        // En caso de que la interfaz antigua o mezcla de datos traiga objeto o null
+        const idEnDetalle = (typeof d.articulo === 'object' && d.articulo !== null)
+                            ? (d.articulo as any).id
+                            : d.articulo;
+
+        return Number(idEnDetalle) === Number(idArticuloNuevo);
+    });
   }
 
-  private agregarAColaOffline(codigo: string, cantidad: number): void {
+  private agregarAColaOffline(codigo: string, cantidad: number, articuloId?: number): void {
     const nuevoItem: PayloadDetalleBatch = {
       producto_codigo: codigo,
-      cantidad_contada: cantidad
+      cantidad_contada: cantidad,
+      articulo_id: articuloId // Guardamos el ID también para sync futura
     };
     this.colaPendientes.push(nuevoItem);
     this._errorsService.mostrarAlerta(`Guardado localmente (${this.colaPendientes.length} pendientes).`);
@@ -197,7 +245,7 @@ export class CapturaCapturadoresScreenComponent implements OnInit {
     const id = this.capturaActual?.id;
     if (id) {
         this.capturaService.terminarCaptura(id).subscribe({
-            next: () => this._router.navigate(['/home/dashboard']),
+            next: () => this._router.navigate(['/home/captura']),
             error: (err) => this._errorsService.mostrarError(err.message)
         });
     }
@@ -217,6 +265,32 @@ export class CapturaCapturadoresScreenComponent implements OnInit {
       error: (err) => {
         this.isLoading = false;
         this._errorsService.mostrarError("No se pudo eliminar la captura: " + err.message);
+      }
+    });
+  }
+
+  public descargarReporteExcel(): void {
+    if (!this.capturaActual || !this.capturaActual.id) {
+      this._errorsService.mostrarError("No hay información de captura para descargar.");
+      return;
+    }
+
+    this.isLoading = true;
+    this.capturaService.descargarExcel(this.capturaActual.id).subscribe({
+      next: (blob) => {
+        this.isLoading = false;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Captura_${this.capturaActual?.folio}.xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this._errorsService.mostrarExito("Archivo descargado correctamente.");
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this._errorsService.mostrarError("Error al generar el archivo Excel.");
+        console.error(err);
       }
     });
   }

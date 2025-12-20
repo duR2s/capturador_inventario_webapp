@@ -6,8 +6,6 @@
 
   <!--
     BOTÓN FLOTANTE (TOGGLE)
-    Siempre visible. Si está cerrado, la flecha apunta izquierda (chevron_left).
-    Si está abierto, apunta derecha (chevron_right) para indicar "cerrar".
   -->
   <button class="toggle-btn" (click)="toggleMenu()">
     <mat-icon>{{ isOpen ? 'chevron_right' : 'chevron_left' }}</mat-icon>
@@ -15,7 +13,6 @@
 
   <!--
     PANEL DE CONTENIDO
-    Aquí va toda la info.
   -->
   <div class="info-panel" *ngIf="isOpen">
 
@@ -37,7 +34,6 @@
 
       <div class="info-row">
         <label>Almacén:</label>
-        <!-- Usamos el nombre que viene del serializer o un fallback -->
         <span>{{ captura.almacen_nombre || 'Desconocido' }}</span>
       </div>
 
@@ -71,6 +67,14 @@
     <!-- ACCIONES -->
     <div class="panel-actions">
 
+      <!-- NUEVO: Descargar Excel (Solo si NO es Borrador) -->
+      <button class="action-btn btn-excel"
+              *ngIf="captura && captura.estado !== 'BORRADOR'"
+              (click)="ejecutarDescargarExcel()">
+        <mat-icon>description</mat-icon>
+        Descargar Excel
+      </button>
+
       <!-- Sincronizar (Solo visible si hay pendientes) -->
       <button class="action-btn btn-sync"
               *ngIf="pendientesSincronizar > 0"
@@ -80,7 +84,10 @@
       </button>
 
       <!-- Terminar Captura -->
-      <button class="action-btn btn-finish" (click)="ejecutarFinalizar()">
+      <!-- Solo visible si está en Borrador para no terminarla dos veces (opcional) -->
+      <button class="action-btn btn-finish"
+              *ngIf="captura && captura.estado === 'BORRADOR'"
+              (click)="ejecutarFinalizar()">
         <mat-icon>check_circle</mat-icon>
         Terminar
       </button>

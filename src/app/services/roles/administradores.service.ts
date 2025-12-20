@@ -4,7 +4,7 @@ import { FacadeService } from '../facade.service';
 import { ErrorsService } from '../tools/errors.service';
 import { ValidatorService } from '../tools/validator.service';
 import { Observable } from 'rxjs';
-import { environment } from 'src/environments/environment.development';
+import { environment } from 'src/environments/environment';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })

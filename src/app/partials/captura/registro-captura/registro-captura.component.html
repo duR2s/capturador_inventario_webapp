@@ -5,16 +5,17 @@
     <!-- HEADER -->
     <div class="header">
       <div class="icon-container">
-        <mat-icon>inventory_2</mat-icon>
+        <!-- Icono cambia según modo -->
+        <mat-icon>{{ isEditMode ? 'edit_note' : 'inventory_2' }}</mat-icon>
       </div>
       <div class="title-container">
-        <h2>Nueva Sesión</h2>
-        <p>Configura los datos iniciales de la captura</p>
+        <h2>{{ isEditMode ? 'Editar Sesión' : 'Nueva Sesión' }}</h2>
+        <p>{{ isEditMode ? 'Modifica los datos de cabecera' : 'Configura los datos iniciales' }}</p>
       </div>
     </div>
 
     <!-- FORM -->
-    <form [formGroup]="form" (ngSubmit)="crearSesion()" class="form-grid">
+    <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid">
 
       <!-- 1. FOLIO (Texto) -->
       <mat-form-field appearance="outline" class="pill-input">
@@ -50,6 +51,17 @@
         <mat-error *ngIf="form.get('capturador')?.hasError('required')">Requerido</mat-error>
       </mat-form-field>
 
+      <!-- 4. ESTADO (Solo visible/editable para ADMINS en modo edición) -->
+      <mat-form-field appearance="outline" class="pill-input" *ngIf="isEditMode && isAdmin">
+        <mat-label>Estado de la Captura</mat-label>
+        <mat-select formControlName="estado">
+          <mat-option *ngFor="let est of estadosDisponibles" [value]="est.value">
+            {{ est.label }}
+          </mat-option>
+        </mat-select>
+        <mat-icon matPrefix>info</mat-icon>
+      </mat-form-field>
+
       <!-- Feedback de Error General -->
       <div class="error-feedback" *ngIf="errorMessage">
         <mat-icon>error_outline</mat-icon>
@@ -63,8 +75,11 @@
         </button>
         <button type="submit" class="btn-crear" [disabled]="form.invalid || isLoading">
           <mat-spinner *ngIf="isLoading" diameter="18"></mat-spinner>
-          <span *ngIf="!isLoading">INICIAR CAPTURA</span>
-          <mat-icon *ngIf="!isLoading">arrow_forward</mat-icon>
+
+          <span *ngIf="!isLoading">
+            {{ isEditMode ? 'GUARDAR CAMBIOS' : 'INICIAR CAPTURA' }}
+          </span>
+          <mat-icon *ngIf="!isLoading">{{ isEditMode ? 'save' : 'arrow_forward' }}</mat-icon>
         </button>
       </div>
 

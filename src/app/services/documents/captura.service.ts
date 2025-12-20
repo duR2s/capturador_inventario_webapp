@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError, forkJoin } from 'rxjs';
 import { catchError, tap, map } from 'rxjs/operators';
-import { environment } from '../../../environments/environment.development';
+import { environment } from '../../../environments/environment';
 import { Captura, DetalleCaptura, PayloadEscaner, PayloadDetalleBatch } from '../../captura.interfaces';
 import { FacadeService } from 'src/app/services/facade.service';
 
@@ -61,7 +61,6 @@ export class CapturaService {
   getCapturadores(): Observable<any[]> { return this.http.get<any[]>(this.EMPLEADOS_ENDPOINT, { headers: this.getHeaders() }).pipe(catchError(this.handleError)); }
   cargarCatalogosIniciales(): Observable<{ almacenes: any[], capturadores: any[] }> { return forkJoin({ almacenes: this.getAlmacenes(), capturadores: this.getCapturadores() }); }
 
-  // CORRECCIÓN: Aceptar parámetro opcional almacenId
   buscarArticulo(codigo: string, almacenId?: number): Observable<any> {
     let url = `${this.BUSQUEDA_ENDPOINT}?codigo=${encodeURIComponent(codigo)}`;
     if (almacenId) {
@@ -74,6 +73,21 @@ export class CapturaService {
     const payload: any = { folio: folio, capturador: capturadorId, almacen: almacenId, estado: 'BORRADOR', detalles: [] };
     return this.http.post<Captura>(this.CAPTURA_ENDPOINT, payload, { headers: this.getHeaders() }).pipe(
       tap((captura) => { this._capturaActualSubject.next(captura); this._detallesSubject.next([]); }),
+      catchError(this.handleError)
+    );
+  }
+
+  // --- NUEVO: Actualizar Cabecera (PATCH) ---
+  actualizarCaptura(id: number, data: Partial<Captura>): Observable<Captura> {
+    const url = `${this.CAPTURA_ENDPOINT}${id}/`;
+    return this.http.patch<Captura>(url, data, { headers: this.getHeaders() }).pipe(
+      tap((capturaActualizada) => {
+        // Si estamos editando la captura actual en memoria, actualizamos el subject también
+        const actual = this.capturaActualValue;
+        if (actual && actual.id === id) {
+           this._capturaActualSubject.next({ ...actual, ...capturaActualizada });
+        }
+      }),
       catchError(this.handleError)
     );
   }
@@ -112,7 +126,7 @@ export class CapturaService {
     return this.cargarCapturaPorId(capturaId).pipe(map(captura => captura.detalles || []));
   }
 
-  escanearArticulo(codigo: string, cantidad: number): Observable<DetalleCaptura> {
+  escanearArticulo(codigo: string, cantidad: number, articuloId?: number): Observable<DetalleCaptura> {
     const capturaActual = this.capturaActualValue;
     if (!capturaActual || !capturaActual.id) {
       return throwError(() => new Error("No hay una captura activa."));
@@ -121,7 +135,8 @@ export class CapturaService {
     const payload: PayloadEscaner = {
       captura_id: capturaActual.id,
       producto_codigo: codigo,
-      cantidad_contada: cantidad
+      cantidad_contada: cantidad,
+      articulo_id: articuloId
     };
 
     return this.http.post<DetalleCaptura>(this.DETALLE_ENDPOINT, payload, { headers: this.getHeaders() }).pipe(
@@ -154,7 +169,7 @@ export class CapturaService {
           const nuevaLista = [...listaActual];
           const ticketsPrevios = nuevaLista[index].tickets;
           nuevaLista[index] = { ...nuevaLista[index], ...itemActualizado };
-          if (ticketsPrevios && !nuevaLista[index].tickets) {
+           if (ticketsPrevios && !nuevaLista[index].tickets) {
              nuevaLista[index].tickets = ticketsPrevios;
           }
           this._detallesSubject.next(nuevaLista);
@@ -217,13 +232,24 @@ export class CapturaService {
     );
   }
 
+  descargarExcel(capturaId: number): Observable<Blob> {
+    const url = `${this.CAPTURA_ENDPOINT}${capturaId}/excel/`;
+    return this.http.get(url, { headers: this.getHeaders(), responseType: 'blob' }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   private handleError(error: HttpErrorResponse) {
     let msg = 'Error desconocido';
     if (error.error instanceof ErrorEvent) {
       msg = `Error cliente: ${error.error.message}`;
     } else {
-      msg = error.error?.detail || error.error?.error || `Error Servidor: ${error.status}`;
-      if (typeof error.error === 'object' && !error.error.detail && !error.error.error) msg = JSON.stringify(error.error);
+      if (error.error instanceof Blob) {
+         msg = `Error Servidor: ${error.status} (Archivo no generado)`;
+      } else {
+        msg = error.error?.detail || error.error?.error || `Error Servidor: ${error.status}`;
+        if (typeof error.error === 'object' && !error.error.detail && !error.error.error) msg = JSON.stringify(error.error);
+      }
     }
     console.error(msg);
     return throwError(() => new Error(msg));

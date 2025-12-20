@@ -80,27 +80,33 @@
     <!-- === ZONA TABLA COMPLETA === -->
     <section class="table-section">
       <!--
-        Inyección del componente de tabla.
-        Pasamos 'todasLasCapturas' y conectamos los eventos.
+        CAMBIO:
+        (onEdit)="editarCaptura($event)" -> Abre el modal de edición
+        (onView)="seleccionarCaptura($event)" -> Va al detalle (items)
       -->
       <app-tabla-lista-capturas
         [capturas]="todasLasCapturas"
         (onView)="seleccionarCaptura($event)"
-        (onEdit)="seleccionarCaptura($event)"
+        (onEdit)="editarCaptura($event)"
         (onDelete)="eliminarCaptura($event)">
       </app-tabla-lista-capturas>
     </section>
 
   </div>
 
-  <!-- VISTA FORMULARIO -->
+  <!-- VISTA FORMULARIO (CREATE / EDIT) -->
   <div class="form-container" *ngIf="showNuevoForm">
     <div class="back-btn-row">
       <button class="btn-back" (click)="cancelarNuevo()">
         <mat-icon>arrow_back</mat-icon> Volver al Dashboard
       </button>
     </div>
-    <app-registro-captura></app-registro-captura>
+
+    <!-- Pasamos la captura a editar (si existe) -->
+    <app-registro-captura
+        [capturaEdicion]="capturaParaEditar"
+        (onSesionCreada)="cancelarNuevo()">
+    </app-registro-captura>
   </div>
 
 </div>
