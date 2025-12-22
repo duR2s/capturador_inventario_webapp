@@ -260,7 +260,7 @@ export class CapturaCapturadoresScreenComponent implements OnInit {
       next: () => {
         this.isLoading = false;
         this._errorsService.mostrarExito("Captura eliminada correctamente.");
-        this._router.navigate(['/home/dashboard']);
+        this._router.navigate(['/home/captura']);
       },
       error: (err) => {
         this.isLoading = false;

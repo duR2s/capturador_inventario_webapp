@@ -1,7 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { Captura } from '../../../captura.interfaces'; // Ajusta la ruta
+import { Captura } from '../../../captura.interfaces';
+import { FacadeService } from 'src/app/services/facade.service';
 
 @Component({
   selector: 'app-captura-info-card',
@@ -10,17 +11,21 @@ import { Captura } from '../../../captura.interfaces'; // Ajusta la ruta
   templateUrl: './captura-info-card.component.html',
   styleUrls: ['./captura-info-card.component.scss']
 })
-export class CapturaInfoCardComponent {
+export class CapturaInfoCardComponent implements OnInit {
 
-  // Si captura es null/undefined, mostramos la tarjeta "Vacía/Nuevo"
   @Input() captura: Captura | null = null;
-
-  // Evento al hacer click en la tarjeta
   @Output() onClick = new EventEmitter<void>();
+
+  private facadeService = inject(FacadeService);
+  public isAdmin: boolean = false;
 
   constructor() {}
 
-  // Helpers para determinar estilo según estado
+  ngOnInit(): void {
+    const rol = this.facadeService.getUserGroup();
+    this.isAdmin = (rol === 'ADMIN');
+  }
+
   get statusColorClass(): string {
     if (!this.captura) return '';
     switch (this.captura.estado) {
@@ -34,9 +39,9 @@ export class CapturaInfoCardComponent {
   get statusText(): string {
     if (!this.captura) return '';
     switch (this.captura.estado) {
-      case 'BORRADOR': return 'Pendiente';
-      case 'CONFIRMADO': return 'Sincronización Local';
-      case 'PROCESADO': return 'Sincronizado';
+      case 'BORRADOR': return 'Borrador';
+      case 'CONFIRMADO': return 'Confirmado';
+      case 'PROCESADO': return 'Procesado';
       default: return 'Desconocido';
     }
   }

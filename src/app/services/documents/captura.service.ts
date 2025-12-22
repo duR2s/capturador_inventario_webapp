@@ -16,6 +16,7 @@ export class CapturaService {
   private readonly CAPTURA_ENDPOINT = `${this.API_URL}/inventario/captura/`;
   private readonly DETALLE_ENDPOINT = `${this.API_URL}/inventario/detalle/`;
   private readonly ALMACENES_ENDPOINT = `${this.API_URL}/inventario/almacenes/`;
+  private readonly ESTADOS_ENDPOINT = `${this.API_URL}/inventario/estados/`; // NUEVO
   private readonly EMPLEADOS_ENDPOINT = `${this.API_URL}/lista-empleados/`;
   private readonly BUSQUEDA_ENDPOINT = `${this.API_URL}/inventario/buscar-articulo/`;
   private readonly TICKET_ENDPOINT = `${this.API_URL}/inventario/ticket/`;
@@ -59,7 +60,16 @@ export class CapturaService {
 
   getAlmacenes(): Observable<any[]> { return this.http.get<any[]>(this.ALMACENES_ENDPOINT, { headers: this.getHeaders() }).pipe(catchError(this.handleError)); }
   getCapturadores(): Observable<any[]> { return this.http.get<any[]>(this.EMPLEADOS_ENDPOINT, { headers: this.getHeaders() }).pipe(catchError(this.handleError)); }
-  cargarCatalogosIniciales(): Observable<{ almacenes: any[], capturadores: any[] }> { return forkJoin({ almacenes: this.getAlmacenes(), capturadores: this.getCapturadores() }); }
+  getEstados(): Observable<any[]> { return this.http.get<any[]>(this.ESTADOS_ENDPOINT, { headers: this.getHeaders() }).pipe(catchError(this.handleError)); } // NUEVO
+
+  // MODIFICADO: Incluye estados en el forkJoin
+  cargarCatalogosIniciales(): Observable<{ almacenes: any[], capturadores: any[], estados: any[] }> {
+    return forkJoin({
+      almacenes: this.getAlmacenes(),
+      capturadores: this.getCapturadores(),
+      estados: this.getEstados()
+    });
+  }
 
   buscarArticulo(codigo: string, almacenId?: number): Observable<any> {
     let url = `${this.BUSQUEDA_ENDPOINT}?codigo=${encodeURIComponent(codigo)}`;

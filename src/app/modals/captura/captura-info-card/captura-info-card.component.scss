@@ -1,7 +1,6 @@
 @import '../../../styles/color-variables';
 
-// Configuración local de dimensiones (esto está bien aquí)
-$card-height: 160px;
+$card-height: 180px; // Aumenté un poco la altura para acomodar el nuevo campo
 $card-radius: 20px;
 
 .card-container {
@@ -14,15 +13,15 @@ $card-radius: 20px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   background-color: $color-white;
-  box-shadow: 0 8px 20px $color-shadow-light; // Variable global
-  border: 1px solid $color-border-light;      // Variable global
+  box-shadow: 0 8px 20px $color-shadow-light;
+  border: 1px solid $color-border-light;
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
 
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 30px $color-shadow-medium; // Variable global
+    box-shadow: 0 12px 30px $color-shadow-medium;
   }
 }
 
@@ -41,7 +40,6 @@ $card-radius: 20px;
       border-radius: 50%;
       flex-shrink: 0;
 
-      // Usando las nuevas variables globales
       &.status-orange {
         background-color: $status-borrador;
         box-shadow: 0 0 6px rgba($status-borrador, 0.4);
@@ -70,6 +68,7 @@ $card-radius: 20px;
 
   .info-content {
     margin-top: 10px;
+    flex-grow: 1; // Para que ocupe el espacio disponible y empuje el footer
 
     .folio-text {
       margin: 0;
@@ -87,24 +86,49 @@ $card-radius: 20px;
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
+    // NUEVO ESTILO
+    .capturador-text {
+      margin: 4px 0 0 0;
+      font-family: 'Nexa-Bold', sans-serif; // En negritas
+      font-size: 13px;
+      color: $color-text-muted; // Un poco más oscuro que light, o usar $color-text-title si quieres más contraste
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 
   .footer-row {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-end; // Alineado a la izquierda como pediste
     margin-top: auto;
+    border-top: 1px solid rgba($color-border-light, 0.5); // Opcional: separador sutil
+    padding-top: 8px;
 
-    .date-text {
-      font-family: 'Nexa-Bold', sans-serif;
-      font-size: 11px;
-      color: $color-text-muted;
+    .datetime-container {
+      display: flex;
+      flex-direction: column; // Fecha arriba, hora abajo (o row si prefieres lado a lado)
+
+      .date-text {
+        font-family: 'Nexa-Bold', sans-serif;
+        font-size: 11px;
+        color: $color-text-muted;
+      }
+
+      .time-text {
+        font-family: 'Nexa', sans-serif;
+        font-size: 10px;
+        color: lighten($color-text-muted, 10%);
+        margin-top: 2px;
+      }
     }
   }
 }
 
 // === TARJETA VACÍA (NUEVA) ===
 .empty-card {
-  background-color: $card-empty-bg; // Variable global
+  background-color: $card-empty-bg;
   justify-content: center;
   align-items: center;
   border: 2px dashed rgba($card-empty-icon, 0.3);
@@ -122,7 +146,7 @@ $card-radius: 20px;
     transition: transform 0.2s;
 
     mat-icon {
-      color: $card-empty-icon; // Variable global
+      color: $card-empty-icon;
       font-size: 28px;
       width: 28px;
       height: 28px;
@@ -131,7 +155,7 @@ $card-radius: 20px;
 
   .new-label {
     font-family: 'Nexa-Bold', sans-serif;
-    color: $card-empty-icon; // Variable global
+    color: $card-empty-icon;
     font-size: 14px;
   }
 

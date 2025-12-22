@@ -18,11 +18,17 @@
     <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid">
 
       <!-- 1. FOLIO (Texto) -->
-      <mat-form-field appearance="outline" class="pill-input">
+      <mat-form-field appearance="outline" class="pill-input" *ngIf="isEditMode" aria-disabled="true">
         <mat-label>Folio de Captura</mat-label>
-        <input matInput formControlName="folio" placeholder="Ej. INV-2023-001">
+
+        <!-- CAMBIO: Readonly siempre (el usuario no lo edita). Placeholder cambia dinámicamente -->
+        <input matInput
+               formControlName="folio"
+               [placeholder]="isEditMode ? '' : 'Autogenerado al guardar'"
+               readonly>
+
         <mat-icon matPrefix>tag</mat-icon>
-        <mat-error *ngIf="form.get('folio')?.hasError('required')">Requerido</mat-error>
+        <!-- Quitamos el error de required porque ahora puede ir vacío al front -->
       </mat-form-field>
 
       <!-- 2. ALMACÉN (Select) -->
@@ -55,7 +61,8 @@
       <mat-form-field appearance="outline" class="pill-input" *ngIf="isEditMode && isAdmin">
         <mat-label>Estado de la Captura</mat-label>
         <mat-select formControlName="estado">
-          <mat-option *ngFor="let est of estadosDisponibles" [value]="est.value">
+          <!-- Usamos la variable 'estados' que viene del Input -->
+          <mat-option *ngFor="let est of estados" [value]="est.value">
             {{ est.label }}
           </mat-option>
         </mat-select>

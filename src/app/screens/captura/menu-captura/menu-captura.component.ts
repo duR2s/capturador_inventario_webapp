@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
+import { forkJoin } from 'rxjs';
 
 // Componentes Hijos
 import { CapturaInfoCardComponent } from '../../../modals/captura/captura-info-card/captura-info-card.component';
@@ -37,11 +38,15 @@ export class MenuCapturaComponent implements OnInit, OnDestroy {
   public row1Items: (Captura | null)[] = [];
   public row2Items: Captura[] = [];
 
+  // Datos para inyectar al hijo
+  public almacenes: any[] = [];
+  public capturadores: any[] = [];
+  public estados: any[] = [];
+
   public isLoading: boolean = true;
 
-  // Variables para controlar el formulario (Create vs Edit)
   public showNuevoForm: boolean = false;
-  public capturaParaEditar: Captura | null = null; // NUEVO
+  public capturaParaEditar: Captura | null = null;
 
   @ViewChild('scrollRow1') scrollRow1!: ElementRef<HTMLElement>;
   @ViewChild('scrollRow2') scrollRow2!: ElementRef<HTMLElement>;
@@ -51,14 +56,42 @@ export class MenuCapturaComponent implements OnInit, OnDestroy {
   private readonly SCROLL_TICK = 10;
 
   ngOnInit(): void {
-    this.cargarCapturas();
+    this.cargarDatosIniciales();
   }
 
   ngOnDestroy(): void {
     this.stopScroll();
   }
 
+  cargarDatosIniciales() {
+    this.isLoading = true;
+
+    // Usamos forkJoin para traer Capturas + Catálogos en paralelo
+    forkJoin({
+      capturas: this.capturaService.listarMisCapturas(),
+      catalogos: this.capturaService.cargarCatalogosIniciales()
+    }).subscribe({
+      next: (resultado) => {
+        // 1. Procesar Capturas
+        this.todasLasCapturas = resultado.capturas;
+        this.procesarListas(resultado.capturas);
+
+        // 2. Guardar Catálogos para el hijo
+        this.almacenes = resultado.catalogos.almacenes;
+        this.capturadores = resultado.catalogos.capturadores;
+        this.estados = resultado.catalogos.estados;
+
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error("Error cargando dashboard:", err);
+        this.isLoading = false;
+      }
+    });
+  }
+
   cargarCapturas() {
+    // Método auxiliar por si solo queremos recargar la lista sin los catálogos
     this.isLoading = true;
     this.capturaService.listarMisCapturas().subscribe({
       next: (data) => {
@@ -95,13 +128,11 @@ export class MenuCapturaComponent implements OnInit, OnDestroy {
 
   // --- Acciones ---
 
-  // Navegar a la pantalla de captura (Detalle)
   seleccionarCaptura(captura: Captura | null) {
     if (!captura) return;
     this.router.navigate(['/home/captura/form', captura.id]);
   }
 
-  // NUEVO: Abrir formulario en modo edición (Sin navegar)
   editarCaptura(captura: Captura) {
     this.capturaParaEditar = captura;
     this.showNuevoForm = true;
@@ -135,7 +166,7 @@ export class MenuCapturaComponent implements OnInit, OnDestroy {
   }
 
   crearNueva() {
-    this.capturaParaEditar = null; // Modo Create
+    this.capturaParaEditar = null;
     this.showNuevoForm = true;
   }
 
@@ -145,7 +176,6 @@ export class MenuCapturaComponent implements OnInit, OnDestroy {
     this.cargarCapturas();
   }
 
-  // --- Scroll Logic ---
   startScroll(rowKey: 'row1' | 'row2', direction: number) {
     this.stopScroll();
     const element = rowKey === 'row1' ? this.scrollRow1?.nativeElement : this.scrollRow2?.nativeElement;

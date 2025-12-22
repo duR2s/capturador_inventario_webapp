@@ -14,6 +14,7 @@ import { Captura } from '../../../captura.interfaces';
 
 //Importar Servicios
 import { FacadeService } from 'src/app/services/facade.service';
+import { A11yModule } from "@angular/cdk/a11y";
 
 @Component({
   selector: 'app-tabla-lista-capturas',
@@ -27,8 +28,9 @@ import { FacadeService } from 'src/app/services/facade.service';
     MatFormFieldModule,
     MatIconModule,
     MatButtonModule,
-    MatTooltipModule
-  ],
+    MatTooltipModule,
+    A11yModule
+],
   templateUrl: './tabla-lista-capturas.component.html',
   styleUrls: ['./tabla-lista-capturas.component.scss']
 })
@@ -114,9 +116,9 @@ export class TablaListaCapturasComponent implements OnChanges, AfterViewInit {
 
   getStatusLabel(estado: string): string {
     switch (estado) {
-      case 'BORRADOR': return 'Pendiente';
-      case 'CONFIRMADO': return 'Sincronización Local';
-      case 'PROCESADO': return 'Sincronizado';
+      case 'BORRADOR': return 'Borrador';
+      case 'CONFIRMADO': return 'Confirmado';
+      case 'PROCESADO': return 'Procesado';
       default: return 'Desconocido';
     }
   }

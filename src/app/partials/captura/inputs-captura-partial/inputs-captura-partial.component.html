@@ -38,21 +38,43 @@
         <!-- 1. CÓDIGO -->
         <mat-form-field appearance="outline" class="pill-input">
           <mat-label>Código / Barras</mat-label>
+          <!--
+             MEJORAS MÓVIL:
+             1. enterkeyhint="search": Muestra botón 'Buscar'/'Ir' en teclado virtual.
+             2. (keyup.enter): Más compatible con teclados móviles que keydown.
+             3. Botón matSuffix: Permite disparar la búsqueda tocando el icono.
+          -->
           <input matInput formControlName="codigo"
                  #codigoInput
-                 (keydown.enter)="onCodigoEnter()"
+                 (keyup.enter)="onCodigoEnter()"
+                 enterkeyhint="search"
                  autocomplete="off"
                  placeholder="Escanea...">
+
           <mat-icon matPrefix>qr_code_scanner</mat-icon>
+
+          <!-- Spinner de carga -->
           <mat-spinner *ngIf="isLoading" diameter="20" matSuffix></mat-spinner>
+
+          <!-- Botón de búsqueda manual (visible si no carga) -->
+          <button *ngIf="!isLoading"
+                  mat-icon-button
+                  matSuffix
+                  type="button"
+                  (click)="onCodigoEnter()"
+                  aria-label="Buscar"
+                  tabindex="-1">
+            <mat-icon>search</mat-icon>
+          </button>
         </mat-form-field>
 
         <!-- 2. NOMBRE -->
         <mat-form-field appearance="outline" class="pill-input name-field">
           <mat-label>Descripción</mat-label>
           <input matInput formControlName="nombre" readonly tabindex="-1">
-          <button mat-icon-button matSuffix type="button" (click)="abrirBusqueda()" class="search-btn">
-            <mat-icon>search</mat-icon>
+          <!-- Botón para abrir modal de búsqueda avanzada -->
+          <button mat-icon-button matSuffix type="button" (click)="abrirBusqueda()" class="search-btn" matTooltip="Búsqueda avanzada">
+            <mat-icon>list</mat-icon>
           </button>
         </mat-form-field>
 
@@ -63,7 +85,8 @@
                  type="number"
                  formControlName="cantidad"
                  placeholder="0"
-                 (keydown.enter)="onCantidadEnter()">
+                 (keydown.enter)="onCantidadEnter()"
+                 enterkeyhint="done">
           <span matSuffix class="unit-suffix">pzas</span>
         </mat-form-field>
 

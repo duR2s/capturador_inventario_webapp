@@ -3,7 +3,7 @@ import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FacadeService } from 'src/app/services/facade.service';
-import { AdministradoresService } from 'src/app/services/roles/administradores.service';
+import { UsuariosService } from 'src/app/services/roles/usuarios.service';
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,7 +12,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-// Importante para formatear la fecha
 import { DatePipe } from '@angular/common';
 
 @Component({
@@ -30,18 +29,18 @@ import { DatePipe } from '@angular/common';
     MatDatepickerModule,
     MatNativeDateModule
   ],
-  providers: [DatePipe], // Agregamos DatePipe a proveedores
+  providers: [DatePipe],
   templateUrl: './registro-administradores.component.html',
   styleUrls: ['./registro-administradores.component.scss']
 })
 export class RegistroAdminComponent implements OnInit {
 
-  @Input() rol: string = ""; // Puede venir sucio como "administradores"
+  @Input() rol: string = "";
   @Input() datos_user: any = {};
 
-  public admin:any = {};
-  public errors:any = {};
-  public editar:boolean = false;
+  public admin: any = {};
+  public errors: any = {};
+  public editar: boolean = false;
   public token: string = "";
   public idUser: Number = 0;
 
@@ -53,7 +52,7 @@ export class RegistroAdminComponent implements OnInit {
   constructor(
     private location: Location,
     public activatedRoute: ActivatedRoute,
-    private administradoresService: AdministradoresService,
+    private usuariosService: UsuariosService, // Usamos el servicio unificado
     private facadeService: FacadeService,
     private router: Router,
     private datePipe: DatePipe
@@ -67,45 +66,34 @@ export class RegistroAdminComponent implements OnInit {
       if (this.datos_user) {
         this.admin = {
           id: this.datos_user.id,
-          clave_admin: this.datos_user.clave_interna || this.datos_user.clave_admin,
+          // Mapeamos a clave_interna (nombre unificado en back)
+          clave_interna: this.datos_user.clave_interna || this.datos_user.clave_admin,
           rfc: this.datos_user.rfc,
           telefono: this.datos_user.telefono,
           fecha_nacimiento: this.datos_user.fecha_nacimiento,
           first_name: this.datos_user.user?.first_name || "",
           last_name: this.datos_user.user?.last_name || "",
           email: this.datos_user.user?.email || this.datos_user.user?.username || "",
-          rol: 'ADMIN' // Forzamos ADMIN en edición también
+          puesto: 'ADMIN' // Usamos 'puesto' en lugar de 'rol' para coincidir con el servicio
         };
       }
     } else {
-      this.admin = this.administradoresService.esquemaAdmin();
-      // CORRECCIÓN: Ignoramos el @Input rol si viene incorrecto y forzamos la constante
-      this.admin.rol = 'ADMIN';
+      // Usamos el generador del servicio unificado
+      this.admin = this.usuariosService.getEsquemaBase('ADMIN');
       this.token = this.facadeService.getSessionToken();
     }
   }
 
   public showPassword() {
-    if(this.inputType_1 == 'password'){
-      this.inputType_1 = 'text';
-      this.hide_1 = true;
-    } else {
-      this.inputType_1 = 'password';
-      this.hide_1 = false;
-    }
+    this.inputType_1 = (this.inputType_1 == 'password') ? 'text' : 'password';
+    this.hide_1 = !this.hide_1;
   }
 
   public showPwdConfirmar() {
-    if(this.inputType_2 == 'password'){
-      this.inputType_2 = 'text';
-      this.hide_2 = true;
-    } else {
-      this.inputType_2 = 'password';
-      this.hide_2 = false;
-    }
+    this.inputType_2 = (this.inputType_2 == 'password') ? 'text' : 'password';
+    this.hide_2 = !this.hide_2;
   }
 
-  // EVENTO DE FECHA: Convierte el objeto Date de Angular Material a string "YYYY-MM-DD"
   public changeFecha(event: any) {
     if (event.value) {
       this.admin.fecha_nacimiento = this.datePipe.transform(event.value, 'yyyy-MM-dd');
@@ -117,62 +105,51 @@ export class RegistroAdminComponent implements OnInit {
   }
 
   public registrar(): void {
-    this.errors = {};
-    this.errors = this.administradoresService.validarAdmin(this.admin, this.editar);
-    if(Object.keys(this.errors).length > 0){
-      return;
-    }
-
-    // CORRECCIÓN FINAL: Aseguramos que se envíe 'ADMIN' justo antes del submit
-    this.admin.rol = 'ADMIN';
-
-    if(this.admin.password == this.admin.confirmar_password){
-      this.administradoresService.registrarAdmin(this.admin).subscribe(
-        (response) => {
-          alert("Administrador registrado exitosamente");
-          if(this.token && this.token !== ""){
-            this.router.navigate(["administrador"]);
-          } else {
-            this.router.navigate(["/"]);
-          }
-        },
-        (error) => {
-          alert("Error al registrar administrador");
-          if(error.error && error.error.message){
-             alert(error.error.message);
-          }
-        }
-      );
-    } else {
-      alert("Las contraseñas no coinciden");
-      this.admin.password="";
-      this.admin.confirmar_password="";
-    }
+    this.procesarGuardado();
   }
 
   public actualizar(): void {
+    this.procesarGuardado();
+  }
+
+  private procesarGuardado(): void {
     this.errors = {};
-    this.errors = this.administradoresService.validarAdmin(this.admin, this.editar);
+    // Usamos validación unificada
+    this.errors = this.usuariosService.validarUsuario(this.admin, this.editar);
+
     if(Object.keys(this.errors).length > 0){
       return;
     }
 
-    if (!this.admin.id) {
-        this.admin.id = this.idUser;
+    // Forzamos puesto y ID si es necesario
+    this.admin.puesto = 'ADMIN';
+    if (this.editar && !this.admin.id) {
+      this.admin.id = this.idUser;
     }
 
-    // Aseguramos rol en actualización
-    this.admin.rol = 'ADMIN';
+    // Validación extra de passwords en frontend (aunque el servicio también lo valida)
+    if(!this.editar && this.admin.password !== this.admin.confirmar_password){
+      alert("Las contraseñas no coinciden");
+      this.admin.password="";
+      this.admin.confirmar_password="";
+      return;
+    }
 
-    this.administradoresService.actualizarAdmin(this.admin).subscribe(
-      (response) => {
-        alert("Administrador actualizado exitosamente");
+    // Llamada unificada: guardarUsuario detecta si es POST o PUT internamente
+    this.usuariosService.guardarUsuario(this.admin, this.editar).subscribe({
+      next: (response) => {
+        alert(`Administrador ${this.editar ? 'actualizado' : 'registrado'} exitosamente`);
         this.router.navigate(["administrador"]);
       },
-      (error) => {
-        alert("Error al actualizar administrador");
+      error: (error) => {
+        alert(`Error al ${this.editar ? 'actualizar' : 'registrar'} administrador`);
+        if(error.error && error.error.message){
+           alert(error.error.message);
+        } else if (error.error && error.error.error) {
+           alert(error.error.error);
+        }
       }
-    );
+    });
   }
 
   public soloLetras(event: KeyboardEvent) {

@@ -1,0 +1,116 @@
+<p>tabla-usuarios works!</p>
+<div class="table-container-card">
+
+  <!-- CABECERA (Título y Buscador) -->
+  <div class="table-header">
+    <h3 class="table-title">Directorio de Usuarios</h3>
+
+    <mat-form-field appearance="outline" class="dense-search">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput
+             #input
+             (keyup)="applyFilter($event)"
+             placeholder="Buscar nombre, clave, email..."
+             autocomplete="off">
+    </mat-form-field>
+  </div>
+
+  <!-- TABLA -->
+  <div class="table-responsive">
+    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z0">
+
+      <!-- 1. Indicador de Rol -->
+      <ng-container matColumnDef="puesto_indicator">
+        <th mat-header-cell *matHeaderCellDef class="w-icon"></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="status-dot" [ngClass]="getRoleClass(row.puesto)" [matTooltip]="getRoleLabel(row.puesto)"></div>
+        </td>
+      </ng-container>
+
+      <!-- 2. Clave Interna -->
+      <ng-container matColumnDef="clave">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Clave </th>
+        <td mat-cell *matCellDef="let row" class="cell-bold">
+          {{ row.clave_interna || '---' }}
+        </td>
+      </ng-container>
+
+      <!-- 3. Nombre Completo -->
+      <ng-container matColumnDef="nombre">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Nombre </th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.user?.first_name }} {{ row.user?.last_name }}
+        </td>
+      </ng-container>
+
+      <!-- 4. Email -->
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Email / Usuario </th>
+        <td mat-cell *matCellDef="let row" class="cell-muted">
+          {{ row.user?.email || row.user?.username }}
+        </td>
+      </ng-container>
+
+      <!-- 5. Teléfono -->
+      <ng-container matColumnDef="telefono">
+        <th mat-header-cell *matHeaderCellDef> Teléfono </th>
+        <td mat-cell *matCellDef="let row" class="cell-muted">
+          {{ row.telefono || '---' }}
+        </td>
+      </ng-container>
+
+      <!-- 6. Puesto Texto -->
+      <ng-container matColumnDef="puesto_text">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Puesto </th>
+        <td mat-cell *matCellDef="let row">
+          <span class="role-badge" [ngClass]="getRoleClass(row.puesto)">
+            {{ getRoleLabel(row.puesto) }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- 7. Acciones (3 Botones) -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef class="text-right"> Acciones </th>
+        <td mat-cell *matCellDef="let row">
+          <div class="actions-group">
+
+            <!-- Botón 1: Editar (Navigate) -->
+            <button mat-icon-button color="primary" (click)="editarUsuario(row)" matTooltip="Editar información">
+              <mat-icon>edit</mat-icon>
+            </button>
+
+            <!-- Botón 2: Permisos (Placeholder) -->
+            <button mat-icon-button class="btn-permisos" (click)="cambiarPermisos(row)" matTooltip="Cambiar puesto/permisos">
+              <mat-icon>admin_panel_settings</mat-icon>
+            </button>
+
+            <!-- Botón 3: Eliminar -->
+            <button mat-icon-button color="warn" (click)="eliminarUsuario(row)" matTooltip="Dar de baja">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <!-- Row vacía -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-cell" colspan="7">
+          No se encontraron usuarios con: "{{input.value}}"
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- PAGINADOR -->
+  <mat-paginator [pageSize]="10"
+                 [pageSizeOptions]="[5, 10, 20]"
+                 showFirstLastButtons
+                 aria-label="Seleccionar página">
+  </mat-paginator>
+
+</div>

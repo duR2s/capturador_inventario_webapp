@@ -3,7 +3,8 @@ import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FacadeService } from 'src/app/services/facade.service';
-import { EmpleadosService } from 'src/app/services/roles/empleados.service';
+// Importamos el servicio unificado correctamente
+import { UsuariosService } from 'src/app/services/roles/usuarios.service';
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -52,17 +53,19 @@ export class RegistroEmpleadosComponent implements OnInit {
   constructor(
     private location: Location,
     public activatedRoute: ActivatedRoute,
-    private empleadosService: EmpleadosService,
+    private usuariosService: UsuariosService, // Inyección del servicio unificado
     private facadeService: FacadeService,
     private router: Router,
     private datePipe: DatePipe
   ) { }
 
   ngOnInit(): void {
+    // Definir puesto base según input o default
+    const puestoBase = this.determinarPuesto(this.rol) as 'CAPTURADOR' | 'OTRO';
+
     if(this.activatedRoute.snapshot.params['id'] != undefined){
       this.editar = true;
       this.idUser = this.activatedRoute.snapshot.params['id'];
-      console.log("ID Empleado a editar: ", this.idUser);
 
       if (this.datos_user) {
         this.empleado = {
@@ -74,52 +77,31 @@ export class RegistroEmpleadosComponent implements OnInit {
           first_name: this.datos_user.user?.first_name || "",
           last_name: this.datos_user.user?.last_name || "",
           email: this.datos_user.user?.email || this.datos_user.user?.username || "",
-          // Mantenemos el puesto original si existe, si no, calculamos
-          puesto: this.datos_user.puesto || this.determinarPuesto(this.rol)
+          puesto: this.datos_user.puesto || puestoBase
         };
       }
     } else {
-      this.empleado = this.empleadosService.esquemaEmpleado();
-      // CORRECCIÓN: Normalizamos el puesto desde el inicio
-      this.empleado.puesto = this.determinarPuesto(this.rol);
+      // Usamos el esquema del servicio unificado
+      this.empleado = this.usuariosService.getEsquemaBase();
       this.token = this.facadeService.getSessionToken();
     }
-    console.log("Empleado (Formulario): ", this.empleado);
   }
 
-  // NUEVO: Función auxiliar para limpiar el rol de entrada
   private determinarPuesto(rolInput: string): string {
     if (!rolInput) return 'CAPTURADOR';
-
     const rolNormalizado = rolInput.toUpperCase().trim();
-
-    // Mapeo seguro: si dice "otro" o "otros", es OTRO. Todo lo demás es CAPTURADOR.
-    if (rolNormalizado.includes('OTRO')) {
-      return 'OTRO';
-    }
-
-    // Por defecto (incluye "capturador", "capturadores", "empleado", etc.)
+    if (rolNormalizado.includes('OTRO')) return 'OTRO';
     return 'CAPTURADOR';
   }
 
   public showPassword() {
-    if(this.inputType_1 == 'password'){
-      this.inputType_1 = 'text';
-      this.hide_1 = true;
-    } else {
-      this.inputType_1 = 'password';
-      this.hide_1 = false;
-    }
+    this.inputType_1 = (this.inputType_1 == 'password') ? 'text' : 'password';
+    this.hide_1 = !this.hide_1;
   }
 
   public showPwdConfirmar() {
-    if(this.inputType_2 == 'password'){
-      this.inputType_2 = 'text';
-      this.hide_2 = true;
-    } else {
-      this.inputType_2 = 'password';
-      this.hide_2 = false;
-    }
+    this.inputType_2 = (this.inputType_2 == 'password') ? 'text' : 'password';
+    this.hide_2 = !this.hide_2;
   }
 
   public changeFecha(event: any) {
@@ -133,71 +115,53 @@ export class RegistroEmpleadosComponent implements OnInit {
   }
 
   public registrar(): void {
+    this.procesarGuardado();
+  }
+
+  public actualizar(): void {
+    this.procesarGuardado();
+  }
+
+  private procesarGuardado(): void {
     this.errors = {};
-    this.errors = this.empleadosService.validarEmpleado(this.empleado, this.editar);
+    // Validación unificada
+    this.errors = this.usuariosService.validarUsuario(this.empleado, this.editar);
+
     if(Object.keys(this.errors).length > 0){
       return;
     }
 
-    // CORRECCIÓN: Forzamos el puesto correcto justo antes de enviar
-    // Esto asegura que si el usuario manipuló el input o el binding falló, se envíe limpio.
     if (!this.empleado.puesto) {
        this.empleado.puesto = this.determinarPuesto(this.rol);
     }
 
-    if(this.empleado.password == this.empleado.confirmar_password){
-      this.empleadosService.registrarEmpleado(this.empleado).subscribe(
-        (response) => {
-          alert("Empleado registrado exitosamente");
-          console.log("Respuesta: ", response);
-          if(this.token && this.token !== ""){
-            this.router.navigate(["empleados"]);
-          } else {
-            this.router.navigate(["/"]);
-          }
-        },
-        (error) => {
-          alert("Error al registrar empleado");
-          console.error(error);
-          if(error.error && error.error.message){
-             alert(error.error.message);
-          }
-        }
-      );
-    } else {
+    if (this.editar && !this.empleado.id) {
+      this.empleado.id = this.idUser;
+    }
+
+    if(!this.editar && this.empleado.password !== this.empleado.confirmar_password){
       alert("Las contraseñas no coinciden");
       this.empleado.password="";
       this.empleado.confirmar_password="";
-    }
-  }
-
-  public actualizar(): void {
-    this.errors = {};
-    this.errors = this.empleadosService.validarEmpleado(this.empleado, this.editar);
-    if(Object.keys(this.errors).length > 0){
       return;
     }
 
-    if (!this.empleado.id) {
-        this.empleado.id = this.idUser;
-    }
-
-    // Aseguramos puesto en actualización también (opcional, pero buena práctica)
-    if (!this.empleado.puesto) {
-      this.empleado.puesto = this.determinarPuesto(this.rol);
-    }
-
-    this.empleadosService.actualizarEmpleado(this.empleado).subscribe(
-      (response) => {
-        alert("Empleado actualizado exitosamente");
-        console.log("Respuesta: ", response);
+    // Llamada unificada
+    this.usuariosService.guardarUsuario(this.empleado, this.editar).subscribe({
+      next: (response) => {
+        alert(`Empleado ${this.editar ? 'actualizado' : 'registrado'} exitosamente`);
         this.router.navigate(["empleados"]);
       },
-      (error) => {
-        alert("Error al actualizar empleado");
+      error: (error) => {
+        alert(`Error al ${this.editar ? 'actualizar' : 'registrar'} empleado`);
         console.error(error);
+        if(error.error && error.error.message){
+             alert(error.error.message);
+        } else if (error.error && error.error.error) {
+             alert(error.error.error);
+        }
       }
-    );
+    });
   }
 
   public soloLetras(event: KeyboardEvent) {

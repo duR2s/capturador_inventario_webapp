@@ -79,11 +79,6 @@
 
     <!-- === ZONA TABLA COMPLETA === -->
     <section class="table-section">
-      <!--
-        CAMBIO:
-        (onEdit)="editarCaptura($event)" -> Abre el modal de edición
-        (onView)="seleccionarCaptura($event)" -> Va al detalle (items)
-      -->
       <app-tabla-lista-capturas
         [capturas]="todasLasCapturas"
         (onView)="seleccionarCaptura($event)"
@@ -102,9 +97,15 @@
       </button>
     </div>
 
-    <!-- Pasamos la captura a editar (si existe) -->
+    <!--
+       AQUÍ ESTÁ LA INYECCIÓN DE DATOS:
+       Pasamos almacenes, usuarios y estados que cargamos en el padre.
+    -->
     <app-registro-captura
         [capturaEdicion]="capturaParaEditar"
+        [almacenes]="almacenes"
+        [usuarios]="capturadores"
+        [estados]="estados"
         (onSesionCreada)="cancelarNuevo()">
     </app-registro-captura>
   </div>

@@ -1,0 +1,221 @@
+// Importamos tus variables globales (ajusta la ruta relativa si es necesario)
+@import '../../../styles/color-variables';
+
+// Configuración local
+$table-row-height: 52px; // Un poco más alto para mejor lectura de nombres
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.table-container-card {
+  background: $color-white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  border: 1px solid $color-border-light;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+// --- CABECERA ---
+.table-header {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid $color-border-light;
+  background-color: $color-bg-light;
+
+  .table-title {
+    margin: 0;
+    font-family: 'Nexa-Bold', sans-serif;
+    font-size: 18px;
+    color: $color-text-title;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .dense-search {
+    width: 300px;
+
+    ::ng-deep .mat-mdc-text-field-wrapper {
+      background-color: $color-white !important;
+      border: 1px solid $color-border-medium;
+      border-radius: 100px !important;
+      height: 36px;
+      padding: 0 16px;
+    }
+
+    ::ng-deep .mat-mdc-form-field-flex {
+      height: 36px;
+      align-items: center;
+    }
+
+    ::ng-deep .mat-mdc-form-field-infix {
+      padding: 0 !important;
+      min-height: 36px !important;
+    }
+
+    ::ng-deep input {
+      font-size: 13px;
+      color: $color-text-dark;
+    }
+
+    ::ng-deep .mat-icon {
+      font-size: 18px;
+      color: $color-text-muted;
+      margin-right: 8px;
+    }
+
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
+  }
+}
+
+// --- TABLA ---
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table.mat-mdc-table {
+  width: 100%;
+
+  .mat-mdc-header-row {
+    height: 44px;
+    background-color: $color-white;
+  }
+
+  .mat-mdc-header-cell {
+    font-family: 'Nexa-Bold', sans-serif;
+    font-size: 12px;
+    color: $color-text-light;
+    border-bottom: 2px solid $color-bg-light-2;
+    padding: 0 16px;
+
+    &.w-icon { width: 40px; padding-right: 0; }
+    &.text-right { text-align: right; }
+  }
+
+  .mat-mdc-row {
+    height: $table-row-height;
+    transition: background 0.2s;
+    &:hover { background-color: $color-bg-light-3; }
+  }
+
+  .mat-mdc-cell {
+    font-size: 13px;
+    color: $color-text-dark;
+    border-bottom: 1px solid $color-border-light;
+    padding: 0 16px;
+    font-family: 'Nexa', sans-serif;
+
+    &.cell-bold {
+      font-family: 'Nexa-Bold', sans-serif;
+      color: $color-text-title;
+    }
+
+    &.cell-muted {
+      color: $color-text-light;
+    }
+  }
+}
+
+// --- INDICADORES Y BADGES (Roles) ---
+
+// Colores específicos para roles (Extendiendo tu paleta)
+$role-admin-color: $color-secondary; // Terracota para Admin
+$role-capturador-color: $color-primary; // Verde para Capturador
+$role-other-color: #457b9d;
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin: 0 auto;
+
+  &.role-admin { background-color: $role-admin-color; box-shadow: 0 0 6px rgba($role-admin-color, 0.4); }
+  &.role-user { background-color: $role-capturador-color; box-shadow: 0 0 6px rgba($role-capturador-color, 0.4); }
+  &.role-other { background-color: $role-other-color; }
+  &.role-gray { background-color: $color-text-muted; }
+}
+
+.role-badge {
+  font-family: 'Nexa-Bold', sans-serif;
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.role-admin {
+    color: $role-admin-color;
+    background-color: rgba($role-admin-color, 0.1);
+    border: 1px solid rgba($role-admin-color, 0.2);
+  }
+  &.role-user {
+    color: $role-capturador-color;
+    background-color: rgba($role-capturador-color, 0.1);
+    border: 1px solid rgba($role-capturador-color, 0.2);
+  }
+  &.role-other {
+    color: $role-other-color;
+    background-color: rgba($role-other-color, 0.1);
+  }
+  &.role-gray {
+    color: $color-text-muted;
+    background-color: $color-bg-light-2;
+  }
+}
+
+// --- BOTONES DE ACCIÓN ---
+.actions-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+
+  button.mat-mdc-icon-button {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
+    }
+
+    color: $color-text-muted;
+
+    &:hover {
+      background-color: rgba(0,0,0,0.05);
+      &[color="primary"] { color: $color-primary; }
+      &[color="warn"] { color: $color-error; }
+
+      // Botón de permisos (personalizado)
+      &.btn-permisos { color: $role-other-color; }
+    }
+  }
+}
+
+.empty-cell {
+  text-align: center;
+  padding: 32px !important;
+  color: $color-text-muted;
+  font-style: italic;
+}
+
+// Media Queries básicas
+@media (max-width: 600px) {
+  .table-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+
+    .dense-search {
+      width: 100%;
+    }
+  }
+}

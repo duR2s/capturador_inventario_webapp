@@ -13,11 +13,19 @@
   <div class="info-content">
     <h3 class="folio-text">{{ captura.folio }}</h3>
     <p class="almacen-text">{{ captura.almacen_nombre || 'Sin Almacén' }}</p>
+
+    <!-- NUEVO: Capturador (Solo Admin) -->
+    <p class="capturador-text" *ngIf="isAdmin && captura.capturador_nombre">
+      {{ captura.capturador_nombre }}
+    </p>
   </div>
 
-  <!-- Pie: Fecha -->
+  <!-- Pie: Fecha y Hora -->
   <div class="footer-row">
-    <span class="date-text">{{ captura.fecha_captura | date:'mediumDate' }}</span>
+    <div class="datetime-container">
+      <span class="date-text">{{ captura.fecha_captura | date:'mediumDate' }}</span>
+      <span class="time-text">{{ captura.fecha_captura | date:'shortTime' }}</span>
+    </div>
   </div>
 </div>
 

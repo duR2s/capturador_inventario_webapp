@@ -37,10 +37,11 @@ export class RegistroCapturaComponent implements OnInit, OnChanges {
 
   @Output() onSesionCreada = new EventEmitter<any>();
 
+  // Inputs para recibir datos del padre (Smart/Dumb component pattern)
   @Input() almacenes: any[] = [];
   @Input() usuarios: any[] = [];
+  @Input() estados: any[] = [];
 
-  // NUEVO: Input para recibir datos a editar
   @Input() capturaEdicion: any | null = null;
 
   form: FormGroup;
@@ -51,13 +52,6 @@ export class RegistroCapturaComponent implements OnInit, OnChanges {
   public isAdmin: boolean = false;
   public isEditMode: boolean = false;
 
-  // Estados disponibles (Hardcoded por ahora como solicitaste)
-  public estadosDisponibles = [
-    { value: 'BORRADOR', label: 'Borrador (Editable)' },
-    { value: 'CONFIRMADO', label: 'Confirmado (Cerrado Local)' },
-    { value: 'PROCESADO', label: 'Procesado (Sincronizado)' }
-  ];
-
   public router = inject(Router);
   private facadeService = inject(FacadeService);
 
@@ -65,26 +59,21 @@ export class RegistroCapturaComponent implements OnInit, OnChanges {
     private fb: FormBuilder,
     private capturaService: CapturaService
   ) {
+    const rol = this.facadeService.getUserGroup();
+    this.isAdmin = (rol === 'ADMIN');
+
     this.form = this.fb.group({
-      folio: ['', [Validators.required]],
+      // Folio ya no es required en el front para crear, el back lo ignora/genera
+      folio: ['', []],
       almacen: ['', [Validators.required]],
       capturador: ['', [Validators.required]],
-      // NUEVO: Campo Estado (inicialmente deshabilitado para create)
       estado: [{ value: 'BORRADOR', disabled: true }, [Validators.required]]
     });
   }
 
   ngOnInit(): void {
-    // 1. Verificar si es ADMIN
-    const rol = this.facadeService.getUserGroup();
-    this.isAdmin = (rol === 'ADMIN');
+    this.verificarDatos();
 
-    // 2. Cargar catálogos si faltan
-    if (this.almacenes.length === 0 || this.usuarios.length === 0) {
-      this.cargarDatos();
-    }
-
-    // 3. Inicializar modo creación si no hay edición
     if (!this.capturaEdicion) {
       this.inicializarModoCreacion();
     }
@@ -95,23 +84,50 @@ export class RegistroCapturaComponent implements OnInit, OnChanges {
       if (this.capturaEdicion) {
         this.configurarModoEdicion(this.capturaEdicion);
       } else {
-        this.inicializarModoCreacion();
+        if (!this.form.dirty) {
+           this.inicializarModoCreacion();
+        }
       }
     }
   }
 
+  private verificarDatos() {
+    if (this.almacenes.length === 0 || this.usuarios.length === 0 || this.estados.length === 0) {
+      this.cargarDatosDesdeServicio();
+    }
+  }
+
+  cargarDatosDesdeServicio() {
+    this.isLoadingCatalogos = true;
+    this.capturaService.cargarCatalogosIniciales().subscribe({
+      next: (data) => {
+        if (this.almacenes.length === 0) this.almacenes = data.almacenes;
+        if (this.usuarios.length === 0) this.usuarios = data.capturadores;
+        if (this.estados.length === 0) this.estados = data.estados;
+
+        this.isLoadingCatalogos = false;
+      },
+      error: (err) => {
+        console.error("Error cargando catálogos en hijo", err);
+        this.isLoadingCatalogos = false;
+      }
+    });
+  }
+
   private inicializarModoCreacion() {
     this.isEditMode = false;
-    const folioSugerido = `INV-${new Date().getFullYear()}${Math.floor(Math.random() * 10000)}`;
 
+    // CAMBIO: Ya no generamos el folio aquí.
+    // Dejamos el campo vacío y deshabilitado.
     this.form.reset({
-      folio: folioSugerido,
+      folio: '', // El back lo generará
       almacen: '',
       capturador: '',
       estado: 'BORRADOR'
     });
 
-    // En creación, el estado siempre es borrador y está bloqueado
+    // Deshabilitamos el folio porque el usuario no debe tocarlo en creación
+    this.form.get('folio')?.disable();
     this.form.get('estado')?.disable();
   }
 
@@ -125,28 +141,15 @@ export class RegistroCapturaComponent implements OnInit, OnChanges {
       estado: data.estado
     });
 
-    // Si es ADMIN, habilitamos el select de estado
+    // En edición sí mostramos el folio (que vendrá en data), pero sigue disabled o readonly si prefieres
+    // Generalmente el folio no se edita nunca.
+    this.form.get('folio')?.disable();
+
     if (this.isAdmin) {
       this.form.get('estado')?.enable();
     } else {
       this.form.get('estado')?.disable();
     }
-  }
-
-  cargarDatos() {
-    this.isLoadingCatalogos = true;
-    this.capturaService.cargarCatalogosIniciales().subscribe({
-      next: (data) => {
-        if (this.almacenes.length === 0) this.almacenes = data.almacenes;
-        if (this.usuarios.length === 0) this.usuarios = data.capturadores;
-        this.isLoadingCatalogos = false;
-      },
-      error: (err) => {
-        console.error("Error cargando catálogos", err);
-        this.errorMessage = "Error al conectar con el servidor para obtener listas.";
-        this.isLoadingCatalogos = false;
-      }
-    });
   }
 
   guardar() {
@@ -158,12 +161,11 @@ export class RegistroCapturaComponent implements OnInit, OnChanges {
     this.isLoading = true;
     this.errorMessage = '';
 
-    // Usamos getRawValue para incluir campos deshabilitados (como estado en modo create)
     const formValues = this.form.getRawValue();
 
     if (this.isEditMode && this.capturaEdicion) {
-      // --- MODO EDICIÓN (PATCH) ---
       const payload = {
+        // En edición, el folio no debería cambiar, pero lo mandamos por consistencia (o se ignora en back)
         folio: formValues.folio,
         almacen: formValues.almacen,
         capturador: formValues.capturador,
@@ -173,27 +175,25 @@ export class RegistroCapturaComponent implements OnInit, OnChanges {
       this.capturaService.actualizarCaptura(this.capturaEdicion.id, payload).subscribe({
         next: (capturaActualizada) => {
           this.isLoading = false;
-          // Emitimos evento de éxito (el padre recargará la lista o cerrará)
           this.onSesionCreada.emit(capturaActualizada);
         },
         error: (err) => {
           this.isLoading = false;
-          this.errorMessage = err.message || 'Error al actualizar la sesión';
+          this.errorMessage = err.message || 'Error al actualizar';
         }
       });
-
     } else {
-      // --- MODO CREACIÓN (POST) ---
-      this.capturaService.iniciarCaptura(formValues.folio, formValues.capturador, formValues.almacen).subscribe({
+      // --- MODO CREACIÓN ---
+      // Enviamos el folio vacío. El back detectará esto y generará uno nuevo.
+      this.capturaService.iniciarCaptura('', formValues.capturador, formValues.almacen).subscribe({
         next: (captura) => {
           this.isLoading = false;
-          // Navegar directamente a la captura
           this.router.navigate(['/home/captura/form', captura.id]);
           this.onSesionCreada.emit(captura);
         },
         error: (err) => {
           this.isLoading = false;
-          this.errorMessage = err.message || 'Error al crear la sesión';
+          this.errorMessage = err.message || 'Error al crear';
         }
       });
     }

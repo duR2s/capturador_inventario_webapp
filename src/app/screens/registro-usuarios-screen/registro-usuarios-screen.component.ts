@@ -8,7 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { FacadeService } from 'src/app/services/facade.service';
-import { AdministradoresService } from 'src/app/services/roles/administradores.service';
+import { UsuariosService } from 'src/app/services/roles/usuarios.service';
 import { RegistroAdminComponent } from 'src/app/partials/registro/registro-administradores/registro-administradores.component';
 import { MatIconModule } from "@angular/material/icon";
 import { RegistroEmpleadosComponent } from "src/app/partials/registro/registro-empleados/registro-empleados.component";
@@ -57,7 +57,7 @@ export class RegistroUsuariosScreenComponent implements OnInit {
     public activatedRoute: ActivatedRoute,
     private router: Router,
     public facadeService: FacadeService,
-    private administradoresService: AdministradoresService
+    private usuariosService: UsuariosService
     //private maestrosService: MaestrosService,
     //private alumnosService: AlumnosService
   ) { }
