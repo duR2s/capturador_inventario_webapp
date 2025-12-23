@@ -17,7 +17,11 @@ export class UsuariosService {
   private validatorService = inject(ValidatorService);
   private errorService = inject(ErrorsService);
 
-  private readonly API_URL = `${environment.url_api}/usuarios/`;
+  // --- SEPARACIÓN DE ENDPOINTS ---
+  // Para obtener el listado completo
+  private readonly API_LISTA_URL = `${environment.url_api}/lista-usuarios/`;
+  // Para operaciones sobre un usuario específico (CRUD)
+  private readonly API_GESTION_URL = `${environment.url_api}/usuarios/`;
 
   constructor() { }
 
@@ -26,7 +30,7 @@ export class UsuariosService {
     return {
       id: null,
       puesto: rolInicial,
-      clave_interna: '', // Unificamos 'clave_admin' y 'clave_interna'
+      clave_interna: '',
       first_name: '',
       last_name: '',
       email: '',
@@ -35,7 +39,7 @@ export class UsuariosService {
       telefono: '',
       rfc: '',
       fecha_nacimiento: '',
-      edad: '' // Calculado por back, solo display
+      edad: ''
     };
   }
 
@@ -44,43 +48,37 @@ export class UsuariosService {
     let error: any = {};
     const esAdmin = data.puesto === 'ADMIN';
 
-    // Validaciones Comunes
     if (!this.validatorService.required(data["first_name"])) error["first_name"] = this.errorService.required;
     if (!this.validatorService.required(data["last_name"])) error["last_name"] = this.errorService.required;
     if (!this.validatorService.required(data["clave_interna"])) error["clave_interna"] = this.errorService.required;
 
-    // Email
     if (!this.validatorService.required(data["email"])) {
       error["email"] = this.errorService.required;
     } else if (!this.validatorService.email(data['email'])) {
       error['email'] = this.errorService.email;
     }
 
-    // Password (solo si es nuevo)
     if (!esEdicion) {
       if (!this.validatorService.required(data["password"])) error["password"] = this.errorService.required;
       if (data["password"] !== data["confirmar_password"]) error["confirmar_password"] = "Las contraseñas no coinciden";
     }
 
-    // RFC
     if (!this.validatorService.required(data["rfc"])) {
       error["rfc"] = this.errorService.required;
     } else if (!this.validatorService.min(data["rfc"], 12) || !this.validatorService.max(data["rfc"], 13)) {
       error["rfc"] = "RFC debe tener 12 o 13 caracteres";
     }
 
-    // Fecha Nacimiento (Obligatoria para todos ahora)
     if (!this.validatorService.required(data["fecha_nacimiento"])) {
       error["fecha_nacimiento"] = this.errorService.required;
     }
 
-    // Teléfono
     if (!this.validatorService.required(data["telefono"])) error["telefono"] = this.errorService.required;
 
     return error;
   }
 
-  // --- 3. MÉTODOS HTTP GENÉRICOS ---
+  // --- 3. MÉTODOS HTTP ---
 
   private getHeaders(): HttpHeaders {
     const token = this.facadeService.getSessionToken();
@@ -92,20 +90,21 @@ export class UsuariosService {
   }
 
   /**
-   * Obtiene usuarios con filtros opcionales.
-   * @param rol (Opcional) 'ADMIN', 'CAPTURADOR', 'OTRO'
-   * @param busqueda (Opcional) Texto para buscar por nombre/email
+   * USA EL NUEVO ENDPOINT: /lista-usuarios/
    */
   public obtenerUsuarios(rol?: string, busqueda?: string): Observable<any[]> {
     let params = new HttpParams();
     if (rol) params = params.set('rol', rol);
     if (busqueda) params = params.set('q', busqueda);
 
-    return this.http.get<any[]>(this.API_URL, { headers: this.getHeaders(), params });
+    return this.http.get<any[]>(this.API_LISTA_URL, { headers: this.getHeaders(), params });
   }
 
+  /**
+   * USA EL ENDPOINT DE GESTIÓN: /usuarios/
+   */
   public obtenerUsuarioPorID(id: number): Observable<any> {
-    return this.http.get<any>(this.API_URL, {
+    return this.http.get<any>(this.API_GESTION_URL, {
       headers: this.getHeaders(),
       params: new HttpParams().set('id', id)
     });
@@ -113,15 +112,14 @@ export class UsuariosService {
 
   public guardarUsuario(data: any, esEdicion: boolean): Observable<any> {
     if (esEdicion) {
-      return this.http.put<any>(this.API_URL, data, { headers: this.getHeaders() });
+      return this.http.put<any>(this.API_GESTION_URL, data, { headers: this.getHeaders() });
     } else {
-      return this.http.post<any>(this.API_URL, data, { headers: this.getHeaders() });
+      return this.http.post<any>(this.API_GESTION_URL, data, { headers: this.getHeaders() });
     }
   }
 
   public eliminarUsuario(id: number): Observable<any> {
-    // Soportamos enviar ID por query param como estaba en tu back anterior
-    return this.http.delete<any>(this.API_URL, {
+    return this.http.delete<any>(this.API_GESTION_URL, {
       headers: this.getHeaders(),
       params: new HttpParams().set('id', id)
     });

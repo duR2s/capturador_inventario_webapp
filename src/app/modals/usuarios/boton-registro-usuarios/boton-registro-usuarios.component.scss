@@ -1,0 +1,162 @@
+@import '../../../styles/color-variables';
+
+$card-height: 120px;
+$card-radius: 20px;
+
+.action-card {
+  position: relative;
+  width: 100%;
+  height: $card-height;
+  border-radius: $card-radius;
+  background-color: $color-white;
+  box-shadow: 0 8px 20px $color-shadow-light;
+  border: 1px solid $color-border-light;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-sizing: border-box;
+
+  // Hover Effect General
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px $color-shadow-medium;
+
+    .action-arrow {
+      transform: translateX(5px);
+      background-color: rgba($color-text-dark, 0.1);
+    }
+  }
+
+  // --- CONTENIDO ---
+  .card-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 2; // Sobre el icono de fondo
+  }
+
+  .text-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .action-title {
+      margin: 0;
+      font-family: 'Nexa-Bold', sans-serif;
+      font-size: 18px;
+      color: $color-text-title;
+      line-height: 1.2;
+    }
+
+    .action-desc {
+      margin: 4px 0 0 0;
+      font-family: 'Nexa', sans-serif;
+      font-size: 13px;
+      color: $color-text-light;
+    }
+  }
+
+  // --- ICONO BADGE (Círculo) ---
+  .icon-badge {
+    width: 50px;
+    height: 50px;
+    border-radius: 16px; // Cuadrado redondeado moderno
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  // --- FLECHA DERECHA ---
+  .action-arrow {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $color-text-muted;
+    transition: all 0.2s ease;
+    z-index: 2;
+  }
+
+  // --- ICONO DE FONDO (Decorativo) ---
+  .bg-icon {
+    position: absolute;
+    right: -20px;
+    bottom: -20px;
+    font-size: 140px;
+    width: 140px;
+    height: 140px;
+    opacity: 0.05; // Muy sutil
+    z-index: 1;
+    pointer-events: none;
+    transform: rotate(-15deg);
+  }
+
+  // ==========================================
+  // VARIANTES DE COLOR (Tematización)
+  // ==========================================
+
+  // ESTILO EMPLEADO (Verde / Primary)
+  &.style-empleado {
+    .icon-badge {
+      background-color: rgba($color-primary, 0.1);
+      color: $color-primary;
+    }
+
+    .bg-icon {
+      color: $color-primary;
+    }
+
+    &:hover {
+      border-color: rgba($color-primary, 0.3);
+      .action-title { color: $color-primary-dark; }
+    }
+  }
+
+  // ESTILO ADMIN (Terracota / Secondary)
+  &.style-admin {
+    .icon-badge {
+      background-color: rgba($color-secondary, 0.1);
+      color: $color-secondary;
+    }
+
+    .bg-icon {
+      color: $color-secondary;
+    }
+
+    &:hover {
+      border-color: rgba($color-secondary, 0.3);
+      .action-title { color: $color-secondary-dark; }
+    }
+  }
+}
+
+// Media query para móviles
+@media (max-width: 480px) {
+  .action-card {
+    height: auto;
+    padding: 16px;
+
+    .icon-badge {
+      width: 40px;
+      height: 40px;
+      mat-icon { font-size: 24px; width: 24px; height: 24px; }
+    }
+
+    .action-title { font-size: 16px !important; }
+    .action-desc { font-size: 12px !important; }
+
+    .bg-icon { font-size: 100px; } // Más pequeño en móvil
+  }
+}

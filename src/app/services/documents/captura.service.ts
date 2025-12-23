@@ -17,7 +17,7 @@ export class CapturaService {
   private readonly DETALLE_ENDPOINT = `${this.API_URL}/inventario/detalle/`;
   private readonly ALMACENES_ENDPOINT = `${this.API_URL}/inventario/almacenes/`;
   private readonly ESTADOS_ENDPOINT = `${this.API_URL}/inventario/estados/`; // NUEVO
-  private readonly EMPLEADOS_ENDPOINT = `${this.API_URL}/lista-empleados/`;
+  private readonly EMPLEADOS_ENDPOINT = `${this.API_URL}/lista-usuarios/`;
   private readonly BUSQUEDA_ENDPOINT = `${this.API_URL}/inventario/buscar-articulo/`;
   private readonly TICKET_ENDPOINT = `${this.API_URL}/inventario/ticket/`;
 

@@ -9,9 +9,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { FacadeService } from 'src/app/services/facade.service';
 import { UsuariosService } from 'src/app/services/roles/usuarios.service';
-import { RegistroAdminComponent } from 'src/app/partials/registro/registro-administradores/registro-administradores.component';
+import { RegistroAdminComponent } from 'src/app/partials/usuarios/registro-administradores/registro-administradores.component';
 import { MatIconModule } from "@angular/material/icon";
-import { RegistroEmpleadosComponent } from "src/app/partials/registro/registro-empleados/registro-empleados.component";
+import { RegistroEmpleadosComponent } from "src/app/partials/usuarios/registro-empleados/registro-empleados.component";
 //import { MaestrosService } from 'src/app/services/maestros.service';
 //import { AlumnosService } from 'src/app/services/alumnos.service';
 

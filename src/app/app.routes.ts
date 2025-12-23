@@ -6,6 +6,7 @@ import { RegistroUsuariosScreenComponent } from './screens/registro-usuarios-scr
 import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-layout.component';
 import { CapturaCapturadoresScreenComponent } from './screens/captura/captura-capturadores-screen/captura-capturadores-screen.component';
 import { MenuCapturaComponent } from './screens/captura/menu-captura/menu-captura.component';
+import { UsuariosScreenComponent } from './screens/usuarios-screen/usuarios-screen.component';
 // 1. Importamos el Guard que acabamos de crear
 import { AuthGuard } from './auth.guard';
 
@@ -33,15 +34,17 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       { path: 'dashboard', component: DashboardInicioScreenComponent},
-      { path: 'captura', component: MenuCapturaComponent},
 
-      // CAMBIO IMPORTANTE: Agregamos /:id para recibir el parámetro
-      // Esto permite entrar directamente a una captura específica (ej. /captura/form/15)
+      { path: 'captura', component: MenuCapturaComponent},
       { path: 'captura/form/:id', component: CapturaCapturadoresScreenComponent},
+
+      { path: 'usuarios', component: UsuariosScreenComponent },
 
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
+
+
 
   { path: '**', redirectTo: 'login' }
 ];

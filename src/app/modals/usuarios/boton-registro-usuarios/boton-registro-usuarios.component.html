@@ -1,0 +1,27 @@
+<div class="action-card"
+     [ngClass]="config.cssClass"
+     (click)="navegar()"
+     matRipple>
+
+  <!-- Icono Decorativo de Fondo (Grande) -->
+  <mat-icon class="bg-icon">{{ config.icon }}</mat-icon>
+
+  <div class="card-content">
+    <!-- Icono Principal -->
+    <div class="icon-badge">
+      <mat-icon>{{ config.icon }}</mat-icon>
+    </div>
+
+    <!-- Textos -->
+    <div class="text-group">
+      <h3 class="action-title">{{ config.title }}</h3>
+      <p class="action-desc">{{ config.desc }}</p>
+    </div>
+  </div>
+
+  <!-- Flecha de Navegación -->
+  <div class="action-arrow">
+    <mat-icon>arrow_forward</mat-icon>
+  </div>
+
+</div>

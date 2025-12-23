@@ -1,0 +1,48 @@
+<div class="dashboard-container">
+
+  <!-- ==============================================
+       SECCIÓN 1: ACCIONES RÁPIDAS (CARDS)
+       ============================================== -->
+  <section class="dashboard-section fade-in-up">
+    <h3 class="section-label">Gestión de Personal</h3>
+
+    <!-- Grid para las tarjetas de acción -->
+    <div class="cards-grid">
+
+      <!-- Card para Registrar Empleado -->
+      <app-boton-registro-usuarios
+        tipo="EMPLEADO">
+      </app-boton-registro-usuarios>
+
+      <!-- Card para Registrar Admin -->
+      <app-boton-registro-usuarios
+        tipo="ADMIN">
+      </app-boton-registro-usuarios>
+
+    </div>
+  </section>
+
+  <!-- ==============================================
+       SECCIÓN 2: LISTADO DE USUARIOS
+       ============================================== -->
+  <section class="table-section fade-in-up delay-100">
+
+    <div class="loading-shade" *ngIf="isLoading">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <!--
+      Componente Tabla Reutilizable
+      Recibe: [usuarios]
+      Emite: (onDelete), (onChangeRole)
+    -->
+    <app-tabla-usuarios
+      *ngIf="!isLoading"
+      [usuarios]="listaUsuarios"
+      (onDelete)="handleDelete($event)"
+      (onChangeRole)="handleChangeRole($event)">
+    </app-tabla-usuarios>
+
+  </section>
+
+</div>
