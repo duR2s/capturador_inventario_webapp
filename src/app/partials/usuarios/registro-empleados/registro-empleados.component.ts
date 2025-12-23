@@ -1,9 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FacadeService } from 'src/app/services/facade.service';
-// Importamos el servicio unificado correctamente
 import { UsuariosService } from 'src/app/services/roles/usuarios.service';
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from '@angular/material/input';
@@ -36,8 +35,13 @@ import { DatePipe } from '@angular/common';
 })
 export class RegistroEmpleadosComponent implements OnInit {
 
+  // Inputs para modo "Embebido"
   @Input() rol: string = "";
-  @Input() datos_user: any = {};
+  @Input() datos_user: any = null;
+  @Input() isEmbedded: boolean = false;
+
+  // Outputs
+  @Output() onClose = new EventEmitter<boolean>();
 
   public empleado: any = {};
   public errors: any = {};
@@ -53,38 +57,46 @@ export class RegistroEmpleadosComponent implements OnInit {
   constructor(
     private location: Location,
     public activatedRoute: ActivatedRoute,
-    private usuariosService: UsuariosService, // Inyección del servicio unificado
+    private usuariosService: UsuariosService,
     private facadeService: FacadeService,
     private router: Router,
     private datePipe: DatePipe
   ) { }
 
   ngOnInit(): void {
-    // Definir puesto base según input o default
     const puestoBase = this.determinarPuesto(this.rol) as 'CAPTURADOR' | 'OTRO';
 
-    if(this.activatedRoute.snapshot.params['id'] != undefined){
+    // Prioridad a datos pasados por Input (Modo Embebido)
+    if (this.datos_user && this.datos_user.id) {
+      this.configurarEdicion(this.datos_user, puestoBase);
+    }
+    // Modo legacy por URL
+    else if(this.activatedRoute.snapshot.params['id'] != undefined){
       this.editar = true;
       this.idUser = this.activatedRoute.snapshot.params['id'];
-
-      if (this.datos_user) {
-        this.empleado = {
-          id: this.datos_user.id,
-          clave_interna: this.datos_user.clave_interna,
-          rfc: this.datos_user.rfc,
-          telefono: this.datos_user.telefono,
-          fecha_nacimiento: this.datos_user.fecha_nacimiento,
-          first_name: this.datos_user.user?.first_name || "",
-          last_name: this.datos_user.user?.last_name || "",
-          email: this.datos_user.user?.email || this.datos_user.user?.username || "",
-          puesto: this.datos_user.puesto || puestoBase
-        };
-      }
-    } else {
-      // Usamos el esquema del servicio unificado
+      // Aquí se asumiría fetch por ID si fuera necesario
+    }
+    // Modo Creación
+    else {
       this.empleado = this.usuariosService.getEsquemaBase();
       this.token = this.facadeService.getSessionToken();
     }
+  }
+
+  private configurarEdicion(data: any, puestoBase: string) {
+    this.editar = true;
+    this.idUser = data.id;
+    this.empleado = {
+      id: data.id,
+      clave_interna: data.clave_interna,
+      rfc: data.rfc,
+      telefono: data.telefono,
+      fecha_nacimiento: data.fecha_nacimiento,
+      first_name: data.user?.first_name || "",
+      last_name: data.user?.last_name || "",
+      email: data.user?.email || data.user?.username || "",
+      puesto: data.puesto || puestoBase
+    };
   }
 
   private determinarPuesto(rolInput: string): string {
@@ -111,7 +123,11 @@ export class RegistroEmpleadosComponent implements OnInit {
   }
 
   public regresar(){
-    this.location.back();
+    if (this.isEmbedded) {
+      this.onClose.emit(false);
+    } else {
+      this.location.back();
+    }
   }
 
   public registrar(): void {
@@ -124,7 +140,6 @@ export class RegistroEmpleadosComponent implements OnInit {
 
   private procesarGuardado(): void {
     this.errors = {};
-    // Validación unificada
     this.errors = this.usuariosService.validarUsuario(this.empleado, this.editar);
 
     if(Object.keys(this.errors).length > 0){
@@ -146,11 +161,14 @@ export class RegistroEmpleadosComponent implements OnInit {
       return;
     }
 
-    // Llamada unificada
     this.usuariosService.guardarUsuario(this.empleado, this.editar).subscribe({
       next: (response) => {
         alert(`Empleado ${this.editar ? 'actualizado' : 'registrado'} exitosamente`);
-        this.router.navigate(["empleados"]);
+        if (this.isEmbedded) {
+          this.onClose.emit(true);
+        } else {
+          this.router.navigate(["empleados"]);
+        }
       },
       error: (error) => {
         alert(`Error al ${this.editar ? 'actualizar' : 'registrar'} empleado`);

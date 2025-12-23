@@ -1,6 +1,5 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatRippleModule } from '@angular/material/core';
 
@@ -16,8 +15,8 @@ export type TipoAccionUsuario = 'ADMIN' | 'EMPLEADO';
 export class BotonRegistroUsuariosComponent {
 
   @Input() tipo: TipoAccionUsuario = 'EMPLEADO'; // Default
-
-  private router = inject(Router);
+  // Nuevo: Emitimos el evento en lugar de navegar internamente
+  @Output() onClick = new EventEmitter<TipoAccionUsuario>();
 
   get config() {
     if (this.tipo === 'ADMIN') {
@@ -25,21 +24,20 @@ export class BotonRegistroUsuariosComponent {
         title: 'Registrar Administrador',
         desc: 'Crear usuario con acceso total al sistema',
         icon: 'admin_panel_settings',
-        cssClass: 'style-admin',
-        route: '/administrador/registro' // Ajusta a tu ruta real
+        cssClass: 'style-admin'
       };
     } else {
       return {
         title: 'Registrar Empleado',
         desc: 'Crear capturador u operativo',
-        icon: 'person_add', // O 'badge'
-        cssClass: 'style-empleado',
-        route: '/empleados/registro' // Ajusta a tu ruta real
+        icon: 'person_add',
+        cssClass: 'style-empleado'
       };
     }
   }
 
   navegar() {
-    this.router.navigate([this.config.route]);
+    // Emitimos el tipo de acción al padre (UsuariosScreen)
+    this.onClick.emit(this.tipo);
   }
 }

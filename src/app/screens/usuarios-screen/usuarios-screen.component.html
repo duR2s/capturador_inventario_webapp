@@ -1,48 +1,85 @@
 <div class="dashboard-container">
 
   <!-- ==============================================
-       SECCIÓN 1: ACCIONES RÁPIDAS (CARDS)
+       VISTA 1: LISTA Y BOTONES (Se oculta si showForm es true)
        ============================================== -->
-  <section class="dashboard-section fade-in-up">
-    <h3 class="section-label">Gestión de Personal</h3>
+  <ng-container *ngIf="!showForm">
 
-    <!-- Grid para las tarjetas de acción -->
-    <div class="cards-grid">
+    <!-- Sección Acciones Rápidas -->
+    <section class="dashboard-section fade-in-up">
+      <h3 class="section-label">Gestión de Personal</h3>
 
-      <!-- Card para Registrar Empleado -->
-      <app-boton-registro-usuarios
-        tipo="EMPLEADO">
-      </app-boton-registro-usuarios>
+      <div class="cards-grid">
+        <app-boton-registro-usuarios
+          tipo="EMPLEADO"
+          (onClick)="abrirRegistro($event)">
+        </app-boton-registro-usuarios>
 
-      <!-- Card para Registrar Admin -->
-      <app-boton-registro-usuarios
-        tipo="ADMIN">
-      </app-boton-registro-usuarios>
+        <app-boton-registro-usuarios
+          tipo="ADMIN"
+          (onClick)="abrirRegistro($event)">
+        </app-boton-registro-usuarios>
+      </div>
+    </section>
 
-    </div>
-  </section>
+    <!-- Sección Tabla -->
+    <section class="table-section fade-in-up delay-100">
+      <div class="loading-shade" *ngIf="isLoading">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+
+      <app-tabla-usuarios
+        *ngIf="!isLoading"
+        [usuarios]="listaUsuarios"
+        (onEdit)="abrirEdicion($event)"
+        (onDelete)="handleDelete($event)"
+        (onChangeRole)="handleChangeRole($event)">
+      </app-tabla-usuarios>
+    </section>
+
+  </ng-container>
 
   <!-- ==============================================
-       SECCIÓN 2: LISTADO DE USUARIOS
+       VISTA 2: FORMULARIOS EMBEBIDOS (Se muestra si showForm es true)
        ============================================== -->
-  <section class="table-section fade-in-up delay-100">
+  <ng-container *ngIf="showForm">
 
-    <div class="loading-shade" *ngIf="isLoading">
-      <mat-spinner diameter="40"></mat-spinner>
+    <!-- HEADER DE NAVEGACIÓN (NUEVO) -->
+    <div class="form-navigation-header fade-in-up">
+      <button mat-icon-button
+              class="btn-back"
+              (click)="cerrarFormulario(false)"
+              matTooltip="Regresar a la lista">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+
+      <div class="header-text">
+        <h2 class="title">
+          {{ userToEdit ? 'Editar' : 'Registrar' }}
+          <span class="highlight">{{ formRole === 'ADMIN' ? 'Administrador' : 'Empleado' }}</span>
+        </h2>
+        <p class="subtitle">Complete la información solicitada a continuación</p>
+      </div>
     </div>
 
-    <!--
-      Componente Tabla Reutilizable
-      Recibe: [usuarios]
-      Emite: (onDelete), (onChangeRole)
-    -->
-    <app-tabla-usuarios
-      *ngIf="!isLoading"
-      [usuarios]="listaUsuarios"
-      (onDelete)="handleDelete($event)"
-      (onChangeRole)="handleChangeRole($event)">
-    </app-tabla-usuarios>
+    <!-- Formulario ADMIN -->
+    <div *ngIf="formRole === 'ADMIN'" class="fade-in-up delay-100">
+      <app-registro-admin
+        [isEmbedded]="true"
+        [datos_user]="userToEdit"
+        (onClose)="cerrarFormulario($event)">
+      </app-registro-admin>
+    </div>
 
-  </section>
+    <!-- Formulario EMPLEADO -->
+    <div *ngIf="formRole === 'EMPLEADO'" class="fade-in-up delay-100">
+      <app-registro-empleados
+        [isEmbedded]="true"
+        [datos_user]="userToEdit"
+        (onClose)="cerrarFormulario($event)">
+      </app-registro-empleados>
+    </div>
+
+  </ng-container>
 
 </div>

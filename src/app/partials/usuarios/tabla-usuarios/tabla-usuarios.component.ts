@@ -1,6 +1,5 @@
-import { Component, Input, Output, EventEmitter, ViewChild, OnChanges, SimpleChanges, AfterViewInit, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, OnChanges, SimpleChanges, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router'; // Importamos Router para la navegación
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
@@ -32,9 +31,11 @@ export class TablaUsuariosComponent implements OnChanges, AfterViewInit {
   // Recibimos la lista de usuarios (admin o empleados)
   @Input() usuarios: any[] = [];
 
-  // Eventos para acciones que no son navegación directa
+  // Eventos para acciones
   @Output() onDelete = new EventEmitter<any>();
-  @Output() onChangeRole = new EventEmitter<any>(); // Botón de "Permisos/Puesto"
+  @Output() onChangeRole = new EventEmitter<any>();
+  // Nuevo: Evento para editar en lugar de navegar
+  @Output() onEdit = new EventEmitter<any>();
 
   // Configuración de la tabla
   dataSource = new MatTableDataSource<any>([]);
@@ -51,8 +52,6 @@ export class TablaUsuariosComponent implements OnChanges, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  private router = inject(Router);
-
   constructor() {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -65,7 +64,7 @@ export class TablaUsuariosComponent implements OnChanges, AfterViewInit {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
 
-    // Filtro personalizado para buscar por varios campos
+    // Filtro personalizado
     this.dataSource.filterPredicate = (data: any, filter: string) => {
       const searchStr = (
         (data.clave_interna || '') +
@@ -90,17 +89,11 @@ export class TablaUsuariosComponent implements OnChanges, AfterViewInit {
   // --- ACCIONES ---
 
   editarUsuario(usuario: any) {
-    // AQUÍ PONES TU URL DE EDICIÓN
-    // Ejemplo: /administradores/editar/5  o  /empleados/editar/5
-    // Puedes lógica condicional si la ruta cambia según el rol
-    const rutaBase = usuario.puesto === 'ADMIN' ? 'administrador' : 'empleados';
-
-    this.router.navigate([`/${rutaBase}/editar`, usuario.id]);
+    // Emitimos el usuario al padre para que él decida cómo mostrar el formulario
+    this.onEdit.emit(usuario);
   }
 
   cambiarPermisos(usuario: any) {
-    // Por ahora no hace nada, solo emite
-    console.log("Cambiar permisos de:", usuario);
     this.onChangeRole.emit(usuario);
   }
 
@@ -112,8 +105,8 @@ export class TablaUsuariosComponent implements OnChanges, AfterViewInit {
 
   getRoleClass(puesto: string): string {
     switch (puesto) {
-      case 'ADMIN': return 'role-admin';       // Color especial para Admin
-      case 'CAPTURADOR': return 'role-user';   // Color para capturadores
+      case 'ADMIN': return 'role-admin';
+      case 'CAPTURADOR': return 'role-user';
       case 'OTRO': return 'role-other';
       default: return 'role-gray';
     }

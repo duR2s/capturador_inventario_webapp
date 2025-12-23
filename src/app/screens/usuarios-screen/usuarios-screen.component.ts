@@ -2,12 +2,18 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button'; // Importar
+import { MatTooltipModule } from '@angular/material/tooltip'; // Importar
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-// Componentes Hijos (Asegúrate de que las rutas sean correctas)
-import { BotonRegistroUsuariosComponent } from '../../modals/usuarios/boton-registro-usuarios/boton-registro-usuarios.component';
+// Componentes Hijos
+import { BotonRegistroUsuariosComponent, TipoAccionUsuario } from '../../modals/usuarios/boton-registro-usuarios/boton-registro-usuarios.component';
 import { TablaUsuariosComponent } from '../../partials/usuarios/tabla-usuarios/tabla-usuarios.component';
 import { ConfirmationDialogModalComponent } from '../../modals/utilities/confirmation-dialog-modal/confirmation-dialog-modal.component';
+
+// Componentes de Registro (Formularios)
+import { RegistroAdminComponent } from '../../partials/usuarios/registro-administradores/registro-administradores.component';
+import { RegistroEmpleadosComponent } from '../../partials/usuarios/registro-empleados/registro-empleados.component';
 
 // Servicios
 import { UsuariosService } from '../../services/roles/usuarios.service';
@@ -18,10 +24,14 @@ import { UsuariosService } from '../../services/roles/usuarios.service';
   imports: [
     CommonModule,
     MatIconModule,
+    MatButtonModule,   // Agregado
+    MatTooltipModule,  // Agregado
     MatDialogModule,
     MatProgressSpinnerModule,
-    BotonRegistroUsuariosComponent, // Tus cards de registro
-    TablaUsuariosComponent    // Tu tabla unificada
+    BotonRegistroUsuariosComponent,
+    TablaUsuariosComponent,
+    RegistroAdminComponent,
+    RegistroEmpleadosComponent
   ],
   templateUrl: './usuarios-screen.component.html',
   styleUrls: ['./usuarios-screen.component.scss']
@@ -32,9 +42,14 @@ export class UsuariosScreenComponent implements OnInit {
   private usuariosService = inject(UsuariosService);
   private dialog = inject(MatDialog);
 
-  // Estado
+  // Estado de Datos
   public listaUsuarios: any[] = [];
   public isLoading: boolean = true;
+
+  // Estado de la Vista (Orquestación)
+  public showForm: boolean = false;
+  public formRole: 'ADMIN' | 'EMPLEADO' = 'EMPLEADO';
+  public userToEdit: any = null; // Si es null, es modo registro
 
   ngOnInit(): void {
     this.cargarUsuarios();
@@ -42,7 +57,6 @@ export class UsuariosScreenComponent implements OnInit {
 
   cargarUsuarios() {
     this.isLoading = true;
-    // Llamamos al servicio unificado sin filtros para traer a todos (Admins + Empleados)
     this.usuariosService.obtenerUsuarios().subscribe({
       next: (data) => {
         this.listaUsuarios = data;
@@ -53,6 +67,38 @@ export class UsuariosScreenComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  // --- Navegación Interna (Lógica de Botones y Tabla) ---
+
+  // Se ejecuta al dar click en las Cards de "Registrar X"
+  abrirRegistro(tipo: TipoAccionUsuario) {
+    this.userToEdit = null; // Modo Registro
+    this.formRole = tipo;
+    this.showForm = true;
+  }
+
+  // Se ejecuta al dar click en el botón "Editar" de la tabla
+  abrirEdicion(usuario: any) {
+    this.userToEdit = usuario; // Modo Edición
+    // Determinamos qué formulario mostrar según el puesto
+    if (usuario.puesto === 'ADMIN') {
+      this.formRole = 'ADMIN';
+    } else {
+      this.formRole = 'EMPLEADO';
+    }
+    this.showForm = true;
+  }
+
+  // Se ejecuta cuando el formulario emite "onClose"
+  cerrarFormulario(seGuardoCambio: boolean) {
+    this.showForm = false;
+    this.userToEdit = null;
+
+    if (seGuardoCambio) {
+      // Si hubo cambios, recargamos la tabla
+      this.cargarUsuarios();
+    }
   }
 
   // --- Manejo de Eventos de la Tabla ---
@@ -72,7 +118,6 @@ export class UsuariosScreenComponent implements OnInit {
         this.isLoading = true;
         this.usuariosService.eliminarUsuario(usuario.id).subscribe({
           next: () => {
-            // Recargamos la lista tras eliminar
             this.cargarUsuarios();
           },
           error: (err) => {
@@ -86,7 +131,6 @@ export class UsuariosScreenComponent implements OnInit {
   }
 
   handleChangeRole(usuario: any) {
-    // Aquí implementarás la lógica para abrir un modal de cambio de permisos en el futuro
     console.log("Solicitud de cambio de rol para:", usuario.id);
     alert(`Funcionalidad de cambio de permisos para ${usuario.user.username} próximamente.`);
   }

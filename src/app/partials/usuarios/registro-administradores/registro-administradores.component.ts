@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -35,8 +35,13 @@ import { DatePipe } from '@angular/common';
 })
 export class RegistroAdminComponent implements OnInit {
 
+  // Inputs para modo "Embebido"
   @Input() rol: string = "";
-  @Input() datos_user: any = {};
+  @Input() datos_user: any = null; // Objeto a editar
+  @Input() isEmbedded: boolean = false; // Bandera para saber si estamos dentro de otra pantalla
+
+  // Outputs para comunicar al padre cuando terminar
+  @Output() onClose = new EventEmitter<boolean>(); // true = guardado, false = cancelado
 
   public admin: any = {};
   public errors: any = {};
@@ -52,36 +57,46 @@ export class RegistroAdminComponent implements OnInit {
   constructor(
     private location: Location,
     public activatedRoute: ActivatedRoute,
-    private usuariosService: UsuariosService, // Usamos el servicio unificado
+    private usuariosService: UsuariosService,
     private facadeService: FacadeService,
     private router: Router,
     private datePipe: DatePipe
   ) { }
 
   ngOnInit(): void {
-    if(this.activatedRoute.snapshot.params['id'] != undefined){
+    // Lógica prioritaria: Si hay datos por Input (modo embebido o pasados directo)
+    if (this.datos_user && this.datos_user.id) {
+      this.configurarEdicion(this.datos_user);
+    }
+    // Lógica secundaria: Si viene por URL (modo legacy o acceso directo)
+    else if(this.activatedRoute.snapshot.params['id'] != undefined){
       this.editar = true;
       this.idUser = this.activatedRoute.snapshot.params['id'];
-
-      if (this.datos_user) {
-        this.admin = {
-          id: this.datos_user.id,
-          // Mapeamos a clave_interna (nombre unificado en back)
-          clave_interna: this.datos_user.clave_interna || this.datos_user.clave_admin,
-          rfc: this.datos_user.rfc,
-          telefono: this.datos_user.telefono,
-          fecha_nacimiento: this.datos_user.fecha_nacimiento,
-          first_name: this.datos_user.user?.first_name || "",
-          last_name: this.datos_user.user?.last_name || "",
-          email: this.datos_user.user?.email || this.datos_user.user?.username || "",
-          puesto: 'ADMIN' // Usamos 'puesto' en lugar de 'rol' para coincidir con el servicio
-        };
-      }
-    } else {
-      // Usamos el generador del servicio unificado
+      // Aquí podrías llamar al servicio para obtener el usuario si no viene en datos_user
+      // Pero asumiendo que ya se tiene la lógica, lo dejamos así o adaptamos según tu backend.
+      // Por ahora, asumimos que si es por URL, el componente se encarga (no implementado aquí fetch por ID).
+    }
+    // Modo Creación
+    else {
       this.admin = this.usuariosService.getEsquemaBase('ADMIN');
       this.token = this.facadeService.getSessionToken();
     }
+  }
+
+  private configurarEdicion(data: any) {
+    this.editar = true;
+    this.idUser = data.id;
+    this.admin = {
+      id: data.id,
+      clave_interna: data.clave_interna || data.clave_admin,
+      rfc: data.rfc,
+      telefono: data.telefono,
+      fecha_nacimiento: data.fecha_nacimiento,
+      first_name: data.user?.first_name || "",
+      last_name: data.user?.last_name || "",
+      email: data.user?.email || data.user?.username || "",
+      puesto: 'ADMIN'
+    };
   }
 
   public showPassword() {
@@ -101,7 +116,11 @@ export class RegistroAdminComponent implements OnInit {
   }
 
   public regresar(){
-    this.location.back();
+    if (this.isEmbedded) {
+      this.onClose.emit(false); // Emitimos cancelar
+    } else {
+      this.location.back();
+    }
   }
 
   public registrar(): void {
@@ -114,20 +133,17 @@ export class RegistroAdminComponent implements OnInit {
 
   private procesarGuardado(): void {
     this.errors = {};
-    // Usamos validación unificada
     this.errors = this.usuariosService.validarUsuario(this.admin, this.editar);
 
     if(Object.keys(this.errors).length > 0){
       return;
     }
 
-    // Forzamos puesto y ID si es necesario
     this.admin.puesto = 'ADMIN';
     if (this.editar && !this.admin.id) {
       this.admin.id = this.idUser;
     }
 
-    // Validación extra de passwords en frontend (aunque el servicio también lo valida)
     if(!this.editar && this.admin.password !== this.admin.confirmar_password){
       alert("Las contraseñas no coinciden");
       this.admin.password="";
@@ -135,11 +151,14 @@ export class RegistroAdminComponent implements OnInit {
       return;
     }
 
-    // Llamada unificada: guardarUsuario detecta si es POST o PUT internamente
     this.usuariosService.guardarUsuario(this.admin, this.editar).subscribe({
       next: (response) => {
         alert(`Administrador ${this.editar ? 'actualizado' : 'registrado'} exitosamente`);
-        this.router.navigate(["administrador"]);
+        if (this.isEmbedded) {
+          this.onClose.emit(true); // Emitimos éxito
+        } else {
+          this.router.navigate(["administrador"]);
+        }
       },
       error: (error) => {
         alert(`Error al ${this.editar ? 'actualizar' : 'registrar'} administrador`);
