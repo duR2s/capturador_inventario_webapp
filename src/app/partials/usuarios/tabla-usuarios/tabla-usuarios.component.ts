@@ -9,6 +9,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+//Importar Servicios
+import { FacadeService } from '../../../services/facade.service';
+
 @Component({
   selector: 'app-tabla-usuarios',
   standalone: true,
@@ -30,6 +33,8 @@ export class TablaUsuariosComponent implements OnChanges, AfterViewInit {
 
   // Recibimos la lista de usuarios (admin o empleados)
   @Input() usuarios: any[] = [];
+  @Input() _isAdmin: boolean = true;
+
 
   // Eventos para acciones
   @Output() onDelete = new EventEmitter<any>();
@@ -52,7 +57,9 @@ export class TablaUsuariosComponent implements OnChanges, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor() {}
+
+  constructor() {
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['usuarios'] && this.usuarios) {

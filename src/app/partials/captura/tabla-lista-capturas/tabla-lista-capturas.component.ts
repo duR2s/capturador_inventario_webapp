@@ -39,6 +39,8 @@ export class TablaListaCapturasComponent implements OnChanges, AfterViewInit {
   // Recibe los datos desde el padre (MenuCaptura)
   @Input() capturas: Captura[] = [];
 
+
+
   // Eventos para acciones
   @Output() onView = new EventEmitter<Captura>();
   @Output() onEdit = new EventEmitter<Captura>();

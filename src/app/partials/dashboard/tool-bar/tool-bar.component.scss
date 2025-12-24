@@ -1,6 +1,6 @@
 // @import '../../styles/color-variables';
 
-// Variables fallback
+// Variables fallback (Usa las globales en tu compilación real)
 $color-critical: #d32f2f;
 $color-accent-blue: #e3f2fd;
 $color-border-light: #e0e0e0;
@@ -16,18 +16,38 @@ $color-white: #ffffff;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1rem; // Ajuste de padding
+  padding: 0 1rem;
   flex-shrink: 0;
 
   .toolbar-title {
     color: $color-accent-blue;
     margin-left: 10px;
+    font-weight: 500;
   }
 }
 
 .toolbar-hamburger {
   color: $color-text-aquamarine;
   cursor: pointer;
+
+  // Contenedor para la animación de rotación
+  .icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+
+    // FIX: Iniciamos rotado 180 grados (Menu se ve igual).
+    // Esto prepara el giro para que al abrir regrese a 0.
+    transform: rotate(180deg);
+
+    // Cuando está activo (sidebar abierta, mostramos arrow_back):
+    // Lo rotamos a 0 grados.
+    // Al estar en 0, 'arrow_back' apunta naturalmente a la IZQUIERDA.
+    &.is-active {
+      transform: rotate(0deg);
+    }
+  }
 }
 
 .spacer {
@@ -37,25 +57,44 @@ $color-white: #ffffff;
 .user-info {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
   font-size: 0.9rem;
   color: $color-white;
+
+  .user-name {
+    font-weight: 500;
+  }
 }
 
 .logout-button {
   padding: 0 1rem;
-  background-color: $color-danger;
+  background-color: rgba(255, 255, 255, 0.1); // Fondo translúcido sutil
   color: $color-white;
   border-radius: 4px;
   cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .icon-logout {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
 
   &:hover {
     background-color: $color-danger-dark;
+    border-color: $color-danger-dark;
   }
 }
 
 @media (max-width: 480px) {
   .toolbar-title {
-    font-size: 0;
+    display: none;
+  }
+
+  .user-info .user-name {
+    display: none;
   }
 }

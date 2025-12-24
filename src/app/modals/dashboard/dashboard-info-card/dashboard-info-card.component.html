@@ -1,0 +1,16 @@
+<div class="card-container">
+
+  <!-- CABECERA: Título (Izq) e Icono (Der) -->
+  <div class="card-header">
+    <span class="card-label">{{ title }}</span>
+    <div class="icon-wrapper" [ngClass]="iconClass">
+      <mat-icon>{{ icon }}</mat-icon>
+    </div>
+  </div>
+
+  <!-- CUERPO: Número Grande (Abajo Derecha) -->
+  <div class="card-body">
+    <span class="big-value">{{ value }}</span>
+  </div>
+
+</div>

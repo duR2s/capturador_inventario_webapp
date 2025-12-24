@@ -1,10 +1,149 @@
-<h1>Mi Dashboard</h1>
-<p>Bienvenido a tu panel de control. Aquí puedes ver un resumen de tus actividades recientes y acceder a diferentes secciones de la aplicación.</p>
-<div class="dashboard-overview">
-  <mat-card class="overview-card">
-    <mat-card-title>Resumen de Actividades</mat-card-title>
-    <mat-card-content>
-      <p>Aquí puedes ver un resumen de tus actividades recientes.</p>
-      <!-- Contenido dinámico de resumen -->
-    </mat-card-content>
-  </mat-card>
+<div class="dashboard-wrapper fade-in-up">
+
+  <div class="dashboard-header">
+    <h1>Panel de Control</h1>
+    <p class="subtitle">Resumen general de operaciones e inventario</p>
+  </div>
+
+  <!-- GRID PRINCIPAL (6 Columnas) -->
+  <div class="dashboard-grid">
+
+    <!-- ==========================================
+         ROW 1: KPIs (3 Cards de 2 columnas c/u)
+         ========================================== -->
+
+    <!-- 1. Artículos Actualizados -->
+    <div class="grid-item span-2">
+      <app-dashboard-info-card
+        title="Artículos Actualizados"
+        icon="sync"
+        [value]="kpis.articulos_actualizados_mes || 0"
+        colorType="primary">
+      </app-dashboard-info-card>
+    </div>
+
+    <!-- 2. Capturas del Mes -->
+    <div class="grid-item span-2">
+      <app-dashboard-info-card
+        title="Capturas (Mes)"
+        icon="qr_code_scanner"
+        [value]="kpis.capturas_mes || 0"
+        colorType="secondary">
+      </app-dashboard-info-card>
+    </div>
+
+    <!-- 3. Top Capturador -->
+    <div class="grid-item span-2">
+      <app-dashboard-info-card
+        title="Top Capturador ({{ kpis.top_capturador_mes?.total || 0 }} capturas)"
+        icon="emoji_events"
+        [value]="kpis.top_capturador_mes?.nombre || '---'"
+        colorType="neutral">
+      </app-dashboard-info-card>
+
+      <small class="capturador-name" *ngIf="kpis.top_capturador_mes">
+      </small>
+    </div>
+
+
+    <!-- ==========================================
+         ROW 2: GRÁFICAS DE CALIDAD (2 Gráficas de 3 columnas c/u)
+         ========================================== -->
+
+    <!-- Gráfica 1: Diferencias (Rojo) -->
+    <div class="grid-item span-3 chart-card">
+      <div class="chart-header">
+        <h3>Artículos con Diferencias</h3>
+        <span class="badge badge-warn">Revisión Requerida</span>
+      </div>
+      <div class="chart-container">
+        <ngx-charts-bar-vertical
+          [scheme]="colorSchemeDiferencias"
+          [results]="chartDiferencias"
+          [gradient]="gradient"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          xAxisLabel="Mes"
+          yAxisLabel="Cant. Diferencias"
+          [showDataLabel]="true">
+        </ngx-charts-bar-vertical>
+      </div>
+    </div>
+
+    <!-- Gráfica 2: Exactos (Verde) -->
+    <div class="grid-item span-3 chart-card">
+      <div class="chart-header">
+        <h3>Artículos Exactos</h3>
+        <span class="badge badge-success">Sin Incidencias</span>
+      </div>
+      <div class="chart-container">
+        <ngx-charts-bar-vertical
+          [scheme]="colorSchemeExactos"
+          [results]="chartExactos"
+          [gradient]="gradient"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          xAxisLabel="Mes"
+          yAxisLabel="Cant. Exactos"
+          [showDataLabel]="true">
+        </ngx-charts-bar-vertical>
+      </div>
+    </div>
+
+
+    <!-- ==========================================
+         ROW 3: MIXTO (Gráfica + Sincronización + Usuario)
+         ========================================== -->
+
+    <!-- Gráfica 3: Total Capturas (3 columnas) -->
+    <div class="grid-item span-3 chart-card">
+      <div class="chart-header">
+        <h3>Histórico de Capturas</h3>
+      </div>
+      <div class="chart-container">
+        <!-- CAMBIO: Usamos bar-vertical en lugar de area-chart -->
+        <ngx-charts-bar-vertical
+          [scheme]="colorSchemeCapturas"
+          [results]="chartCapturas"
+          [gradient]="true"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [showDataLabel]="true"
+          xAxisLabel="Mes"
+          yAxisLabel="Total Capturas">
+        </ngx-charts-bar-vertical>
+      </div>
+    </div>
+
+    <!-- Card: Próxima Sincronización (2 columnas) -->
+    <div class="grid-item span-2">
+      <div class="sync-card">
+        <div class="sync-icon">
+          <mat-icon class="spin-slow">sync</mat-icon>
+        </div>
+        <div class="sync-info">
+          <span class="label">Próxima Sincronización</span>
+          <span class="value">{{ kpis.proxima_sincronizacion_formatted || '---' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card: Usuario (1 columna) -->
+    <div class="grid-item span-1 user-card">
+      <div class="user-avatar">
+        <span>{{ userName.charAt(0) }}</span>
+      </div>
+      <div class="user-details">
+        <span class="u-name">{{ userName.split(' ')[0] }}</span>
+        <span class="u-role">{{ userRole }}</span>
+      </div>
+    </div>
+
+  </div> <!-- Fin Grid -->
+</div>

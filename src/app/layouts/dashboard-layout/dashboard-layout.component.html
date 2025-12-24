@@ -1,18 +1,34 @@
 <mat-sidenav-container class="dashboard-sidenav-container">
 
-  <!-- SIDENAV: Usamos nuestro componente app-sidenav -->
-  <mat-sidenav #sidenav class="app-sidenav" mode="side">
+  <!-- SIDENAV:
+       [mode]: Dinámico. 'over' en móvil (tiene backdrop), 'side' en desktop.
+       [opened]: Controlado por la variable isSidenavOpen.
+       (openedChange): Detecta cuando se cierra/abre (ej. clic fuera en móvil).
+  -->
+  <mat-sidenav
+    #sidenav
+    class="app-sidenav"
+    [mode]="isMobile ? 'over' : 'side'"
+    [opened]="isSidenavOpen"
+    (openedChange)="onSidenavChange($event)">
+
     <app-sidenav></app-sidenav>
+
   </mat-sidenav>
 
-  <!-- CONTENT: Contiene el toolbar y el router-outlet -->
+  <!-- CONTENT -->
   <mat-sidenav-content>
 
-    <!-- TOOLBAR: Escuchamos el evento (menuClick) -->
-    <app-toolbar (menuClick)="sidenav.toggle()"></app-toolbar>
+    <!-- TOOLBAR:
+         Pasamos [isSidebarOpen] para que sepa qué icono mostrar.
+         (menuClick) simplemente alterna el valor.
+    -->
+    <app-toolbar
+      [isSidebarOpen]="isSidenavOpen"
+      (menuClick)="sidenav.toggle()">
+    </app-toolbar>
 
     <main class="content-area">
-      <!-- Aquí se carga el contenido de las páginas hijas -->
       <router-outlet></router-outlet>
     </main>
 

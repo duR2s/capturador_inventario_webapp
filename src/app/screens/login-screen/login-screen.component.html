@@ -1,14 +1,26 @@
 <section class="login-new">
   <div class="login-container">
+
     <!-- Left: Form -->
     <div class="login-form-section">
+
       <div class="login-brand">
         <img src="/assets/images/VR_simbolo.png" alt="Logo VR" class="logo-VR" />
         <span class="brand-title">Asistente Refaccionaria Vergara</span>
       </div>
+
       <h2 class="login-title">Inicia sesión</h2>
       <p class="login-subtitle">Ingresa los datos que registraste</p>
+
       <form (ngSubmit)="login()" class="login-form" #form="ngForm">
+
+        <!-- NUEVO: Banner de Error Global -->
+        <div class="login-error-banner fade-in" *ngIf="generalErrorMessage">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ generalErrorMessage }}</span>
+        </div>
+
+        <!-- Input Email -->
         <div class="form-group">
           <label for="email">Correo electrónico</label>
           <input
@@ -16,12 +28,15 @@
             [(ngModel)]="username"
             name="username"
             class="form-control"
+            [class.is-invalid]="errors.username"
             id="email"
             placeholder="nombre@correo.com"
             autocomplete="username"
           />
           <div *ngIf="errors.username" class="invalid-feedback">{{ errors.username }}</div>
         </div>
+
+        <!-- Input Password -->
         <div class="form-group">
           <label for="password">Contraseña</label>
           <div style="position:relative;">
@@ -31,33 +46,40 @@
               id="password"
               name="password_user"
               class="form-control pwd"
+              [class.is-invalid]="errors.password"
               placeholder="Mínimo 8 caracteres"
               autocomplete="current-password"
               (keyup.enter)="login()"
               style="padding-right:40px;"
             />
-            <span class="show-password" (click)="showPassword()" style="position:absolute; right:18px; top:50%; transform:translateY(-50%);">
-              <i [ngClass]="type == 'password' ? 'bi bi-eye-fill' : 'bi bi-eye-slash-fill'"></i>
+            <span class="show-password" (click)="showPassword()" style="position:absolute; right:18px; top:50%; transform:translateY(-50%); cursor: pointer;">
+              <!-- Usamos mat-icon en lugar de <i> para consistencia -->
+              <mat-icon>{{ type == 'password' ? 'visibility' : 'visibility_off' }}</mat-icon>
             </span>
           </div>
           <div *ngIf="errors.password" class="invalid-feedback">{{ errors.password }}</div>
         </div>
-        <div class="form-links">
-          <a (click)="router.navigate(['olvide-contrasena'])">¿Olvidaste tu contraseña?</a>
-        </div>
-        <button class="btn-login" type="submit" [disabled]="load">Iniciar sesión</button>
-        <div class="form-register">
-          ¿No tienes cuenta? <a (click)="registrar()">Regístrate</a>
-        </div>
+
+        <!-- Botón Submit -->
+        <button class="btn-login" type="submit" [disabled]="load">
+          <span *ngIf="!load">Iniciar sesión</span>
+          <mat-progress-bar *ngIf="load" mode="indeterminate" color="accent" class="loader-bar"></mat-progress-bar>
+        </button>
+
       </form>
     </div>
+
     <!-- Right: Illustration -->
     <div class="login-illustration-section">
       <div class="welcome-message">
         <h2>¡Bienvenido de nuevo!</h2>
         <p>Nos alegra verte otra vez</p>
       </div>
-      <img src="/assets/images/refa-ubicacion-horizontal.png" alt="Ilustración bienvenida" class="login-illustration" />
+      <!-- Imagen ilustrativa (puedes cambiarla por una img tag si tienes el asset) -->
+      <div class="login-illustration">
+         <img src="/assets/images/login-illustration.png" onerror="this.style.display='none'" alt="Illustration">
+      </div>
     </div>
+
   </div>
 </section>

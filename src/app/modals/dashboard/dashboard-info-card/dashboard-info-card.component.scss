@@ -1,0 +1,118 @@
+@import '../../../styles/color-variables';
+
+$card-radius: 20px;
+// Altura flexible pero con un mínimo para mantener consistencia
+$min-height: 140px;
+
+.card-container {
+  width: 100%;
+  min-height: $min-height;
+  height: 100%; // Se adapta si el padre (grid) le da más altura
+  background-color: $color-white;
+  border-radius: $card-radius;
+  padding: 20px;
+
+  // Flex para distribuir elementos
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  // Estilos visuales base (similares a tus otras cards)
+  box-shadow: 0 8px 20px $color-shadow-light;
+  border: 1px solid $color-border-light;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  cursor: default; // O pointer si vas a agregar click
+  overflow: hidden;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px $color-shadow-medium;
+    border-color: rgba($color-primary, 0.3);
+  }
+}
+
+// --- SECCIÓN SUPERIOR ---
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+
+  .card-label {
+    font-family: 'Nexa-Bold', sans-serif;
+    font-size: 14px;
+    color: $color-text-light;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-right: 12px; // Espacio seguro contra el icono
+    line-height: 1.2;
+  }
+
+  .icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background-color: $color-bg-light-3; // Fondo suave por defecto
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+
+    // Variantes de color para el icono
+    &.icon-primary {
+      color: $color-primary;
+      background-color: rgba($color-primary, 0.1);
+    }
+    &.icon-secondary {
+      color: $color-secondary;
+      background-color: rgba($color-secondary, 0.1);
+    }
+    &.icon-neutral {
+      color: $color-text-muted;
+      background-color: $color-bg-light-2;
+    }
+  }
+}
+
+// --- SECCIÓN INFERIOR (Valor) ---
+.card-body {
+  display: flex;
+  justify-content: flex-end; // Alineado a la derecha
+  align-items: flex-end;
+  margin-top: 10px;
+
+  .big-value {
+    font-family: 'Nexa-Bold', sans-serif;
+    // Tamaño grande dinámico, se ajusta bien visualmente
+    font-size: 3.5rem;
+    line-height: 1;
+    color: $color-text-title;
+
+    // Gradiente sutil en el texto (opcional, le da un toque premium)
+    // background: $gradient-green-primary;
+    // -webkit-background-clip: text;
+    // -webkit-text-fill-color: transparent;
+
+    // Si prefieres color sólido, usa esto:
+    color: $color-primary-dark;
+  }
+}
+
+// --- Responsive ---
+@media (max-width: 600px) {
+  .card-container {
+    padding: 16px;
+    min-height: 120px;
+  }
+
+  .card-body .big-value {
+    font-size: 2.8rem;
+  }
+}

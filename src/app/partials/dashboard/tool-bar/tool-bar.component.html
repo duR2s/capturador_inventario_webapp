@@ -1,6 +1,12 @@
 <mat-toolbar class="top-header" color="primary">
+  <!--
+    Botón hamburguesa dinámico con animación:
+    La clase 'is-active' se aplica si la barra está abierta para activar la rotación CSS
+  -->
   <button class="toolbar-hamburger" mat-icon-button (click)="onToggleClick()" aria-label="Toggle sidenav">
-    <mat-icon>menu</mat-icon>
+    <div class="icon-container" [class.is-active]="isSidebarOpen">
+      <mat-icon>{{ isSidebarOpen ? 'arrow_back' : 'menu' }}</mat-icon>
+    </div>
   </button>
 
   <span class="toolbar-title">Panel de Control</span>
@@ -8,7 +14,13 @@
   <span class="spacer"></span>
 
   <div class="user-info">
-    <span>Hola, Usuario</span>
-    <button mat-button class="logout-button">Salir</button>
+    <!-- Nombre del usuario desde el Facade -->
+    <span class="user-name">Hola, {{ userName || 'Usuario' }}</span>
+
+    <!-- Botón de Salir funcional -->
+    <button mat-button class="logout-button" (click)="logout()">
+      <mat-icon class="icon-logout">logout</mat-icon>
+      Salir
+    </button>
   </div>
 </mat-toolbar>

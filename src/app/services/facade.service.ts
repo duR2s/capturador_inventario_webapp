@@ -55,8 +55,8 @@ export class FacadeService {
     let name = (first_name + " " + last_name).trim();
 
     // Configuración segura de cookies
-    const cookieOptions = (val: string) =>
-      this.cookieService.set(val, val, undefined, undefined, undefined, secure, secure ? "None" : "Lax");
+    // const cookieOptions = (val: string) =>
+    //   this.cookieService.set(val, val, undefined, undefined, undefined, secure, secure ? "None" : "Lax");
 
     this.cookieService.set(user_id_cookie_name, id, undefined, undefined, undefined, secure, secure ? "None" : "Lax");
     this.cookieService.set(user_email_cookie_name, email, undefined, undefined, undefined, secure, secure ? "None" : "Lax");
@@ -76,6 +76,15 @@ export class FacadeService {
     return this.cookieService.get(session_cookie_name);
   }
 
+  getUserCompleteName() {
+    return this.cookieService.get(user_complete_name_cookie_name);
+  }
+
+  // --- NUEVO: Obtener ID del usuario ---
+  getUserId(): string {
+    return this.cookieService.get(user_id_cookie_name);
+  }
+
   destroyUser() {
     this.cookieService.deleteAll();
   }
@@ -84,15 +93,10 @@ export class FacadeService {
     return this.cookieService.get(group_name_cookie_name);
   }
 
-  // --- NUEVO MÉTODO DE VALIDACIÓN ROBUSTA ---
-  // Usa esto en tus componentes en lugar de comparar strings manualmente
-  // Ejemplo: if (this.facade.isInRole('ADMIN')) { ... }
   public isInRole(roleToCheck: string): boolean {
-    // 1. Checar rol principal
     const mainRole = this.getUserGroup();
     if (mainRole === roleToCheck) return true;
 
-    // 2. Checar lista de roles (si el usuario tiene múltiples)
     const rolesListStr = this.cookieService.get(groups_list_cookie_name);
     if (rolesListStr) {
       try {

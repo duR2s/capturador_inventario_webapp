@@ -6,7 +6,7 @@
   <ng-container *ngIf="!showForm">
 
     <!-- Sección Acciones Rápidas -->
-    <section class="dashboard-section fade-in-up">
+    <section class="dashboard-section fade-in-up" *ngIf="isAdmin">
       <h3 class="section-label">Gestión de Personal</h3>
 
       <div class="cards-grid">
@@ -31,6 +31,7 @@
       <app-tabla-usuarios
         *ngIf="!isLoading"
         [usuarios]="listaUsuarios"
+        [_isAdmin]="isAdmin"
         (onEdit)="abrirEdicion($event)"
         (onDelete)="handleDelete($event)"
         (onChangeRole)="handleChangeRole($event)">

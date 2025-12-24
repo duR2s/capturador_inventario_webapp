@@ -17,6 +17,7 @@ import { RegistroEmpleadosComponent } from '../../partials/usuarios/registro-emp
 
 // Servicios
 import { UsuariosService } from '../../services/roles/usuarios.service';
+import { FacadeService } from 'src/app/services/facade.service';
 
 @Component({
   selector: 'app-usuarios-screen',
@@ -40,16 +41,24 @@ export class UsuariosScreenComponent implements OnInit {
 
   // Inyecciones
   private usuariosService = inject(UsuariosService);
+  private facadeService = inject(FacadeService);
   private dialog = inject(MatDialog);
 
   // Estado de Datos
   public listaUsuarios: any[] = [];
   public isLoading: boolean = true;
+  public isAdmin: boolean = false;
 
   // Estado de la Vista (Orquestación)
   public showForm: boolean = false;
   public formRole: 'ADMIN' | 'EMPLEADO' = 'EMPLEADO';
   public userToEdit: any = null; // Si es null, es modo registro
+
+  constructor() {
+    // Verificar si es ADMIN
+    const rol = this.facadeService.getUserGroup();
+    this.isAdmin = (rol === 'ADMIN');
+  }
 
   ngOnInit(): void {
     this.cargarUsuarios();

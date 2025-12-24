@@ -1,69 +1,212 @@
-// ==========================================
-// LAYOUT DE PANTALLA COMPLETA (Flex Column)
-// ==========================================
+@import '../../../styles/color-variables';
 
-:host {
-  display: block;
+.dashboard-wrapper {
+  padding: 24px;
   height: 100%;
-  width: 100%;
-  overflow: hidden;
-}
-
-.screen-container {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  background-color: transparent;
+  overflow-y: auto;
   box-sizing: border-box;
+
+  // Header del Dashboard
+  .dashboard-header {
+    margin-bottom: 24px;
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    .subtitle {
+      margin: 4px 0 0 0;
+      color: $color-text-light;
+      font-family: 'Nexa-Light', sans-serif;
+    }
+  }
 }
 
-// ------------------------------------------
-// ZONA SUPERIOR: TABLA
-// ------------------------------------------
-.table-wrapper {
-  flex: 1 1 auto; // Crece para ocupar todo el espacio libre
+// --- GRID SYSTEM (6 Columnas) ---
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr); // 6 columnas iguales
+  grid-auto-rows: minmax(160px, auto);   // Altura mínima por fila
+  gap: 24px;                             // Espacio entre elementos
+  padding-bottom: 40px;
+}
+
+// Clases utilitarias para el ancho (Span)
+.span-1 { grid-column: span 1; }
+.span-2 { grid-column: span 2; }
+.span-3 { grid-column: span 3; }
+.span-6 { grid-column: span 6; } // Full width en móvil
+
+.grid-item {
+  position: relative;
+}
+
+// --- ESTILOS ESPECÍFICOS DE COMPONENTES INTERNOS ---
+
+// 1. Contenedores de Gráficas (Chart Cards)
+.chart-card {
+  background: $color-white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 8px 20px $color-shadow-light;
+  border: 1px solid $color-border-light;
   display: flex;
   flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
+  min-height: 350px; // Altura para que la gráfica se vea bien
 
-  // AQUÍ EL CAMBIO SOLICITADO:
-  // Aumentamos el margen inferior de 10px a 18px.
-  // Esto visualmente le "quita" 8px de altura a la tabla y se los "da" (como espacio vacío)
-  // encima de los inputs, haciendo que el área inferior se sienta más amplia.
-  margin-bottom: 18px;
-
-  app-tabla-captura-partial {
-    height: 100%;
-    width: 100%;
+  .chart-header {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    h3 {
+      font-size: 1.1rem;
+      margin: 0;
+      color: $color-text-dark;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: bold;
+
+      &.badge-warn { background: lighten($color-secondary, 35%); color: $color-secondary; }
+      &.badge-success { background: lighten($color-primary, 45%); color: $color-primary; }
+    }
+  }
+
+  .chart-container {
+    flex-grow: 1;
+    width: 100%;
+    min-height: 250px;
+    // Ngx-charts necesita display block y dimensiones definidas
+    display: block;
+    overflow: hidden;
+  }
+}
+
+// 2. Card de Sincronización (Custom)
+.sync-card {
+  height: 100%;
+  background: $color-bg-light-3; // Color Hueso
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 20px;
+  border: 1px solid rgba($color-primary, 0.1);
+  box-shadow: 0 4px 10px $color-shadow-light;
+
+  .sync-icon {
+    width: 50px;
+    height: 50px;
+    background: $color-white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
     justify-content: center;
-    padding: 0px;
+    color: $color-primary;
+
+    .spin-slow {
+      animation: spin 4s linear infinite;
+    }
+  }
+
+  .sync-info {
+    display: flex;
+    flex-direction: column;
+
+    .label {
+      font-size: 0.85rem;
+      color: $color-text-muted;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    .value {
+      font-family: 'Nexa-Bold', sans-serif;
+      font-size: 1.1rem;
+      color: $color-text-dark;
+      margin-top: 4px;
+    }
   }
 }
 
-// ------------------------------------------
-// ZONA INFERIOR: ACCIONES
-// ------------------------------------------
-.bottom-actions {
-  flex: 0 0 auto;
-  width: 100%;
-  z-index: 10;
+// 3. User Card (Compacta)
+.user-card {
+  background: $color-primary;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  padding: 16px;
+  color: $color-white;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba($color-primary, 0.3);
+
+  .user-avatar {
+    width: 45px;
+    height: 45px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+
+  .user-details {
+    .u-name { display: block; font-family: 'Nexa-Bold', sans-serif; font-size: 0.9rem; }
+    .u-role { display: block; font-size: 0.75rem; opacity: 0.8; }
+  }
 }
 
-// ------------------------------------------
-// RESPONSIVE
-// ------------------------------------------
-@media (max-width: 600px) {
-  .screen-container {
-    padding: 0;
+// 4. Texto flotante para el top capturador en Row 1
+.capturador-name {
+  position: absolute;
+  bottom: 25px;
+  left: 20px;
+  font-size: 0.85rem;
+  color: $color-text-muted;
+  font-weight: bold;
+}
+
+// --- RESPONSIVE ---
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+@media (max-width: 1100px) {
+  // Tablet: Grid de 2 columnas (3 items por fila visualmente si es de 6)
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr); // 2 columnas reales
   }
 
-  .bottom-actions {
-    position: sticky;
-    bottom: 0;
-    background: transparent;
+  // Reajustamos spans para tablet
+  .span-1, .span-2, .span-3 { grid-column: span 1; }
+  .span-3 { grid-column: span 2; } // Gráficas full width en tablet
+}
+
+@media (max-width: 768px) {
+  // Móvil: 1 sola columna
+  .dashboard-grid {
+    display: flex;
+    flex-direction: column;
   }
+
+  .grid-item {
+    width: 100%;
+    margin-bottom: 0;
+  }
+}
+
+// Animación de entrada
+.fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }

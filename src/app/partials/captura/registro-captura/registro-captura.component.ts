@@ -35,121 +35,79 @@ import { FacadeService } from 'src/app/services/facade.service';
 })
 export class RegistroCapturaComponent implements OnInit, OnChanges {
 
+  @Output() onCancelar = new EventEmitter<void>();
   @Output() onSesionCreada = new EventEmitter<any>();
 
-  // Inputs para recibir datos del padre (Smart/Dumb component pattern)
+  // Inputs para llenar los Selects
   @Input() almacenes: any[] = [];
-  @Input() usuarios: any[] = [];
+  @Input() usuarios: any[] = []; // Lista de capturadores disponibles
   @Input() estados: any[] = [];
 
-  @Input() capturaEdicion: any | null = null;
+  // Input opcional para modo edición
+  @Input() capturaEdicion: any = null;
 
-  form: FormGroup;
-  isLoading: boolean = false;
-  isLoadingCatalogos: boolean = false;
-  errorMessage: string = '';
-
-  public isAdmin: boolean = false;
-  public isEditMode: boolean = false;
-
-  public router = inject(Router);
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private capturaService = inject(CapturaService);
   private facadeService = inject(FacadeService);
 
-  constructor(
-    private fb: FormBuilder,
-    private capturaService: CapturaService
-  ) {
-    const rol = this.facadeService.getUserGroup();
-    this.isAdmin = (rol === 'ADMIN');
+  public form!: FormGroup;
+  public isLoading: boolean = false;
+  public isEditMode: boolean = false;
+  public isAdmin: boolean = false;
+  public errorMessage: string = '';
 
-    this.form = this.fb.group({
-      // Folio ya no es required en el front para crear, el back lo ignora/genera
-      folio: ['', []],
-      almacen: ['', [Validators.required]],
-      capturador: ['', [Validators.required]],
-      estado: [{ value: 'BORRADOR', disabled: true }, [Validators.required]]
-    });
+  constructor() {
+    this.initForm();
   }
 
   ngOnInit(): void {
-    this.verificarDatos();
+    const rol = this.facadeService.getUserGroup();
+    this.isAdmin = (rol === 'ADMIN');
 
-    if (!this.capturaEdicion) {
-      this.inicializarModoCreacion();
+    // --- RESTRICCIÓN PARA CAPTURADORES ---
+    // Si no es admin (es capturador), forzamos su ID y deshabilitamos el campo
+    if (!this.isAdmin) {
+      const userId = this.facadeService.getUserId();
+      if (userId) {
+        // Asignamos el ID del usuario logueado al campo 'capturador'
+        // Convertimos a número porque el value del mat-select suele ser numérico
+        this.form.patchValue({ capturador: Number(userId) });
+        // Deshabilitamos el control para que no puedan cambiarlo
+        this.form.get('capturador')?.disable();
+      }
     }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['capturaEdicion']) {
-      if (this.capturaEdicion) {
-        this.configurarModoEdicion(this.capturaEdicion);
-      } else {
-        if (!this.form.dirty) {
-           this.inicializarModoCreacion();
-        }
+    if (changes['capturaEdicion'] && this.capturaEdicion) {
+      this.isEditMode = true;
+      // Llenar formulario
+      this.form.patchValue({
+        folio: this.capturaEdicion.folio,
+        almacen: this.capturaEdicion.almacen, // ID del almacen
+        capturador: this.capturaEdicion.capturador, // ID del usuario
+        estado: this.capturaEdicion.estado
+      });
+
+      // Si estamos editando y no es admin, aseguramos que el campo siga bloqueado
+      if (!this.isAdmin) {
+        this.form.get('capturador')?.disable();
       }
     }
   }
 
-  private verificarDatos() {
-    if (this.almacenes.length === 0 || this.usuarios.length === 0 || this.estados.length === 0) {
-      this.cargarDatosDesdeServicio();
-    }
-  }
-
-  cargarDatosDesdeServicio() {
-    this.isLoadingCatalogos = true;
-    this.capturaService.cargarCatalogosIniciales().subscribe({
-      next: (data) => {
-        if (this.almacenes.length === 0) this.almacenes = data.almacenes;
-        if (this.usuarios.length === 0) this.usuarios = data.capturadores;
-        if (this.estados.length === 0) this.estados = data.estados;
-
-        this.isLoadingCatalogos = false;
-      },
-      error: (err) => {
-        console.error("Error cargando catálogos en hijo", err);
-        this.isLoadingCatalogos = false;
-      }
+  private initForm() {
+    this.form = this.fb.group({
+      folio: [''], // Solo visual o autogenerado
+      almacen: ['', [Validators.required]],
+      capturador: ['', [Validators.required]],
+      estado: ['BORRADOR'] // Default para nuevos
     });
   }
 
-  private inicializarModoCreacion() {
-    this.isEditMode = false;
-
-    // CAMBIO: Ya no generamos el folio aquí.
-    // Dejamos el campo vacío y deshabilitado.
-    this.form.reset({
-      folio: '', // El back lo generará
-      almacen: '',
-      capturador: '',
-      estado: 'BORRADOR'
-    });
-
-    // Deshabilitamos el folio porque el usuario no debe tocarlo en creación
-    this.form.get('folio')?.disable();
-    this.form.get('estado')?.disable();
-  }
-
-  private configurarModoEdicion(data: any) {
-    this.isEditMode = true;
-
-    this.form.patchValue({
-      folio: data.folio,
-      almacen: data.almacen,
-      capturador: data.capturador,
-      estado: data.estado
-    });
-
-    // En edición sí mostramos el folio (que vendrá en data), pero sigue disabled o readonly si prefieres
-    // Generalmente el folio no se edita nunca.
-    this.form.get('folio')?.disable();
-
-    if (this.isAdmin) {
-      this.form.get('estado')?.enable();
-    } else {
-      this.form.get('estado')?.disable();
-    }
+  cancelar() {
+    this.onCancelar.emit();
   }
 
   guardar() {
@@ -161,11 +119,11 @@ export class RegistroCapturaComponent implements OnInit, OnChanges {
     this.isLoading = true;
     this.errorMessage = '';
 
+    // Usamos getRawValue() para obtener valores incluso de campos deshabilitados (como el capturador bloqueado)
     const formValues = this.form.getRawValue();
 
     if (this.isEditMode && this.capturaEdicion) {
       const payload = {
-        // En edición, el folio no debería cambiar, pero lo mandamos por consistencia (o se ignora en back)
         folio: formValues.folio,
         almacen: formValues.almacen,
         capturador: formValues.capturador,
@@ -184,7 +142,6 @@ export class RegistroCapturaComponent implements OnInit, OnChanges {
       });
     } else {
       // --- MODO CREACIÓN ---
-      // Enviamos el folio vacío. El back detectará esto y generará uno nuevo.
       this.capturaService.iniciarCaptura('', formValues.capturador, formValues.almacen).subscribe({
         next: (captura) => {
           this.isLoading = false;
@@ -193,13 +150,10 @@ export class RegistroCapturaComponent implements OnInit, OnChanges {
         },
         error: (err) => {
           this.isLoading = false;
-          this.errorMessage = err.message || 'Error al crear';
+          console.error(err);
+          this.errorMessage = 'No se pudo crear la sesión. Verifique conexión.';
         }
       });
     }
-  }
-
-  cancelar() {
-    this.onSesionCreada.emit(null);
   }
 }
