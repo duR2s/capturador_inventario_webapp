@@ -52,7 +52,8 @@ export class InputsCapturaPartialComponent implements OnInit, OnChanges {
     this.form = this.fb.group({
       codigo: ['', Validators.required],
       nombre: [{ value: '', disabled: true }], // Campo solo visual
-      cantidad: [1, [Validators.required, Validators.min(0.001)]]
+      // CAMBIO: Se cambió min(0.001) a min(0) para permitir el valor 0
+      cantidad: [1, [Validators.required, Validators.min(0)]]
     });
 
     // Si se abre como Modal (Edición)
