@@ -253,18 +253,35 @@ export class CapturaCapturadoresScreenComponent implements OnInit {
 
   public eliminarCapturaActual(): void {
     const id = this.capturaActual?.id;
+    const folio = this.capturaActual?.folio || 'Desconocido';
+
     if (!id) return;
 
-    this.isLoading = true;
-    this.capturaService.eliminarCaptura(id).subscribe({
-      next: () => {
-        this.isLoading = false;
-        this._errorsService.mostrarExito("Captura eliminada correctamente.");
-        this._router.navigate(['/home/captura']);
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this._errorsService.mostrarError("No se pudo eliminar la captura: " + err.message);
+    // --- NUEVO: Confirmación con Modal ---
+    const dialogRef = this.dialog.open(ConfirmationDialogModalComponent, {
+      data: {
+        type: 'danger',
+        title: 'Eliminar Sesión Actual',
+        message: `¿Estás seguro de eliminar la sesión actual con folio "${folio}"? Se perderán todos los conteos asociados y no podrás recuperarla.`,
+        confirmText: 'Sí, Eliminar'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Si confirmó, procedemos a borrar
+        this.isLoading = true;
+        this.capturaService.eliminarCaptura(id).subscribe({
+          next: () => {
+            this.isLoading = false;
+            this._errorsService.mostrarExito("Captura eliminada correctamente.");
+            this._router.navigate(['/home/captura']);
+          },
+          error: (err) => {
+            this.isLoading = false;
+            this._errorsService.mostrarError("No se pudo eliminar la captura: " + err.message);
+          }
+        });
       }
     });
   }

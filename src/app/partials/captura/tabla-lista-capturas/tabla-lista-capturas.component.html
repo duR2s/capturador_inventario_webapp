@@ -87,8 +87,8 @@
             color="primary"
             (click)="onEdit.emit(row)"
             matTooltip="Editar captura"
-            [class.disabled-icon]="isAdmin"
-            [disabled]="isAdmin"
+            [class.disabled-icon]="!isAdmin"
+            [disabled]="!isAdmin"
             *ngIf="isAdmin">
               <mat-icon>edit</mat-icon>
             </button>
@@ -98,8 +98,8 @@
             color="warn"
             (click)="onDelete.emit(row)"
             matTooltip="Eliminar"
-            [class.disabled-icon]="isAdmin"
-            [disabled]="isAdmin"
+            [class.disabled-icon]="!isAdmin"
+            [disabled]="!isAdmin"
             *ngIf="isAdmin">
               <mat-icon>delete_outline</mat-icon>
             </button>

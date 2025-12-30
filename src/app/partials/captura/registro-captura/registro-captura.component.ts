@@ -62,24 +62,17 @@ export class RegistroCapturaComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
-    const rol = this.facadeService.getUserGroup();
-    this.isAdmin = (rol === 'ADMIN');
-
-    // --- RESTRICCIÓN PARA CAPTURADORES ---
-    // Si no es admin (es capturador), forzamos su ID y deshabilitamos el campo
-    if (!this.isAdmin) {
-      const userId = this.facadeService.getUserId();
-      if (userId) {
-        // Asignamos el ID del usuario logueado al campo 'capturador'
-        // Convertimos a número porque el value del mat-select suele ser numérico
-        this.form.patchValue({ capturador: Number(userId) });
-        // Deshabilitamos el control para que no puedan cambiarlo
-        this.form.get('capturador')?.disable();
-      }
-    }
+    this.checkUserRole();
+    this.aplicarFiltroCapturador(); // Intento inicial por si los datos ya están ahí
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    // Detectamos si cambia la lista de usuarios (viene asíncrona del padre)
+    if (changes['usuarios']) {
+      this.checkUserRole(); // Aseguramos tener el rol actualizado
+      this.aplicarFiltroCapturador();
+    }
+
     if (changes['capturaEdicion'] && this.capturaEdicion) {
       this.isEditMode = true;
       // Llenar formulario
@@ -104,6 +97,39 @@ export class RegistroCapturaComponent implements OnInit, OnChanges {
       capturador: ['', [Validators.required]],
       estado: ['BORRADOR'] // Default para nuevos
     });
+  }
+
+  private checkUserRole() {
+    const rol = this.facadeService.getUserGroup();
+    this.isAdmin = (rol === 'ADMIN');
+  }
+
+  /**
+   * Lógica Principal:
+   * Si NO es admin, filtra la lista de usuarios para mostrar solo el propio
+   * y lo selecciona automáticamente.
+   */
+  private aplicarFiltroCapturador() {
+    // Solo actuamos si no es admin y ya tenemos lista de usuarios cargada
+    if (!this.isAdmin && this.usuarios && this.usuarios.length > 0) {
+      const userId = Number(this.facadeService.getUserId());
+
+      if (userId) {
+        // 1. Filtramos la lista visualmente para que solo aparezca él mismo
+        const miUsuario = this.usuarios.find(u => u.user.id === userId);
+
+        if (miUsuario) {
+          this.usuarios = [miUsuario];
+        }
+
+        // 2. Pre-seleccionamos el valor en el form
+        // Usamos emitEvent: false para no disparar validaciones innecesarias aún
+        this.form.patchValue({ capturador: userId }, { emitEvent: false });
+
+        // 3. Deshabilitamos el control para protegerlo
+        this.form.get('capturador')?.disable();
+      }
+    }
   }
 
   cancelar() {

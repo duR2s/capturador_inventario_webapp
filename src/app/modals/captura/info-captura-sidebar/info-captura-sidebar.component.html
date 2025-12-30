@@ -93,7 +93,12 @@
       </button>
 
       <!-- Eliminar Captura (Peligroso) -->
-      <button class="action-btn btn-delete" (click)="ejecutarEliminar()">
+      <!-- MODIFICADO: Se deshabilita si NO es BORRADOR y el usuario NO es ADMIN -->
+      <button class="action-btn btn-delete"
+              (click)="ejecutarEliminar()"
+              [class.disabled-icon]="captura.estado !== 'BORRADOR' && !isAdmin"
+              [disabled]="captura.estado !== 'BORRADOR' && !isAdmin"
+              *ngIf="captura.estado == 'BORRADOR' || isAdmin">
         <mat-icon>delete_forever</mat-icon>
         Eliminar Sesión
       </button>
