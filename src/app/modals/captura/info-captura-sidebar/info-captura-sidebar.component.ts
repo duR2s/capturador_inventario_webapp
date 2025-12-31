@@ -30,7 +30,6 @@ export class InfoCapturaSidebarComponent implements OnInit {
 
   ngOnInit(): void {
     this.checkUserRole();
-    alert(this.captura.estado);
   }
 
   private checkUserRole() {
